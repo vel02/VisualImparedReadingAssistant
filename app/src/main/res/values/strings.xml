@@ -1,3 +1,5 @@
 <resources>
-    <string name="app_name">Visual Impared Reading Assistant</string>
+    <string name="app_name">Visual Impaired Reading Assistant</string>
+    <string name="label_select_image">Select Image</string>
+    <string name="label_view_image">View Image</string>
 </resources>
