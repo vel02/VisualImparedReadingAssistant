@@ -30,9 +30,14 @@ import sti.software.engineering.reading.assistant.BaseActivity;
 import sti.software.engineering.reading.assistant.R;
 import sti.software.engineering.reading.assistant.databinding.ActivityHomeBinding;
 import sti.software.engineering.reading.assistant.ui.home.selection.Camera;
+import sti.software.engineering.reading.assistant.ui.home.selection.Gallery;
 import sti.software.engineering.reading.assistant.ui.home.selection.SelectImageFrom;
 import sti.software.engineering.reading.assistant.viewmodel.ViewModelProviderFactory;
 
+/**
+ * Next Functionality
+ * - Directly open the app through power button.
+ */
 public class HomeActivity extends BaseActivity {
 
     private static final String TAG = "HomeActivity";
@@ -53,21 +58,6 @@ public class HomeActivity extends BaseActivity {
         setSupportActionBar(binding.toolbar);
     }
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.menu_home, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
-        if (item.getItemId() == R.id.action_select_image) {
-            selectImageDialog();
-            return true;
-        }
-        return super.onOptionsItemSelected(item);
-    }
-
     private void selectImageDialog() {
         String[] items = {" Camera", " Gallery"};
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
@@ -83,36 +73,37 @@ public class HomeActivity extends BaseActivity {
                         imageUri = selectImageFrom.getImageUri();
                     }
                     break;
+                case 1:
+                    if (!checkStoragePermission()) {
+                        requestStoragePermission();
+                    } else {
+                        selectImageFrom = new SelectImageFrom(new Gallery());
+                        startActivityForResult(selectImageFrom.pickGallery(), IMAGE_PICK_GALLERY_CODE);
+                    }
+                    break;
             }
         }));
         builder.create().show();
     }
 
     @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        switch (requestCode) {
-            case CAMERA_REQUEST_CODE:
-                if (grantResults.length > 0) {
-                    boolean cameraAccepted = grantResults[0] == PackageManager.PERMISSION_GRANTED;
-                    boolean storageAccepted = grantResults[1] == PackageManager.PERMISSION_GRANTED;
-                    if (cameraAccepted && storageAccepted) {
-                        selectImageFrom = new SelectImageFrom(new Camera(this));
-                        startActivityForResult(selectImageFrom.pickCamera(), IMAGE_PICK_CAMERA_CODE);
-                        imageUri = selectImageFrom.getImageUri();
-                    } else Toast.makeText(this, "Permission Denied", Toast.LENGTH_SHORT).show();
-                }
-                break;
-        }
-    }
-
-    @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (resultCode == RESULT_OK) {
-            if (requestCode == IMAGE_PICK_CAMERA_CODE) {
-                CropImage.activity(imageUri).setGuidelines(CropImageView.Guidelines.ON)
+
+            if (requestCode == IMAGE_PICK_GALLERY_CODE) {
+                assert data != null;
+                CropImage.activity(data.getData())
+                        .setGuidelines(CropImageView.Guidelines.ON)
                         .start(this);
             }
+
+            if (requestCode == IMAGE_PICK_CAMERA_CODE) {
+                CropImage.activity(imageUri)
+                        .setGuidelines(CropImageView.Guidelines.ON)
+                        .start(this);
+            }
+
         }
 
         if (requestCode == CropImage.CROP_IMAGE_ACTIVITY_REQUEST_CODE) {
@@ -150,6 +141,47 @@ public class HomeActivity extends BaseActivity {
                     Toast.makeText(this, "" + error, Toast.LENGTH_SHORT).show();
                 }
             }
+        }
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_home, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        if (item.getItemId() == R.id.action_select_image) {
+            selectImageDialog();
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        switch (requestCode) {
+            case CAMERA_REQUEST_CODE:
+                if (grantResults.length > 0) {
+                    boolean cameraAccepted = grantResults[0] == PackageManager.PERMISSION_GRANTED;
+                    boolean storageAccepted = grantResults[1] == PackageManager.PERMISSION_GRANTED;
+                    if (cameraAccepted && storageAccepted) {
+                        selectImageFrom = new SelectImageFrom(new Camera(this));
+                        startActivityForResult(selectImageFrom.pickCamera(), IMAGE_PICK_CAMERA_CODE);
+                        imageUri = selectImageFrom.getImageUri();
+                    } else Toast.makeText(this, "Permission Denied", Toast.LENGTH_SHORT).show();
+                }
+                break;
+            case STORAGE_REQUEST_CODE:
+                if (grantResults.length > 0) {
+                    boolean storageAccepted = grantResults[0] == PackageManager.PERMISSION_GRANTED;
+                    if (storageAccepted) {
+                        selectImageFrom = new SelectImageFrom(new Gallery());
+                        startActivityForResult(selectImageFrom.pickGallery(), IMAGE_PICK_GALLERY_CODE);
+                    } else Toast.makeText(this, "Permission Denied", Toast.LENGTH_SHORT).show();
+                }
+                break;
         }
     }
 }
