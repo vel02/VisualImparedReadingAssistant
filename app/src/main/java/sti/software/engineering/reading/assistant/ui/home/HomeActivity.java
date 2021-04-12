@@ -1,11 +1,16 @@
 package sti.software.engineering.reading.assistant.ui.home;
 
+import android.app.ActivityManager;
+import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.util.Log;
 import android.util.SparseArray;
 import android.view.Menu;
@@ -29,6 +34,7 @@ import javax.inject.Inject;
 import sti.software.engineering.reading.assistant.BaseActivity;
 import sti.software.engineering.reading.assistant.R;
 import sti.software.engineering.reading.assistant.databinding.ActivityHomeBinding;
+import sti.software.engineering.reading.assistant.service.TriggerCameraService;
 import sti.software.engineering.reading.assistant.ui.home.selection.Camera;
 import sti.software.engineering.reading.assistant.ui.home.selection.Gallery;
 import sti.software.engineering.reading.assistant.ui.home.selection.SelectImageFrom;
@@ -36,9 +42,9 @@ import sti.software.engineering.reading.assistant.viewmodel.ViewModelProviderFac
 
 /**
  * Next Functionality
- * - Directly open the app through power button.
+ * - refactor codes
  */
-public class HomeActivity extends BaseActivity {
+public class HomeActivity extends BaseActivity  {
 
     private static final String TAG = "HomeActivity";
 
@@ -46,9 +52,28 @@ public class HomeActivity extends BaseActivity {
     ViewModelProviderFactory providerFactory;
 
     private ActivityHomeBinding binding;
+    private TriggerCameraService triggerCameraService;
+
     private HomeViewModel viewModel;
     private SelectImageFrom selectImageFrom;
     private Uri imageUri;
+
+    private boolean isServiceBound;
+
+    private final ServiceConnection connection = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder service) {
+            TriggerCameraService.TriggerCameraBinder binder = (TriggerCameraService.TriggerCameraBinder) service;
+            HomeActivity.this.triggerCameraService = binder.getService();
+            isServiceBound = true;
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+            HomeActivity.this.triggerCameraService = null;
+            isServiceBound = false;
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -56,6 +81,22 @@ public class HomeActivity extends BaseActivity {
         binding = DataBindingUtil.setContentView(HomeActivity.this, R.layout.activity_home);
         viewModel = new ViewModelProvider(HomeActivity.this, providerFactory).get(HomeViewModel.class);
         setSupportActionBar(binding.toolbar);
+
+        if (!isMyServiceRunning(TriggerCameraService.class)) {
+            Intent intent = new Intent(this, TriggerCameraService.class);
+            startService(intent);
+        }
+
+        Intent intent = getIntent();
+        if (intent != null) {
+            boolean startedThroughService = intent.getBooleanExtra(TriggerCameraService.INTENT_STARTED_THROUGH_SERVICE, false);
+            if (startedThroughService) {
+                selectImageFrom = new SelectImageFrom(new Camera(this));
+                startActivityForResult(selectImageFrom.pickCamera(), IMAGE_PICK_CAMERA_CODE);
+                imageUri = selectImageFrom.getImageUri();
+            }
+        }
+
     }
 
     private void selectImageDialog() {
@@ -84,6 +125,19 @@ public class HomeActivity extends BaseActivity {
             }
         }));
         builder.create().show();
+    }
+
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        bindTriggerCameraService();
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        unbindTriggerCameraService();
     }
 
     @Override
@@ -144,6 +198,18 @@ public class HomeActivity extends BaseActivity {
         }
     }
 
+    private void bindTriggerCameraService() {
+        bindService(new Intent(this, TriggerCameraService.class),
+                connection, Context.BIND_AUTO_CREATE);
+    }
+
+    private void unbindTriggerCameraService() {
+        if (isServiceBound) {
+            unbindService(connection);
+            isServiceBound = false;
+        }
+    }
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_home, menu);
@@ -184,4 +250,15 @@ public class HomeActivity extends BaseActivity {
                 break;
         }
     }
+
+    private boolean isMyServiceRunning(Class<?> serviceClass) {
+        ActivityManager manager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
+        for (ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
+            if (serviceClass.getName().equals(service.service.getClassName())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
 }
