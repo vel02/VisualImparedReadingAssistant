@@ -1,12 +1,11 @@
 package sti.software.engineering.reading.assistant;
 
-import android.Manifest;
-import android.content.pm.PackageManager;
-
-import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
+import android.content.ComponentName;
+import android.content.ServiceConnection;
+import android.os.IBinder;
 
 import dagger.android.support.DaggerAppCompatActivity;
+import sti.software.engineering.reading.assistant.service.TriggerCameraService;
 
 public class BaseActivity extends DaggerAppCompatActivity {
 
@@ -16,29 +15,22 @@ public class BaseActivity extends DaggerAppCompatActivity {
     protected static final int IMAGE_PICK_CAMERA_CODE = 1001;
     protected static final int IMAGE_PICK_GALLERY_CODE = 2001;
 
-    protected void requestCameraPermission() {
-        ActivityCompat.requestPermissions(this, new String[]{
-                        Manifest.permission.CAMERA,
-                        Manifest.permission.WRITE_EXTERNAL_STORAGE},
-                CAMERA_REQUEST_CODE);
-    }
+    protected TriggerCameraService triggerCameraService;
+    protected boolean isServiceBound;
 
-    protected void requestStoragePermission() {
-        ActivityCompat.requestPermissions(this,
-                new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, STORAGE_REQUEST_CODE);
-    }
+    protected final ServiceConnection connection = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder service) {
+            TriggerCameraService.TriggerCameraBinder binder = (TriggerCameraService.TriggerCameraBinder) service;
+            BaseActivity.this.triggerCameraService = binder.getService();
+            isServiceBound = true;
+        }
 
-    protected boolean checkCameraPermission() {
-        boolean cameraPermitted = ContextCompat.checkSelfPermission(this,
-                Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED;
-        boolean storagePermitted = ContextCompat.checkSelfPermission(this,
-                Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED;
-        return cameraPermitted && storagePermitted;
-    }
-
-    protected boolean checkStoragePermission() {
-        return ContextCompat.checkSelfPermission(this,
-                Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED;
-    }
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+            BaseActivity.this.triggerCameraService = null;
+            isServiceBound = false;
+        }
+    };
 
 }

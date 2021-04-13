@@ -1,16 +1,14 @@
 package sti.software.engineering.reading.assistant.ui.home;
 
-import android.app.ActivityManager;
-import android.content.ComponentName;
+import android.Manifest;
 import android.content.Context;
 import android.content.Intent;
-import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.IBinder;
+import android.provider.Settings;
 import android.util.Log;
 import android.util.SparseArray;
 import android.view.Menu;
@@ -20,12 +18,14 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
+import androidx.core.app.ActivityCompat;
 import androidx.databinding.DataBindingUtil;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.google.android.gms.vision.Frame;
 import com.google.android.gms.vision.text.TextBlock;
 import com.google.android.gms.vision.text.TextRecognizer;
+import com.google.android.material.snackbar.Snackbar;
 import com.theartofdev.edmodo.cropper.CropImage;
 import com.theartofdev.edmodo.cropper.CropImageView;
 
@@ -38,13 +38,19 @@ import sti.software.engineering.reading.assistant.service.TriggerCameraService;
 import sti.software.engineering.reading.assistant.ui.home.selection.Camera;
 import sti.software.engineering.reading.assistant.ui.home.selection.Gallery;
 import sti.software.engineering.reading.assistant.ui.home.selection.SelectImageFrom;
+import sti.software.engineering.reading.assistant.util.Utility;
 import sti.software.engineering.reading.assistant.viewmodel.ViewModelProviderFactory;
+
+import static android.Manifest.permission.WRITE_EXTERNAL_STORAGE;
+import static sti.software.engineering.reading.assistant.ui.home.HomeViewModel.SelectImageFrom.CAMERA;
+import static sti.software.engineering.reading.assistant.ui.home.HomeViewModel.SelectImageFrom.GALLERY;
 
 /**
  * Next Functionality
+ * - text to speech when camera activated through power button
  * - refactor codes
  */
-public class HomeActivity extends BaseActivity  {
+public class HomeActivity extends BaseActivity {
 
     private static final String TAG = "HomeActivity";
 
@@ -52,28 +58,11 @@ public class HomeActivity extends BaseActivity  {
     ViewModelProviderFactory providerFactory;
 
     private ActivityHomeBinding binding;
-    private TriggerCameraService triggerCameraService;
 
     private HomeViewModel viewModel;
     private SelectImageFrom selectImageFrom;
     private Uri imageUri;
 
-    private boolean isServiceBound;
-
-    private final ServiceConnection connection = new ServiceConnection() {
-        @Override
-        public void onServiceConnected(ComponentName name, IBinder service) {
-            TriggerCameraService.TriggerCameraBinder binder = (TriggerCameraService.TriggerCameraBinder) service;
-            HomeActivity.this.triggerCameraService = binder.getService();
-            isServiceBound = true;
-        }
-
-        @Override
-        public void onServiceDisconnected(ComponentName name) {
-            HomeActivity.this.triggerCameraService = null;
-            isServiceBound = false;
-        }
-    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -81,21 +70,61 @@ public class HomeActivity extends BaseActivity  {
         binding = DataBindingUtil.setContentView(HomeActivity.this, R.layout.activity_home);
         viewModel = new ViewModelProvider(HomeActivity.this, providerFactory).get(HomeViewModel.class);
         setSupportActionBar(binding.toolbar);
+        subscribeObservers();
 
-        if (!isMyServiceRunning(TriggerCameraService.class)) {
+        if (!Utility.isMyServiceRunning(this, TriggerCameraService.class)) {
             Intent intent = new Intent(this, TriggerCameraService.class);
             startService(intent);
         }
 
         Intent intent = getIntent();
         if (intent != null) {
-            boolean startedThroughService = intent.getBooleanExtra(TriggerCameraService.INTENT_STARTED_THROUGH_SERVICE, false);
+            boolean startedThroughService = intent
+                    .getBooleanExtra(TriggerCameraService.INTENT_STARTED_THROUGH_SERVICE, false);
             if (startedThroughService) {
-                selectImageFrom = new SelectImageFrom(new Camera(this));
-                startActivityForResult(selectImageFrom.pickCamera(), IMAGE_PICK_CAMERA_CODE);
-                imageUri = selectImageFrom.getImageUri();
+                if (checkCameraPermission()) {
+                    viewModel.setShowPermissionRational(true);
+                    return;
+                }
+                viewModel.setSelectImageFrom(CAMERA);
             }
         }
+
+    }
+
+    private void subscribeObservers() {
+
+        viewModel.observedSelectedImage().observe(this, selectImage -> {
+
+            switch (selectImage) {
+                case CAMERA:
+                    selectImageFrom = new SelectImageFrom(new Camera(this));
+                    startActivityForResult(selectImageFrom.pickCamera(), IMAGE_PICK_CAMERA_CODE);
+                    imageUri = selectImageFrom.getImageUri();
+                    break;
+
+                case GALLERY:
+                    selectImageFrom = new SelectImageFrom(new Gallery());
+                    startActivityForResult(selectImageFrom.pickGallery(), IMAGE_PICK_GALLERY_CODE);
+                    break;
+            }
+
+        });
+
+        viewModel.observedShowPermissionRational().observe(this, showPermissionRational -> {
+            if (showPermissionRational) {
+                Snackbar.make(binding.getRoot(), R.string.label_permission_rational, Snackbar.LENGTH_INDEFINITE)
+                        .setAction(R.string.label_grant_permission, v -> {
+                            Intent permissionIntent = new Intent();
+                            permissionIntent.setAction(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
+                            Uri uri = Uri.fromParts("package",
+                                    this.getPackageName(), null);
+                            permissionIntent.setData(uri);
+                            permissionIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                            startActivity(permissionIntent);
+                        }).show();
+            }
+        });
 
     }
 
@@ -104,24 +133,18 @@ public class HomeActivity extends BaseActivity  {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle(R.string.label_select_image);
         builder.setItems(items, ((dialog, which) -> {
-            switch (which) {
-                case 0:
-                    if (!checkCameraPermission())
-                        requestCameraPermission();
-                    else {
-                        selectImageFrom = new SelectImageFrom(new Camera(this));
-                        startActivityForResult(selectImageFrom.pickCamera(), IMAGE_PICK_CAMERA_CODE);
-                        imageUri = selectImageFrom.getImageUri();
-                    }
-                    break;
-                case 1:
-                    if (!checkStoragePermission()) {
-                        requestStoragePermission();
-                    } else {
-                        selectImageFrom = new SelectImageFrom(new Gallery());
-                        startActivityForResult(selectImageFrom.pickGallery(), IMAGE_PICK_GALLERY_CODE);
-                    }
-                    break;
+            if (which == 0) {
+                if (checkCameraPermission()) {
+                    requestCameraPermission();
+                    return;
+                }
+                viewModel.setSelectImageFrom(CAMERA);
+            } else if (which == 1) {
+                if (checkStoragePermission()) {
+                    requestStoragePermission();
+                    return;
+                }
+                viewModel.setSelectImageFrom(GALLERY);
             }
         }));
         builder.create().show();
@@ -233,32 +256,62 @@ public class HomeActivity extends BaseActivity  {
                     boolean cameraAccepted = grantResults[0] == PackageManager.PERMISSION_GRANTED;
                     boolean storageAccepted = grantResults[1] == PackageManager.PERMISSION_GRANTED;
                     if (cameraAccepted && storageAccepted) {
-                        selectImageFrom = new SelectImageFrom(new Camera(this));
-                        startActivityForResult(selectImageFrom.pickCamera(), IMAGE_PICK_CAMERA_CODE);
-                        imageUri = selectImageFrom.getImageUri();
-                    } else Toast.makeText(this, "Permission Denied", Toast.LENGTH_SHORT).show();
+                        viewModel.setSelectImageFrom(CAMERA);
+                    } else viewModel.setShowPermissionRational(true);
                 }
                 break;
             case STORAGE_REQUEST_CODE:
                 if (grantResults.length > 0) {
                     boolean storageAccepted = grantResults[0] == PackageManager.PERMISSION_GRANTED;
                     if (storageAccepted) {
-                        selectImageFrom = new SelectImageFrom(new Gallery());
-                        startActivityForResult(selectImageFrom.pickGallery(), IMAGE_PICK_GALLERY_CODE);
-                    } else Toast.makeText(this, "Permission Denied", Toast.LENGTH_SHORT).show();
+                        viewModel.setSelectImageFrom(GALLERY);
+                    } else viewModel.setShowPermissionRational(true);
                 }
                 break;
         }
     }
 
-    private boolean isMyServiceRunning(Class<?> serviceClass) {
-        ActivityManager manager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
-        for (ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
-            if (serviceClass.getName().equals(service.service.getClassName())) {
-                return true;
-            }
-        }
-        return false;
+    private boolean checkCameraPermission() {
+        return (PackageManager.PERMISSION_DENIED == ActivityCompat
+                .checkSelfPermission(this, Manifest.permission.CAMERA)
+                || PackageManager.PERMISSION_DENIED == ActivityCompat
+                .checkSelfPermission(this, WRITE_EXTERNAL_STORAGE));
     }
+
+    private void requestCameraPermission() {
+        boolean shouldProvideRational = (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.CAMERA)
+                || ActivityCompat.shouldShowRequestPermissionRationale(this, WRITE_EXTERNAL_STORAGE));
+
+        if (shouldProvideRational) {
+            Snackbar.make(binding.getRoot(),
+                    R.string.label_permission_rational, Snackbar.LENGTH_INDEFINITE)
+                    .setAction(R.string.label_ok, v ->
+                            ActivityCompat.requestPermissions(this, new String[]{
+                                            Manifest.permission.CAMERA, WRITE_EXTERNAL_STORAGE},
+                                    CAMERA_REQUEST_CODE)).show();
+        } else ActivityCompat.requestPermissions(this, new String[]{
+                        Manifest.permission.CAMERA, WRITE_EXTERNAL_STORAGE},
+                CAMERA_REQUEST_CODE);
+    }
+
+    private boolean checkStoragePermission() {
+        return PackageManager.PERMISSION_DENIED == ActivityCompat
+                .checkSelfPermission(this, WRITE_EXTERNAL_STORAGE);
+    }
+
+    private void requestStoragePermission() {
+        boolean shouldProvideRational = ActivityCompat
+                .shouldShowRequestPermissionRationale(this, WRITE_EXTERNAL_STORAGE);
+
+        if (shouldProvideRational) {
+            Snackbar.make(binding.getRoot(),
+                    R.string.label_permission_rational, Snackbar.LENGTH_INDEFINITE)
+                    .setAction(R.string.label_ok, v ->
+                            ActivityCompat.requestPermissions(this,
+                                    new String[]{WRITE_EXTERNAL_STORAGE}, STORAGE_REQUEST_CODE)).show();
+        } else ActivityCompat.requestPermissions(this,
+                new String[]{WRITE_EXTERNAL_STORAGE}, STORAGE_REQUEST_CODE);
+    }
+
 
 }
