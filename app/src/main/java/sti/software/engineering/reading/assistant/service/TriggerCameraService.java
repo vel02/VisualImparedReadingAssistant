@@ -9,6 +9,7 @@ import android.content.IntentFilter;
 import android.content.res.Configuration;
 import android.os.Binder;
 import android.os.IBinder;
+import android.speech.tts.TextToSpeech;
 
 import androidx.annotation.Nullable;
 import androidx.core.app.NotificationCompat;
@@ -17,6 +18,7 @@ import sti.software.engineering.reading.assistant.BaseApplication;
 import sti.software.engineering.reading.assistant.R;
 import sti.software.engineering.reading.assistant.receiver.DetectScreenOnReceiver;
 import sti.software.engineering.reading.assistant.ui.home.HomeActivity;
+import sti.software.engineering.reading.assistant.util.TextToSpeechHelper;
 
 public class TriggerCameraService extends Service implements DetectScreenOnReceiver.OnScreenReceiverCallback {
 
@@ -27,10 +29,12 @@ public class TriggerCameraService extends Service implements DetectScreenOnRecei
     private boolean isChangeConfiguration;
 
     private DetectScreenOnReceiver screenOnReceiver;
+    private TextToSpeechHelper textToSpeech;
 
     @Override
     public void onTriggered() {
         if (serviceIsRunningInForeground(TriggerCameraService.this, TriggerCameraService.this)) {
+            textToSpeech.speak("Camera, Activated.", TextToSpeech.QUEUE_FLUSH);
             Intent intent = new Intent(TriggerCameraService.this, HomeActivity.class);
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             intent.putExtra(INTENT_STARTED_THROUGH_SERVICE, true);
@@ -79,6 +83,7 @@ public class TriggerCameraService extends Service implements DetectScreenOnRecei
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
 
+        textToSpeech = TextToSpeechHelper.getInstance(this);
         screenOnReceiver = new DetectScreenOnReceiver();
         screenOnReceiver.onScreenReceiverCallback(this);
         registerScreenOnReceiver();
@@ -107,6 +112,7 @@ public class TriggerCameraService extends Service implements DetectScreenOnRecei
 
     @Override
     public void onDestroy() {
+        textToSpeech.destroy();
         super.onDestroy();
         unregisterScreenOnReceiver();
     }

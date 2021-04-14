@@ -35,9 +35,8 @@ import sti.software.engineering.reading.assistant.BaseActivity;
 import sti.software.engineering.reading.assistant.R;
 import sti.software.engineering.reading.assistant.databinding.ActivityHomeBinding;
 import sti.software.engineering.reading.assistant.service.TriggerCameraService;
-import sti.software.engineering.reading.assistant.ui.home.selection.Camera;
-import sti.software.engineering.reading.assistant.ui.home.selection.Gallery;
 import sti.software.engineering.reading.assistant.ui.home.selection.SelectImageFrom;
+import sti.software.engineering.reading.assistant.ui.home.selection.factory.ComponentFactory;
 import sti.software.engineering.reading.assistant.util.Utility;
 import sti.software.engineering.reading.assistant.viewmodel.ViewModelProviderFactory;
 
@@ -47,7 +46,7 @@ import static sti.software.engineering.reading.assistant.ui.home.HomeViewModel.S
 
 /**
  * Next Functionality
- * - text to speech when camera activated through power button
+ * - learn next to do
  * - refactor codes
  */
 public class HomeActivity extends BaseActivity {
@@ -63,6 +62,20 @@ public class HomeActivity extends BaseActivity {
     private SelectImageFrom selectImageFrom;
     private Uri imageUri;
 
+    private void openThroughPowerButton() {
+        Intent intent = getIntent();
+        if (intent != null) {
+            boolean startedThroughService = intent
+                    .getBooleanExtra(TriggerCameraService.INTENT_STARTED_THROUGH_SERVICE, false);
+            if (startedThroughService) {
+                if (checkCameraPermission()) {
+                    viewModel.setShowPermissionRational(true);
+                    return;
+                }
+                viewModel.setSelectImageFrom(CAMERA);
+            }
+        }
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -77,18 +90,7 @@ public class HomeActivity extends BaseActivity {
             startService(intent);
         }
 
-        Intent intent = getIntent();
-        if (intent != null) {
-            boolean startedThroughService = intent
-                    .getBooleanExtra(TriggerCameraService.INTENT_STARTED_THROUGH_SERVICE, false);
-            if (startedThroughService) {
-                if (checkCameraPermission()) {
-                    viewModel.setShowPermissionRational(true);
-                    return;
-                }
-                viewModel.setSelectImageFrom(CAMERA);
-            }
-        }
+        openThroughPowerButton();
 
     }
 
@@ -98,13 +100,13 @@ public class HomeActivity extends BaseActivity {
 
             switch (selectImage) {
                 case CAMERA:
-                    selectImageFrom = new SelectImageFrom(new Camera(this));
+                    selectImageFrom = new SelectImageFrom(this, ComponentFactory.SELECT_CAMERA);
                     startActivityForResult(selectImageFrom.pickCamera(), IMAGE_PICK_CAMERA_CODE);
                     imageUri = selectImageFrom.getImageUri();
                     break;
 
                 case GALLERY:
-                    selectImageFrom = new SelectImageFrom(new Gallery());
+                    selectImageFrom = new SelectImageFrom(this, ComponentFactory.SELECT_GALLERY);
                     startActivityForResult(selectImageFrom.pickGallery(), IMAGE_PICK_GALLERY_CODE);
                     break;
             }
