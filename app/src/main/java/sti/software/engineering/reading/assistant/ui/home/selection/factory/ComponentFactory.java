@@ -6,10 +6,10 @@ import sti.software.engineering.reading.assistant.ui.home.selection.Camera;
 import sti.software.engineering.reading.assistant.ui.home.selection.Component;
 import sti.software.engineering.reading.assistant.ui.home.selection.Gallery;
 
-public class ComponentFactory {
+import static sti.software.engineering.reading.assistant.ui.home.selection.SelectImageFrom.SELECT_CAMERA;
+import static sti.software.engineering.reading.assistant.ui.home.selection.SelectImageFrom.SELECT_GALLERY;
 
-    public static final int SELECT_CAMERA = 101;
-    public static final int SELECT_GALLERY = 201;
+public class ComponentFactory {
 
     private final Context context;
 

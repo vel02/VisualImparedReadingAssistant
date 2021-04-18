@@ -36,7 +36,6 @@ import sti.software.engineering.reading.assistant.R;
 import sti.software.engineering.reading.assistant.databinding.ActivityHomeBinding;
 import sti.software.engineering.reading.assistant.service.TriggerCameraService;
 import sti.software.engineering.reading.assistant.ui.home.selection.SelectImageFrom;
-import sti.software.engineering.reading.assistant.ui.home.selection.factory.ComponentFactory;
 import sti.software.engineering.reading.assistant.util.Utility;
 import sti.software.engineering.reading.assistant.viewmodel.ViewModelProviderFactory;
 
@@ -46,7 +45,7 @@ import static sti.software.engineering.reading.assistant.ui.home.HomeViewModel.S
 
 /**
  * Next Functionality
- * - learn next to do
+ * - save to SQLite database, display values through recycler view.
  * - refactor codes
  */
 public class HomeActivity extends BaseActivity {
@@ -100,13 +99,13 @@ public class HomeActivity extends BaseActivity {
 
             switch (selectImage) {
                 case CAMERA:
-                    selectImageFrom = new SelectImageFrom(this, ComponentFactory.SELECT_CAMERA);
+                    selectImageFrom = new SelectImageFrom(this, SelectImageFrom.SELECT_CAMERA);
                     startActivityForResult(selectImageFrom.pickCamera(), IMAGE_PICK_CAMERA_CODE);
                     imageUri = selectImageFrom.getImageUri();
                     break;
 
                 case GALLERY:
-                    selectImageFrom = new SelectImageFrom(this, ComponentFactory.SELECT_GALLERY);
+                    selectImageFrom = new SelectImageFrom(this, SelectImageFrom.SELECT_GALLERY);
                     startActivityForResult(selectImageFrom.pickGallery(), IMAGE_PICK_GALLERY_CODE);
                     break;
             }

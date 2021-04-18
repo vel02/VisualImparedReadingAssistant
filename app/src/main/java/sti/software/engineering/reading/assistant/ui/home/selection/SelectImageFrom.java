@@ -8,6 +8,9 @@ import sti.software.engineering.reading.assistant.ui.home.selection.factory.Comp
 
 public class SelectImageFrom {
 
+    public static final int SELECT_CAMERA = 101;
+    public static final int SELECT_GALLERY = 201;
+
     private final Component component;
     
     public SelectImageFrom(Context context, int from) {
