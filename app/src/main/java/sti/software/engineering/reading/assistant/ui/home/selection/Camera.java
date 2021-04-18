@@ -19,6 +19,8 @@ public class Camera implements Component {
     private final Context context;
     private Uri imageUri;
 
+    private File fromFile;
+
     public Camera(Context context) {
         this.context = context;
     }
@@ -41,11 +43,13 @@ public class Camera implements Component {
         int day = calendar.get(Calendar.DAY_OF_MONTH);
         int year = calendar.get(Calendar.YEAR);
 
-        File fromFile = new File(external_storage_directory + SEPARATOR + FOLDER_NAME
-                + SEPARATOR + "image_" + (System.currentTimeMillis() / 1000)
-                + "_" + month + "" + day + "" + year + ".png");
+        String filename = "image_" + (System.currentTimeMillis() / 1000)
+                + "_" + month + "" + day + "" + year + ".png";
 
-        this.imageUri = FileProvider.getUriForFile(context, context.getApplicationContext().getPackageName() + ".provider", fromFile);
+        this.fromFile = new File(external_storage_directory + SEPARATOR + FOLDER_NAME
+                + SEPARATOR + filename);
+
+        this.imageUri = FileProvider.getUriForFile(context, context.getApplicationContext().getPackageName() + ".provider", this.fromFile);
 
         Intent cameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
         cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT, this.imageUri);
@@ -55,5 +59,10 @@ public class Camera implements Component {
     @Override
     public Uri getImageUri() {
         return imageUri;
+    }
+
+    @Override
+    public File getFile() {
+        return this.fromFile;
     }
 }

@@ -8,6 +8,7 @@ import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.provider.Settings;
 import android.util.Log;
 import android.util.SparseArray;
@@ -28,6 +29,10 @@ import com.google.android.gms.vision.text.TextRecognizer;
 import com.google.android.material.snackbar.Snackbar;
 import com.theartofdev.edmodo.cropper.CropImage;
 import com.theartofdev.edmodo.cropper.CropImageView;
+
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
 
 import javax.inject.Inject;
 
@@ -59,7 +64,9 @@ public class HomeActivity extends BaseActivity {
 
     private HomeViewModel viewModel;
     private SelectImageFrom selectImageFrom;
+
     private Uri imageUri;
+    private File file;
 
     private void openThroughPowerButton() {
         Intent intent = getIntent();
@@ -102,6 +109,7 @@ public class HomeActivity extends BaseActivity {
                     selectImageFrom = new SelectImageFrom(this, SelectImageFrom.SELECT_CAMERA);
                     startActivityForResult(selectImageFrom.pickCamera(), IMAGE_PICK_CAMERA_CODE);
                     imageUri = selectImageFrom.getImageUri();
+                    file = selectImageFrom.getFile();
                     break;
 
                 case GALLERY:
@@ -188,10 +196,28 @@ public class HomeActivity extends BaseActivity {
             CropImage.ActivityResult result = CropImage.getActivityResult(data);
             if (resultCode == RESULT_OK) {
                 assert result != null;
+                //retrieve
                 Uri image = result.getUri();
 
+                //save cropped image to app folder, replacing the initial image.
+                File cropped = file;
+                if (cropped == null) return;
+
+                try {
+                    Bitmap croppedBitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(), image);
+                    FileOutputStream fileOutputStream = new FileOutputStream(cropped);
+                    croppedBitmap.compress(Bitmap.CompressFormat.PNG, 90, fileOutputStream);
+                    fileOutputStream.flush();
+                    fileOutputStream.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+
+                //display
                 binding.imvViewImage.setImageURI(image);
 
+
+                //text recognition processes
                 BitmapDrawable drawable = (BitmapDrawable) binding.imvViewImage.getDrawable();
                 Bitmap bitmap = drawable.getBitmap();
 
