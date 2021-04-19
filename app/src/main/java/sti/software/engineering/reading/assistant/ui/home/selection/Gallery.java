@@ -10,9 +10,8 @@ public class Gallery implements Component {
 
     @Override
     public Intent selectImage() {
-        Intent intent = new Intent(Intent.ACTION_PICK);
-        intent.setType("image/*");
-        return intent;
+        return new Intent(Intent.ACTION_PICK,
+                android.provider.MediaStore.Images.Media.INTERNAL_CONTENT_URI);
     }
 
     @Override
@@ -23,5 +22,10 @@ public class Gallery implements Component {
     @Override
     public File getFile() {
         return null;
+    }
+
+    @Override
+    public String getFilename() {
+        return "";
     }
 }

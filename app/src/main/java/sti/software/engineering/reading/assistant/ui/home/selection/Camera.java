@@ -18,21 +18,22 @@ public class Camera implements Component {
     private static final String TAG = "Camera";
     private final Context context;
     private Uri imageUri;
-
     private File fromFile;
+    private String filename;
 
     public Camera(Context context) {
         this.context = context;
     }
 
+
     @Override
     public Intent selectImage() {
 
         final String SEPARATOR = File.separator;
-        final String FOLDER_NAME = "VisualImpairedStorage";
-        String external_storage_directory = Environment.getExternalStorageDirectory().getAbsolutePath();
+        final String FOLDER_NAME = "VisualImpairedImages";
+        String external_storage_directory = Environment.getExternalStorageDirectory().toString();//.getAbsolutePath();
 
-        File folder = new File(external_storage_directory + SEPARATOR + FOLDER_NAME);
+        File folder = new File(external_storage_directory + SEPARATOR + "Pictures" + SEPARATOR + FOLDER_NAME);
 
         if (!folder.exists()) {
             if (folder.mkdir()) Log.d(TAG, "STATUS SUCCESS: FOLDER CREATED SUCCESSFULLY!");
@@ -43,10 +44,10 @@ public class Camera implements Component {
         int day = calendar.get(Calendar.DAY_OF_MONTH);
         int year = calendar.get(Calendar.YEAR);
 
-        String filename = "image_" + (System.currentTimeMillis() / 1000)
-                + "_" + month + "" + day + "" + year + ".png";
+        this.filename = "image_" + (System.currentTimeMillis() / 1000)
+                + "_" + month + "" + day + "" + year + ".jpg";
 
-        this.fromFile = new File(external_storage_directory + SEPARATOR + FOLDER_NAME
+        this.fromFile = new File(external_storage_directory + SEPARATOR + "Pictures" + SEPARATOR + FOLDER_NAME
                 + SEPARATOR + filename);
 
         this.imageUri = FileProvider.getUriForFile(context, context.getApplicationContext().getPackageName() + ".provider", this.fromFile);
@@ -64,5 +65,10 @@ public class Camera implements Component {
     @Override
     public File getFile() {
         return this.fromFile;
+    }
+
+    @Override
+    public String getFilename() {
+        return filename;
     }
 }

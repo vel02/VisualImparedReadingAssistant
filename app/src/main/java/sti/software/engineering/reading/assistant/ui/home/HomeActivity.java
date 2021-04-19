@@ -6,8 +6,10 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
+import android.media.MediaScannerConnection;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.provider.MediaStore;
 import android.provider.Settings;
 import android.util.Log;
@@ -67,6 +69,7 @@ public class HomeActivity extends BaseActivity {
 
     private Uri imageUri;
     private File file;
+    private String filename;
 
     private void openThroughPowerButton() {
         Intent intent = getIntent();
@@ -110,6 +113,7 @@ public class HomeActivity extends BaseActivity {
                     startActivityForResult(selectImageFrom.pickCamera(), IMAGE_PICK_CAMERA_CODE);
                     imageUri = selectImageFrom.getImageUri();
                     file = selectImageFrom.getFile();
+                    filename = selectImageFrom.getFilename();
                     break;
 
                 case GALLERY:
@@ -200,18 +204,29 @@ public class HomeActivity extends BaseActivity {
                 Uri image = result.getUri();
 
                 //save cropped image to app folder, replacing the initial image.
-                File cropped = file;
-                if (cropped == null) return;
+                //should be on the background/thread
+                new Thread(() -> {
+                    File cropped = file;
+                    if (cropped == null) return;
 
-                try {
-                    Bitmap croppedBitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(), image);
-                    FileOutputStream fileOutputStream = new FileOutputStream(cropped);
-                    croppedBitmap.compress(Bitmap.CompressFormat.PNG, 90, fileOutputStream);
-                    fileOutputStream.flush();
-                    fileOutputStream.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
+                    try {
+                        Bitmap croppedBitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(), image);
+                        FileOutputStream fileOutputStream = new FileOutputStream(cropped);
+                        croppedBitmap.compress(Bitmap.CompressFormat.JPEG, 100, fileOutputStream);
+                        fileOutputStream.flush();
+                        fileOutputStream.close();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+
+                    //used to refreshed gallery
+                    final String FOLDER_NAME = "VisualImpairedImages";
+                    MediaScannerConnection.scanFile(this, new String[]{Environment.getExternalStorageDirectory().toString() + "/Pictures/" + FOLDER_NAME + "/" + filename}, null,
+                            (path, uri) -> Log.i(TAG, "Scanned " + path));
+
+
+                }).start();
+
 
                 //display
                 binding.imvViewImage.setImageURI(image);

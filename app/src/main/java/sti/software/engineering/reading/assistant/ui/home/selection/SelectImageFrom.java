@@ -36,4 +36,8 @@ public class SelectImageFrom {
         return this.component.getFile();
     }
 
+    public String getFilename() {
+        return this.component.getFilename();
+    }
+
 }
