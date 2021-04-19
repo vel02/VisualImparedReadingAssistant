@@ -2,6 +2,9 @@ package sti.software.engineering.reading.assistant.util;
 
 import android.app.ActivityManager;
 import android.content.Context;
+import android.media.MediaScannerConnection;
+import android.os.Environment;
+import android.util.Log;
 
 public class Utility {
 
@@ -14,6 +17,13 @@ public class Utility {
             }
         }
         return false;
+    }
+
+    public static void refreshGallery(Context context, String filename) {
+        final String FOLDER_NAME = "VisualImpairedImages";
+        MediaScannerConnection.scanFile(context, new String[]{Environment.getExternalStorageDirectory()
+                        .toString() + "/Pictures/" + FOLDER_NAME + "/" + filename}, null,
+                (path, uri) -> Log.i("home", "Scanned " + path));
     }
 
 }

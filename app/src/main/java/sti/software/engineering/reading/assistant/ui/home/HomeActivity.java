@@ -6,10 +6,8 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
-import android.media.MediaScannerConnection;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Environment;
 import android.provider.MediaStore;
 import android.provider.Settings;
 import android.util.Log;
@@ -68,7 +66,7 @@ public class HomeActivity extends BaseActivity {
     private SelectImageFrom selectImageFrom;
 
     private Uri imageUri;
-    private File file;
+    private File capturedImage;
     private String filename;
 
     private void openThroughPowerButton() {
@@ -112,7 +110,7 @@ public class HomeActivity extends BaseActivity {
                     selectImageFrom = new SelectImageFrom(this, SelectImageFrom.SELECT_CAMERA);
                     startActivityForResult(selectImageFrom.pickCamera(), IMAGE_PICK_CAMERA_CODE);
                     imageUri = selectImageFrom.getImageUri();
-                    file = selectImageFrom.getFile();
+                    capturedImage = selectImageFrom.getFile();
                     filename = selectImageFrom.getFilename();
                     break;
 
@@ -136,6 +134,28 @@ public class HomeActivity extends BaseActivity {
                             permissionIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                             startActivity(permissionIntent);
                         }).show();
+            }
+        });
+
+        viewModel.setSaveCroppedImage(null);
+        viewModel.observedSaveCroppedImage().observe(this, croppedImageUri -> {
+            if (croppedImageUri != null) {
+                new Thread(() -> {
+                    File capturedImageFile = this.capturedImage;
+                    if (capturedImageFile == null) return;
+
+                    try {
+                        Bitmap croppedBitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(), croppedImageUri);
+                        FileOutputStream fileOutputStream = new FileOutputStream(capturedImageFile);
+                        croppedBitmap.compress(Bitmap.CompressFormat.JPEG, 100, fileOutputStream);
+                        fileOutputStream.flush();
+                        fileOutputStream.close();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+
+                    Utility.refreshGallery(this, filename);
+                }).start();
             }
         });
 
@@ -201,36 +221,14 @@ public class HomeActivity extends BaseActivity {
             if (resultCode == RESULT_OK) {
                 assert result != null;
                 //retrieve
-                Uri image = result.getUri();
+                Uri croppedImageUri = result.getUri();
 
                 //save cropped image to app folder, replacing the initial image.
                 //should be on the background/thread
-                new Thread(() -> {
-                    File cropped = file;
-                    if (cropped == null) return;
-
-                    try {
-                        Bitmap croppedBitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(), image);
-                        FileOutputStream fileOutputStream = new FileOutputStream(cropped);
-                        croppedBitmap.compress(Bitmap.CompressFormat.JPEG, 100, fileOutputStream);
-                        fileOutputStream.flush();
-                        fileOutputStream.close();
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-
-                    //used to refreshed gallery
-                    final String FOLDER_NAME = "VisualImpairedImages";
-                    MediaScannerConnection.scanFile(this, new String[]{Environment.getExternalStorageDirectory().toString() + "/Pictures/" + FOLDER_NAME + "/" + filename}, null,
-                            (path, uri) -> Log.i(TAG, "Scanned " + path));
-
-
-                }).start();
-
+                viewModel.setSaveCroppedImage(croppedImageUri);
 
                 //display
-                binding.imvViewImage.setImageURI(image);
-
+                binding.imvViewImage.setImageURI(croppedImageUri);
 
                 //text recognition processes
                 BitmapDrawable drawable = (BitmapDrawable) binding.imvViewImage.getDrawable();

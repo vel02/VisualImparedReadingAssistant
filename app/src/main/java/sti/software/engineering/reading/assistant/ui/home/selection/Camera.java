@@ -16,7 +16,11 @@ import java.util.Calendar;
 public class Camera implements Component {
 
     private static final String TAG = "Camera";
+    private static final String SEPARATOR = File.separator;
+    private static final String FOLDER_NAME = "VisualImpairedImages";
+
     private final Context context;
+
     private Uri imageUri;
     private File fromFile;
     private String filename;
@@ -29,32 +33,34 @@ public class Camera implements Component {
     @Override
     public Intent selectImage() {
 
-        final String SEPARATOR = File.separator;
-        final String FOLDER_NAME = "VisualImpairedImages";
-        String external_storage_directory = Environment.getExternalStorageDirectory().toString();//.getAbsolutePath();
+        String external_storage_directory = Environment.getExternalStorageDirectory().toString();
 
-        File folder = new File(external_storage_directory + SEPARATOR + "Pictures" + SEPARATOR + FOLDER_NAME);
-
+        File folder = new File(external_storage_directory + SEPARATOR + "Pictures"
+                + SEPARATOR + FOLDER_NAME);
         if (!folder.exists()) {
             if (folder.mkdir()) Log.d(TAG, "STATUS SUCCESS: FOLDER CREATED SUCCESSFULLY!");
         } else Log.w(TAG, "STATUS FAILED: FOLDER EXISTS IN PHONE DIRECTORY.");
 
+        this.filename = this.createImageFileName();
+        this.fromFile = new File(external_storage_directory + SEPARATOR + "Pictures"
+                + SEPARATOR + FOLDER_NAME + SEPARATOR + filename);
+        this.imageUri = FileProvider.getUriForFile(context,
+                context.getApplicationContext().getPackageName()
+                        + ".provider", this.fromFile);
+
+        Intent cameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT, this.imageUri);
+        return cameraIntent;
+    }
+
+    private String createImageFileName() {
         Calendar calendar = Calendar.getInstance();
         int month = calendar.get(Calendar.MONTH) + 1;
         int day = calendar.get(Calendar.DAY_OF_MONTH);
         int year = calendar.get(Calendar.YEAR);
 
-        this.filename = "image_" + (System.currentTimeMillis() / 1000)
+        return "image_" + (System.currentTimeMillis() / 1000)
                 + "_" + month + "" + day + "" + year + ".jpg";
-
-        this.fromFile = new File(external_storage_directory + SEPARATOR + "Pictures" + SEPARATOR + FOLDER_NAME
-                + SEPARATOR + filename);
-
-        this.imageUri = FileProvider.getUriForFile(context, context.getApplicationContext().getPackageName() + ".provider", this.fromFile);
-
-        Intent cameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-        cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT, this.imageUri);
-        return cameraIntent;
     }
 
     @Override
