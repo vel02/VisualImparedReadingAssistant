@@ -61,4 +61,8 @@ dependencies {
     implementation "com.google.android.gms:play-services-vision:$image_to_text"
     //reference: https://developers.google.com/android/guides/releases
 
+    def picasso_version = "2.71828"
+    implementation "com.squareup.picasso:picasso:$picasso_version"
+    //reference: https://github.com/square/picasso
+
 }

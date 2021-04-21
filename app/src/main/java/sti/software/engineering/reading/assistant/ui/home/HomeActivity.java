@@ -27,20 +27,26 @@ import com.google.android.gms.vision.Frame;
 import com.google.android.gms.vision.text.TextBlock;
 import com.google.android.gms.vision.text.TextRecognizer;
 import com.google.android.material.snackbar.Snackbar;
+import com.squareup.picasso.Picasso;
 import com.theartofdev.edmodo.cropper.CropImage;
 import com.theartofdev.edmodo.cropper.CropImageView;
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.Vector;
 
 import javax.inject.Inject;
 
 import sti.software.engineering.reading.assistant.BaseActivity;
 import sti.software.engineering.reading.assistant.R;
 import sti.software.engineering.reading.assistant.databinding.ActivityHomeBinding;
+import sti.software.engineering.reading.assistant.model.PhoneAlbum;
+import sti.software.engineering.reading.assistant.model.PhonePhoto;
 import sti.software.engineering.reading.assistant.service.TriggerCameraService;
+import sti.software.engineering.reading.assistant.ui.OnPhoneImagesObtained;
 import sti.software.engineering.reading.assistant.ui.home.selection.SelectImageFrom;
+import sti.software.engineering.reading.assistant.util.DeviceImageManager;
 import sti.software.engineering.reading.assistant.util.Utility;
 import sti.software.engineering.reading.assistant.viewmodel.ViewModelProviderFactory;
 
@@ -50,7 +56,7 @@ import static sti.software.engineering.reading.assistant.ui.home.HomeViewModel.S
 
 /**
  * Next Functionality
- * - save to SQLite database, display values through recycler view.
+ * - display photos through recycler view.
  * - refactor codes
  */
 public class HomeActivity extends BaseActivity {
@@ -99,6 +105,43 @@ public class HomeActivity extends BaseActivity {
 
         openThroughPowerButton();
 
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        //testing image retrieving
+        //REFERENCE: https://stackoverflow.com/questions/4195660/get-list-of-photo-galleries-on-android
+        //BY: BARAKUDA
+        DeviceImageManager.getPhoneAlbums(this, new OnPhoneImagesObtained() {
+            @Override
+            public void onComplete(Vector<PhoneAlbum> albums) {
+                for (int i = 0; i < albums.size(); i++) {
+                    PhoneAlbum album = albums.get(i);
+                    Log.d(TAG, "ALBUM NAME: " + album.getName());
+                    Log.d(TAG, "ALBUM ID: " + album.getId());
+
+                    if (album.getName().equals("VisualImpairedImages")) {
+                        Vector<PhonePhoto> phonePhotos = album.getAlbumPhotos();
+                        for (int j = 0; j < phonePhotos.size(); j++) {
+                            PhonePhoto photo = phonePhotos.get(j);
+                            Log.d(TAG, "PHOTO URI: " + photo.getPhotoUri());
+                            Picasso.get()
+                                    .load("file:" + photo.getPhotoUri())
+                                    .centerCrop()
+                                    .fit()
+                                    .into(binding.imvViewImage);
+                        }
+                    }
+                }
+            }
+
+            @Override
+            public void onError() {
+
+            }
+        });
     }
 
     private void subscribeObservers() {

@@ -112,7 +112,7 @@ public class TriggerCameraService extends Service implements DetectScreenOnRecei
 
     @Override
     public void onDestroy() {
-        textToSpeech.destroy();
+        if (textToSpeech != null) textToSpeech.destroy();
         super.onDestroy();
         unregisterScreenOnReceiver();
     }
