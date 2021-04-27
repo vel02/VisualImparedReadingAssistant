@@ -45,6 +45,6 @@ public class HomeViewModel extends ViewModel {
         return selectImageFrom;
     }
 
-    public enum SelectImageFrom {CAMERA, GALLERY}
+    public enum SelectImageFrom {AUTO_CAMERA, CAMERA, GALLERY}
 
 }

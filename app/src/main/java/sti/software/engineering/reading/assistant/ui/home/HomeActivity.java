@@ -27,7 +27,6 @@ import com.google.android.gms.vision.Frame;
 import com.google.android.gms.vision.text.TextBlock;
 import com.google.android.gms.vision.text.TextRecognizer;
 import com.google.android.material.snackbar.Snackbar;
-import com.squareup.picasso.Picasso;
 import com.theartofdev.edmodo.cropper.CropImage;
 import com.theartofdev.edmodo.cropper.CropImageView;
 
@@ -51,11 +50,18 @@ import sti.software.engineering.reading.assistant.util.Utility;
 import sti.software.engineering.reading.assistant.viewmodel.ViewModelProviderFactory;
 
 import static android.Manifest.permission.WRITE_EXTERNAL_STORAGE;
+import static sti.software.engineering.reading.assistant.ui.home.HomeViewModel.SelectImageFrom.AUTO_CAMERA;
 import static sti.software.engineering.reading.assistant.ui.home.HomeViewModel.SelectImageFrom.CAMERA;
 import static sti.software.engineering.reading.assistant.ui.home.HomeViewModel.SelectImageFrom.GALLERY;
 
 /**
  * Next Functionality
+ * - Save button support
+ * - Retake Image options
+ * - Speech Command integration
+ * - refactor codes
+ *
+ * Stand by.
  * - display photos through recycler view.
  * - refactor codes
  */
@@ -85,7 +91,7 @@ public class HomeActivity extends BaseActivity {
                     viewModel.setShowPermissionRational(true);
                     return;
                 }
-                viewModel.setSelectImageFrom(CAMERA);
+                viewModel.setSelectImageFrom(AUTO_CAMERA);
             }
         }
     }
@@ -127,11 +133,11 @@ public class HomeActivity extends BaseActivity {
                         for (int j = 0; j < phonePhotos.size(); j++) {
                             PhonePhoto photo = phonePhotos.get(j);
                             Log.d(TAG, "PHOTO URI: " + photo.getPhotoUri());
-                            Picasso.get()
-                                    .load("file:" + photo.getPhotoUri())
-                                    .centerCrop()
-                                    .fit()
-                                    .into(binding.imvViewImage);
+//                            Picasso.get()
+//                                    .load("file:" + photo.getPhotoUri())
+//                                    .centerCrop()
+//                                    .fit()
+//                                    .into(binding.imvViewImage);
                         }
                     }
                 }
@@ -149,6 +155,14 @@ public class HomeActivity extends BaseActivity {
         viewModel.observedSelectedImage().observe(this, selectImage -> {
 
             switch (selectImage) {
+                case AUTO_CAMERA:
+                    selectImageFrom = new SelectImageFrom(this, SelectImageFrom.SELECT_CAMERA);
+                    startActivityForResult(selectImageFrom.pickCamera(), IMAGE_PICK_AUTO_CAMERA_CODE);
+                    imageUri = selectImageFrom.getImageUri();
+                    capturedImage = selectImageFrom.getFile();
+                    filename = selectImageFrom.getFilename();
+                    break;
+
                 case CAMERA:
                     selectImageFrom = new SelectImageFrom(this, SelectImageFrom.SELECT_CAMERA);
                     startActivityForResult(selectImageFrom.pickCamera(), IMAGE_PICK_CAMERA_CODE);
@@ -257,6 +271,13 @@ public class HomeActivity extends BaseActivity {
                         .start(this);
             }
 
+            if (requestCode == IMAGE_PICK_AUTO_CAMERA_CODE) {
+
+                //display
+                binding.imvViewImage.setImageURI(imageUri);
+                //check image quality
+
+            }
         }
 
         if (requestCode == CropImage.CROP_IMAGE_ACTIVITY_REQUEST_CODE) {

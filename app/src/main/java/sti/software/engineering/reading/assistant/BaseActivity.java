@@ -13,6 +13,7 @@ public class BaseActivity extends DaggerAppCompatActivity {
     protected static final int STORAGE_REQUEST_CODE = 201;
 
     protected static final int IMAGE_PICK_CAMERA_CODE = 1001;
+    protected static final int IMAGE_PICK_AUTO_CAMERA_CODE = 1002;
     protected static final int IMAGE_PICK_GALLERY_CODE = 2001;
 
     protected TriggerCameraService triggerCameraService;
