@@ -13,12 +13,22 @@ public class HomeViewModel extends ViewModel {
     public MutableLiveData<SelectImageFrom> selectImageFrom;
     public MutableLiveData<Boolean> showPermissionRational;
     public MutableLiveData<Uri> saveCroppedImage;
+    public MutableLiveData<Boolean> extractText;
 
     @Inject
     public HomeViewModel() {
         this.selectImageFrom = new MutableLiveData<>();
         this.showPermissionRational = new MutableLiveData<>();
         this.saveCroppedImage = new MutableLiveData<>();
+        this.extractText = new MutableLiveData<>();
+    }
+
+    public void setExtractText(boolean extract) {
+        this.extractText.setValue(extract);
+    }
+
+    public LiveData<Boolean> observedExtractText() {
+        return extractText;
     }
 
     public void setSaveCroppedImage(Uri uri) {

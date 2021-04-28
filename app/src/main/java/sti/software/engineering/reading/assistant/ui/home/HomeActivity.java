@@ -33,19 +33,14 @@ import com.theartofdev.edmodo.cropper.CropImageView;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.util.Vector;
 
 import javax.inject.Inject;
 
 import sti.software.engineering.reading.assistant.BaseActivity;
 import sti.software.engineering.reading.assistant.R;
 import sti.software.engineering.reading.assistant.databinding.ActivityHomeBinding;
-import sti.software.engineering.reading.assistant.model.PhoneAlbum;
-import sti.software.engineering.reading.assistant.model.PhonePhoto;
 import sti.software.engineering.reading.assistant.service.TriggerCameraService;
-import sti.software.engineering.reading.assistant.ui.OnPhoneImagesObtained;
 import sti.software.engineering.reading.assistant.ui.home.selection.SelectImageFrom;
-import sti.software.engineering.reading.assistant.util.DeviceImageManager;
 import sti.software.engineering.reading.assistant.util.Utility;
 import sti.software.engineering.reading.assistant.viewmodel.ViewModelProviderFactory;
 
@@ -56,11 +51,12 @@ import static sti.software.engineering.reading.assistant.ui.home.HomeViewModel.S
 
 /**
  * Next Functionality
+ * - database (SQLite or Room)
  * - Save button support
  * - Retake Image options
  * - Speech Command integration
  * - refactor codes
- *
+ * <p>
  * Stand by.
  * - display photos through recycler view.
  * - refactor codes
@@ -120,34 +116,34 @@ public class HomeActivity extends BaseActivity {
         //testing image retrieving
         //REFERENCE: https://stackoverflow.com/questions/4195660/get-list-of-photo-galleries-on-android
         //BY: BARAKUDA
-        DeviceImageManager.getPhoneAlbums(this, new OnPhoneImagesObtained() {
-            @Override
-            public void onComplete(Vector<PhoneAlbum> albums) {
-                for (int i = 0; i < albums.size(); i++) {
-                    PhoneAlbum album = albums.get(i);
-                    Log.d(TAG, "ALBUM NAME: " + album.getName());
-                    Log.d(TAG, "ALBUM ID: " + album.getId());
-
-                    if (album.getName().equals("VisualImpairedImages")) {
-                        Vector<PhonePhoto> phonePhotos = album.getAlbumPhotos();
-                        for (int j = 0; j < phonePhotos.size(); j++) {
-                            PhonePhoto photo = phonePhotos.get(j);
-                            Log.d(TAG, "PHOTO URI: " + photo.getPhotoUri());
-//                            Picasso.get()
-//                                    .load("file:" + photo.getPhotoUri())
-//                                    .centerCrop()
-//                                    .fit()
-//                                    .into(binding.imvViewImage);
-                        }
-                    }
-                }
-            }
-
-            @Override
-            public void onError() {
-
-            }
-        });
+//        DeviceImageManager.getPhoneAlbums(this, new OnPhoneImagesObtained() {
+//            @Override
+//            public void onComplete(Vector<PhoneAlbum> albums) {
+//                for (int i = 0; i < albums.size(); i++) {
+//                    PhoneAlbum album = albums.get(i);
+//                    Log.d(TAG, "ALBUM NAME: " + album.getName());
+//                    Log.d(TAG, "ALBUM ID: " + album.getId());
+//
+//                    if (album.getName().equals("VisualImpairedImages")) {
+//                        Vector<PhonePhoto> phonePhotos = album.getAlbumPhotos();
+//                        for (int j = 0; j < phonePhotos.size(); j++) {
+//                            PhonePhoto photo = phonePhotos.get(j);
+//                            Log.d(TAG, "PHOTO URI: " + photo.getPhotoUri());
+////                            Picasso.get()
+////                                    .load("file:" + photo.getPhotoUri())
+////                                    .centerCrop()
+////                                    .fit()
+////                                    .into(binding.imvViewImage);
+//                        }
+//                    }
+//                }
+//            }
+//
+//            @Override
+//            public void onError() {
+//
+//            }
+//        });
     }
 
     private void subscribeObservers() {
@@ -216,6 +212,33 @@ public class HomeActivity extends BaseActivity {
             }
         });
 
+        viewModel.setExtractText(false);
+        viewModel.observedExtractText().observe(this, extract -> {
+            if (extract) {
+                //text recognition processes
+                BitmapDrawable drawable = (BitmapDrawable) binding.imvViewImage.getDrawable();
+                Bitmap bitmap = drawable.getBitmap();
+
+                TextRecognizer recognizer = new TextRecognizer
+                        .Builder(getApplicationContext()).build();
+                if (!recognizer.isOperational()) {
+                    Toast.makeText(this, "Cannot recognize text", Toast.LENGTH_SHORT).show();
+                } else {
+                    Frame frame = new Frame.Builder().setBitmap(bitmap).build();
+                    SparseArray<TextBlock> items = recognizer.detect(frame);
+                    StringBuilder sb = new StringBuilder();
+
+                    for (int i = 0; i < items.size(); i++) {
+                        TextBlock item = items.valueAt(i);
+                        sb.append(item.getValue());
+                        sb.append("\n");
+                    }
+
+                    Log.d(TAG, "result below:\n" + sb.toString());
+                }
+            }
+        });
+
     }
 
     private void selectImageDialog() {
@@ -275,8 +298,9 @@ public class HomeActivity extends BaseActivity {
 
                 //display
                 binding.imvViewImage.setImageURI(imageUri);
-                //check image quality
 
+                //extract text
+                viewModel.setExtractText(true);
             }
         }
 
@@ -295,32 +319,8 @@ public class HomeActivity extends BaseActivity {
                 binding.imvViewImage.setImageURI(croppedImageUri);
 
                 //text recognition processes
-                BitmapDrawable drawable = (BitmapDrawable) binding.imvViewImage.getDrawable();
-                Bitmap bitmap = drawable.getBitmap();
+                viewModel.setExtractText(true);
 
-                TextRecognizer recognizer = new TextRecognizer
-                        .Builder(getApplicationContext()).build();
-                if (!recognizer.isOperational()) {
-                    Toast.makeText(this, "Cannot recognize text", Toast.LENGTH_SHORT).show();
-                } else {
-                    Frame frame = new Frame.Builder().setBitmap(bitmap).build();
-                    SparseArray<TextBlock> items = recognizer.detect(frame);
-                    StringBuilder sb = new StringBuilder();
-
-                    for (int i = 0; i < items.size(); i++) {
-                        TextBlock item = items.valueAt(i);
-                        sb.append(item.getValue());
-                        sb.append("\n");
-                    }
-
-                    Log.d(TAG, "result below:\n" + sb.toString());
-                }
-
-            } else if (requestCode == RESULT_CANCELED) {
-                if (result != null) {
-                    Exception error = result.getError();
-                    Toast.makeText(this, "" + error, Toast.LENGTH_SHORT).show();
-                }
             }
         }
     }
