@@ -20,6 +20,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.core.app.ActivityCompat;
+import androidx.core.content.FileProvider;
 import androidx.databinding.DataBindingUtil;
 import androidx.lifecycle.ViewModelProvider;
 
@@ -52,10 +53,10 @@ import static sti.software.engineering.reading.assistant.ui.home.HomeViewModel.S
 
 /**
  * Next Functionality
- * - database (SQLite or Room)
  * - Save button support
- * - Retake Image options
- * - Speech Command integration
+ * - Dialog to add image nickname
+ * - add nickname to image database entity
+ * - Horizontal RecyclerView
  * - refactor codes
  * <p>
  * Stand by.
@@ -249,6 +250,11 @@ public class HomeActivity extends BaseActivity {
                     File file = image.getFileObject();
                     Log.d(TAG, "Image: " + image.toString());
                     Log.d(TAG, "File: " + file.getPath());
+
+                    Uri uri = FileProvider.getUriForFile(this,
+                            getApplicationContext().getPackageName()
+                                    + ".provider", file);
+                    binding.imvViewImage.setImageURI(uri);
                 }
             }
         });
