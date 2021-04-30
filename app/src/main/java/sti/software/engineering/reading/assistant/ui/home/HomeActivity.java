@@ -39,6 +39,7 @@ import javax.inject.Inject;
 import sti.software.engineering.reading.assistant.BaseActivity;
 import sti.software.engineering.reading.assistant.R;
 import sti.software.engineering.reading.assistant.databinding.ActivityHomeBinding;
+import sti.software.engineering.reading.assistant.model.Image;
 import sti.software.engineering.reading.assistant.service.TriggerCameraService;
 import sti.software.engineering.reading.assistant.ui.home.selection.SelectImageFrom;
 import sti.software.engineering.reading.assistant.util.Utility;
@@ -112,6 +113,7 @@ public class HomeActivity extends BaseActivity {
     @Override
     protected void onResume() {
         super.onResume();
+        viewModel.processDatabaseData();
 
         //testing image retrieving
         //REFERENCE: https://stackoverflow.com/questions/4195660/get-list-of-photo-galleries-on-android
@@ -239,6 +241,18 @@ public class HomeActivity extends BaseActivity {
             }
         });
 
+        viewModel.observedImages().observe(this, images -> {
+            if (images != null) {
+                Log.d(TAG, "Images: " + images);
+                for (int i = 0; i < images.size(); i++) {
+                    Image image = images.get(i);
+                    File file = image.getFileObject();
+                    Log.d(TAG, "Image: " + image.toString());
+                    Log.d(TAG, "File: " + file.getPath());
+                }
+            }
+        });
+
     }
 
     private void selectImageDialog() {
@@ -301,6 +315,10 @@ public class HomeActivity extends BaseActivity {
 
                 //extract text
                 viewModel.setExtractText(true);
+
+                //testing save image
+                Image image = new Image(filename);
+                viewModel.insert(image);
             }
         }
 

@@ -65,4 +65,15 @@ dependencies {
     implementation "com.squareup.picasso:picasso:$picasso_version"
     //reference: https://github.com/square/picasso
 
+    def room_version = "2.3.0"
+    implementation "androidx.room:room-runtime:$room_version"
+    annotationProcessor "androidx.room:room-compiler:$room_version"
+    //reference: https://developer.android.com/jetpack/androidx/releases/room#java
+
+    def rx_version = "3.0.0"
+    implementation "io.reactivex.rxjava3:rxandroid:$rx_version"
+    implementation "io.reactivex.rxjava3:rxjava:3.0.4"
+    //reference: https://github.com/ReactiveX/rxandroid
+
+
 }
