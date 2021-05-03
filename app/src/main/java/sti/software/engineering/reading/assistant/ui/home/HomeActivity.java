@@ -4,6 +4,7 @@ import android.Manifest;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
@@ -57,17 +58,9 @@ import static sti.software.engineering.reading.assistant.ui.home.HomeViewModel.S
  * Next Functionality
  * Bugs
  * - Image quality (too large, need optimization)
- * - Saving images
- * - Show list after saving
- * Stand by.
- * - Save button support (done)
+ * Do
+ * - UI to separate capture images, and pick to gallery functionality
  * - Dialog to add image nickname
- * - add nickname to image database entity (done)
- * - Horizontal RecyclerView (done)
- * - refactor codes
- * <p>
- * Stand by.
- * - display photos through recycler view.
  * - refactor codes
  */
 public class HomeActivity extends BaseActivity {
@@ -275,12 +268,12 @@ public class HomeActivity extends BaseActivity {
             if (images != null) {
                 adapter.refresh(images);
                 Log.d(TAG, "Images: " + images);
-                for (int i = 0; i < images.size(); i++) {
-                    Image image = images.get(i);
-                    File file = image.getFileObject();
-                    Log.d(TAG, "Image: " + image.toString());
-                    Log.d(TAG, "File: " + file.getPath());
-                }
+//                for (int i = 0; i < images.size(); i++) {
+//                    Image image = images.get(i);
+//                    File file = image.getFileObject();
+//                    Log.d(TAG, "Image: " + image.toString());
+//                    Log.d(TAG, "File: " + file.getPath());
+//                }
             }
         });
 
@@ -319,6 +312,23 @@ public class HomeActivity extends BaseActivity {
     protected void onStop() {
         super.onStop();
         unbindTriggerCameraService();
+    }
+
+    public static String getPath(Context context, Uri uri) {
+        String result = null;
+        String[] proj = {MediaStore.Images.Media.DATA};
+        Cursor cursor = context.getContentResolver().query(uri, proj, null, null, null);
+        if (cursor != null) {
+            if (cursor.moveToFirst()) {
+                int column_index = cursor.getColumnIndexOrThrow(proj[0]);
+                result = cursor.getString(column_index);
+            }
+            cursor.close();
+        }
+        if (result == null) {
+            result = "Not found";
+        }
+        return result;
     }
 
     @Override
