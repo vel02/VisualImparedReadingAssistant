@@ -1,5 +1,7 @@
 package sti.software.engineering.reading.assistant.repository;
 
+import android.util.Log;
+
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MediatorLiveData;
 
@@ -13,9 +15,11 @@ import sti.software.engineering.reading.assistant.repository.executor.ExecutorDa
 
 public class ImageRepository {
 
-    private ImageDatabase database;
+    private static final String TAG = "ImageRepository";
 
-    private MediatorLiveData<List<Image>> images = new MediatorLiveData<>();
+    private final ImageDatabase database;
+
+    private final MediatorLiveData<List<Image>> images = new MediatorLiveData<>();
 
     @Inject
     public ImageRepository(ImageDatabase database) {
@@ -23,6 +27,7 @@ public class ImageRepository {
     }
 
     public void insert(Image image) {
+        Log.d(TAG, "insert: called");
         ExecutorDatabase.insert(database, image);
     }
 

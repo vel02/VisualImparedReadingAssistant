@@ -17,11 +17,14 @@ public class Image implements Parcelable {
 
     @PrimaryKey(autoGenerate = true)
     private int id;
+    @ColumnInfo(name = "nickname")
+    private String nickname;
     @ColumnInfo(name = "filename")
     private String filename;
 
 
-    public Image(String filename) {
+    public Image(String nickname, String filename) {
+        this.nickname = nickname;
         this.filename = filename;
     }
 
@@ -31,12 +34,14 @@ public class Image implements Parcelable {
 
     protected Image(Parcel in) {
         id = in.readInt();
+        nickname = in.readString();
         filename = in.readString();
     }
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeInt(id);
+        dest.writeString(nickname);
         dest.writeString(filename);
     }
 
@@ -65,6 +70,14 @@ public class Image implements Parcelable {
         this.id = id;
     }
 
+    public String getNickname() {
+        return nickname;
+    }
+
+    public void setNickname(String nickname) {
+        this.nickname = nickname;
+    }
+
     public String getFilename() {
         return filename;
     }
@@ -89,6 +102,7 @@ public class Image implements Parcelable {
     public String toString() {
         return "Image{" +
                 "id=" + id +
+                ", nickname='" + nickname + '\'' +
                 ", filename='" + filename + '\'' +
                 '}';
     }

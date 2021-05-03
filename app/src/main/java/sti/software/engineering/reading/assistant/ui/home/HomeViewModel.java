@@ -20,11 +20,11 @@ public class HomeViewModel extends ViewModel {
     public MutableLiveData<Uri> saveCroppedImage;
     public MutableLiveData<Boolean> extractText;
 
-    @Inject
-    ImageRepository repository;
+    private final ImageRepository repository;
 
     @Inject
-    public HomeViewModel() {
+    public HomeViewModel(ImageRepository repository) {
+        this.repository = repository;
         this.selectImageFrom = new MutableLiveData<>();
         this.showPermissionRational = new MutableLiveData<>();
         this.saveCroppedImage = new MutableLiveData<>();

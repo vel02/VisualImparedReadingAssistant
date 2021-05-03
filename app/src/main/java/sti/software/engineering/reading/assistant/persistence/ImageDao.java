@@ -15,9 +15,9 @@ public interface ImageDao {
     @Insert
     void insertImage(Image image);
 
-    @Query("UPDATE images SET filename = :filename " +
+    @Query("UPDATE images SET nickname = :nickname, filename = :filename " +
             "WHERE id = :id")
-    void updateImage(int id, String filename);
+    void updateImage(int id, String nickname, String filename);
 
     @Query("DELETE FROM images WHERE id = :id")
     void deleteImage(int id);

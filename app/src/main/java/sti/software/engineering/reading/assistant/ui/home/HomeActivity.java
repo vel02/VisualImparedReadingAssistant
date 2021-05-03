@@ -20,9 +20,10 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.core.app.ActivityCompat;
-import androidx.core.content.FileProvider;
 import androidx.databinding.DataBindingUtil;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.gms.vision.Frame;
 import com.google.android.gms.vision.text.TextBlock;
@@ -39,6 +40,7 @@ import javax.inject.Inject;
 
 import sti.software.engineering.reading.assistant.BaseActivity;
 import sti.software.engineering.reading.assistant.R;
+import sti.software.engineering.reading.assistant.adapter.ImageRecyclerAdapter;
 import sti.software.engineering.reading.assistant.databinding.ActivityHomeBinding;
 import sti.software.engineering.reading.assistant.model.Image;
 import sti.software.engineering.reading.assistant.service.TriggerCameraService;
@@ -53,10 +55,15 @@ import static sti.software.engineering.reading.assistant.ui.home.HomeViewModel.S
 
 /**
  * Next Functionality
- * - Save button support
+ * Bugs
+ * - Image quality (too large, need optimization)
+ * - Saving images
+ * - Show list after saving
+ * Stand by.
+ * - Save button support (done)
  * - Dialog to add image nickname
- * - add nickname to image database entity
- * - Horizontal RecyclerView
+ * - add nickname to image database entity (done)
+ * - Horizontal RecyclerView (done)
  * - refactor codes
  * <p>
  * Stand by.
@@ -78,6 +85,9 @@ public class HomeActivity extends BaseActivity {
     private Uri imageUri;
     private File capturedImage;
     private String filename;
+
+    private ImageRecyclerAdapter adapter;
+
 
     private void openThroughPowerButton() {
         Intent intent = getIntent();
@@ -108,14 +118,31 @@ public class HomeActivity extends BaseActivity {
         }
 
         openThroughPowerButton();
+        initImageRecyclerAdapter();
+        navigate();
+    }
 
+    private void navigate() {
+        binding.btnSave.setOnClickListener(v -> {
+            if (filename != null) {
+                Log.d(TAG, "save: called");
+                Image image = new Image("nickname", filename);
+                viewModel.insert(image);
+                viewModel.processDatabaseData();
+            }
+        });
+    }
+
+    private void initImageRecyclerAdapter() {
+        binding.viewList.setLayoutManager(new LinearLayoutManager(this, RecyclerView.HORIZONTAL, false));
+        adapter = new ImageRecyclerAdapter();
+        binding.viewList.setAdapter(adapter);
     }
 
     @Override
     protected void onResume() {
         super.onResume();
         viewModel.processDatabaseData();
-
         //testing image retrieving
         //REFERENCE: https://stackoverflow.com/questions/4195660/get-list-of-photo-galleries-on-android
         //BY: BARAKUDA
@@ -152,30 +179,30 @@ public class HomeActivity extends BaseActivity {
     private void subscribeObservers() {
 
         viewModel.observedSelectedImage().observe(this, selectImage -> {
+            if (selectImage != null) {
+                switch (selectImage) {
+                    case AUTO_CAMERA:
+                        selectImageFrom = new SelectImageFrom(this, SelectImageFrom.SELECT_CAMERA);
+                        startActivityForResult(selectImageFrom.pickCamera(), IMAGE_PICK_AUTO_CAMERA_CODE);
+                        imageUri = selectImageFrom.getImageUri();
+                        capturedImage = selectImageFrom.getFile();
+                        filename = selectImageFrom.getFilename();
+                        break;
 
-            switch (selectImage) {
-                case AUTO_CAMERA:
-                    selectImageFrom = new SelectImageFrom(this, SelectImageFrom.SELECT_CAMERA);
-                    startActivityForResult(selectImageFrom.pickCamera(), IMAGE_PICK_AUTO_CAMERA_CODE);
-                    imageUri = selectImageFrom.getImageUri();
-                    capturedImage = selectImageFrom.getFile();
-                    filename = selectImageFrom.getFilename();
-                    break;
+                    case CAMERA:
+                        selectImageFrom = new SelectImageFrom(this, SelectImageFrom.SELECT_CAMERA);
+                        startActivityForResult(selectImageFrom.pickCamera(), IMAGE_PICK_CAMERA_CODE);
+                        imageUri = selectImageFrom.getImageUri();
+                        capturedImage = selectImageFrom.getFile();
+                        filename = selectImageFrom.getFilename();
+                        break;
 
-                case CAMERA:
-                    selectImageFrom = new SelectImageFrom(this, SelectImageFrom.SELECT_CAMERA);
-                    startActivityForResult(selectImageFrom.pickCamera(), IMAGE_PICK_CAMERA_CODE);
-                    imageUri = selectImageFrom.getImageUri();
-                    capturedImage = selectImageFrom.getFile();
-                    filename = selectImageFrom.getFilename();
-                    break;
-
-                case GALLERY:
-                    selectImageFrom = new SelectImageFrom(this, SelectImageFrom.SELECT_GALLERY);
-                    startActivityForResult(selectImageFrom.pickGallery(), IMAGE_PICK_GALLERY_CODE);
-                    break;
+                    case GALLERY:
+                        selectImageFrom = new SelectImageFrom(this, SelectImageFrom.SELECT_GALLERY);
+                        startActivityForResult(selectImageFrom.pickGallery(), IMAGE_PICK_GALLERY_CODE);
+                        break;
+                }
             }
-
         });
 
         viewModel.observedShowPermissionRational().observe(this, showPermissionRational -> {
@@ -203,7 +230,7 @@ public class HomeActivity extends BaseActivity {
                     try {
                         Bitmap croppedBitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(), croppedImageUri);
                         FileOutputStream fileOutputStream = new FileOutputStream(capturedImageFile);
-                        croppedBitmap.compress(Bitmap.CompressFormat.JPEG, 100, fileOutputStream);
+                        croppedBitmap.compress(Bitmap.CompressFormat.JPEG, 90, fileOutputStream);
                         fileOutputStream.flush();
                         fileOutputStream.close();
                     } catch (IOException e) {
@@ -239,22 +266,20 @@ public class HomeActivity extends BaseActivity {
 
                     Log.d(TAG, "result below:\n" + sb.toString());
                 }
+
             }
         });
 
         viewModel.observedImages().observe(this, images -> {
+            Log.d(TAG, "subscribeObservers: called");
             if (images != null) {
+                adapter.refresh(images);
                 Log.d(TAG, "Images: " + images);
                 for (int i = 0; i < images.size(); i++) {
                     Image image = images.get(i);
                     File file = image.getFileObject();
                     Log.d(TAG, "Image: " + image.toString());
                     Log.d(TAG, "File: " + file.getPath());
-
-                    Uri uri = FileProvider.getUriForFile(this,
-                            getApplicationContext().getPackageName()
-                                    + ".provider", file);
-                    binding.imvViewImage.setImageURI(uri);
                 }
             }
         });
@@ -322,9 +347,6 @@ public class HomeActivity extends BaseActivity {
                 //extract text
                 viewModel.setExtractText(true);
 
-                //testing save image
-                Image image = new Image(filename);
-                viewModel.insert(image);
             }
         }
 

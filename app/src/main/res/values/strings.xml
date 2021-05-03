@@ -5,4 +5,5 @@
     <string name="label_permission_rational">Required Permissions are needed for core functionality</string>
     <string name="label_grant_permission">Grant Permission</string>
     <string name="label_ok">OK</string>
+    <string name="label_save">Save</string>
 </resources>
