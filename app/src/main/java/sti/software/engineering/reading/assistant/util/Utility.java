@@ -2,8 +2,11 @@ package sti.software.engineering.reading.assistant.util;
 
 import android.app.ActivityManager;
 import android.content.Context;
+import android.database.Cursor;
 import android.media.MediaScannerConnection;
+import android.net.Uri;
 import android.os.Environment;
+import android.provider.MediaStore;
 import android.util.Log;
 
 public class Utility {
@@ -26,4 +29,20 @@ public class Utility {
                 (path, uri) -> Log.i("home", "Scanned " + path));
     }
 
+    public static String getPath(Context context, Uri uri) {
+        String result = null;
+        String[] proj = {MediaStore.Images.Media.DATA};
+        Cursor cursor = context.getContentResolver().query(uri, proj, null, null, null);
+        if (cursor != null) {
+            if (cursor.moveToFirst()) {
+                int column_index = cursor.getColumnIndexOrThrow(proj[0]);
+                result = cursor.getString(column_index);
+            }
+            cursor.close();
+        }
+        if (result == null) {
+            result = "Not found";
+        }
+        return result;
+    }
 }

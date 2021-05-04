@@ -1,5 +1,6 @@
 package sti.software.engineering.reading.assistant.adapter;
 
+import android.net.Uri;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
 
@@ -41,6 +42,10 @@ public class ImageRecyclerAdapter extends RecyclerView.Adapter<ImageBindHolder> 
     @Override
     public int getItemCount() {
         return ((images != null && images.size() > 0) ? images.size() : 0);
+    }
+
+    public interface OnImageClickListener {
+        void onImageClicked(Image image, Uri uri);
     }
 
 }

@@ -17,7 +17,7 @@ public class HomeViewModel extends ViewModel {
 
     public MutableLiveData<SelectImageFrom> selectImageFrom;
     public MutableLiveData<Boolean> showPermissionRational;
-    public MutableLiveData<Uri> saveCroppedImage;
+    public MutableLiveData<Uri> storeCroppedImage;
     public MutableLiveData<Boolean> extractText;
 
     private final ImageRepository repository;
@@ -27,7 +27,7 @@ public class HomeViewModel extends ViewModel {
         this.repository = repository;
         this.selectImageFrom = new MutableLiveData<>();
         this.showPermissionRational = new MutableLiveData<>();
-        this.saveCroppedImage = new MutableLiveData<>();
+        this.storeCroppedImage = new MutableLiveData<>();
         this.extractText = new MutableLiveData<>();
     }
 
@@ -60,12 +60,12 @@ public class HomeViewModel extends ViewModel {
         return extractText;
     }
 
-    public void setSaveCroppedImage(Uri uri) {
-        this.saveCroppedImage.setValue(uri);
+    public void storeCroppedImage(Uri uri) {
+        this.storeCroppedImage.setValue(uri);
     }
 
-    public LiveData<Uri> observedSaveCroppedImage() {
-        return saveCroppedImage;
+    public LiveData<Uri> observedStoreCroppedImage() {
+        return storeCroppedImage;
     }
 
     public void setShowPermissionRational(boolean showPermissionRational) {

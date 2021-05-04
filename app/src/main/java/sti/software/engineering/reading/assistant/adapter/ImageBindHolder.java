@@ -27,7 +27,7 @@ public class ImageBindHolder extends BaseBindHolder {
 
     @Override
     protected void initialization() {
-
+        binding.setListener((ImageRecyclerAdapter.OnImageClickListener) itemView.getContext());
     }
 
     @Override
@@ -36,6 +36,8 @@ public class ImageBindHolder extends BaseBindHolder {
         Uri uri = FileProvider.getUriForFile(itemView.getContext(),
                 itemView.getContext().getPackageName()
                         + ".provider", image.getFileObject());
-        binding.setPlaceholder(uri);
+
+        binding.setImage(image);
+        binding.setUri(uri);
     }
 }

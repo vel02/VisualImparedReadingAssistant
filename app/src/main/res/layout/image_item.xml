@@ -5,9 +5,21 @@
 
     <data>
 
+        <!--        <variable-->
+        <!--            name="placeholder"-->
+        <!--            type="android.net.Uri" />-->
+
         <variable
-            name="placeholder"
+            name="image"
+            type="sti.software.engineering.reading.assistant.model.Image" />
+
+        <variable
+            name="uri"
             type="android.net.Uri" />
+
+        <variable
+            name="listener"
+            type="sti.software.engineering.reading.assistant.adapter.ImageRecyclerAdapter.OnImageClickListener" />
 
     </data>
 
@@ -15,6 +27,10 @@
     <RelativeLayout
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
+        android:background="?selectableItemBackground"
+        android:clickable="true"
+        android:focusable="true"
+        android:onClick="@{() -> listener.onImageClicked(image, uri)}"
         android:padding="8dp">
 
         <ImageView
@@ -23,7 +39,7 @@
             android:layout_height="200dp"
             android:contentDescription="@string/label_view_image"
             android:scaleType="fitCenter"
-            sti:placeholder="@{placeholder}"
+            sti:placeholder="@{uri}"
             tools:srcCompat="@drawable/image_placeholder" />
 
     </RelativeLayout>

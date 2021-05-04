@@ -4,12 +4,10 @@ import android.Manifest;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
 import android.os.Bundle;
-import android.provider.MediaStore;
 import android.provider.Settings;
 import android.util.Log;
 import android.util.SparseArray;
@@ -34,8 +32,6 @@ import com.theartofdev.edmodo.cropper.CropImage;
 import com.theartofdev.edmodo.cropper.CropImageView;
 
 import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
 
 import javax.inject.Inject;
 
@@ -46,6 +42,8 @@ import sti.software.engineering.reading.assistant.databinding.ActivityHomeBindin
 import sti.software.engineering.reading.assistant.model.Image;
 import sti.software.engineering.reading.assistant.service.TriggerCameraService;
 import sti.software.engineering.reading.assistant.ui.home.selection.SelectImageFrom;
+import sti.software.engineering.reading.assistant.util.ProcessDatabaseDataManager;
+import sti.software.engineering.reading.assistant.util.StoreCroppedImageManager;
 import sti.software.engineering.reading.assistant.util.Utility;
 import sti.software.engineering.reading.assistant.viewmodel.ViewModelProviderFactory;
 
@@ -56,22 +54,25 @@ import static sti.software.engineering.reading.assistant.ui.home.HomeViewModel.S
 
 /**
  * Next Functionality
- * Bugs
- * - Image quality (too large, need optimization)
- * Do
  * - UI to separate capture images, and pick to gallery functionality
  * - Dialog to add image nickname
  * - refactor codes
  */
-public class HomeActivity extends BaseActivity {
+public class HomeActivity extends BaseActivity implements ImageRecyclerAdapter.OnImageClickListener {
 
     private static final String TAG = "HomeActivity";
+
+    @Override
+    public void onImageClicked(Image image, Uri uri) {
+        Log.d(TAG, "IMAGE CLICKED: " + image);
+        binding.imvViewImage.setImageURI(uri);
+        viewModel.setExtractText(true);
+    }
 
     @Inject
     ViewModelProviderFactory providerFactory;
 
     private ActivityHomeBinding binding;
-
     private HomeViewModel viewModel;
     private SelectImageFrom selectImageFrom;
 
@@ -121,7 +122,7 @@ public class HomeActivity extends BaseActivity {
                 Log.d(TAG, "save: called");
                 Image image = new Image("nickname", filename);
                 viewModel.insert(image);
-                viewModel.processDatabaseData();
+                ProcessDatabaseDataManager.refresh(viewModel, 1000, 1000).start();
             }
         });
     }
@@ -213,25 +214,12 @@ public class HomeActivity extends BaseActivity {
             }
         });
 
-        viewModel.setSaveCroppedImage(null);
-        viewModel.observedSaveCroppedImage().observe(this, croppedImageUri -> {
+        viewModel.storeCroppedImage(null);
+        viewModel.observedStoreCroppedImage().observe(this, croppedImageUri -> {
             if (croppedImageUri != null) {
-                new Thread(() -> {
-                    File capturedImageFile = this.capturedImage;
-                    if (capturedImageFile == null) return;
-
-                    try {
-                        Bitmap croppedBitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(), croppedImageUri);
-                        FileOutputStream fileOutputStream = new FileOutputStream(capturedImageFile);
-                        croppedBitmap.compress(Bitmap.CompressFormat.JPEG, 90, fileOutputStream);
-                        fileOutputStream.flush();
-                        fileOutputStream.close();
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-
-                    Utility.refreshGallery(this, filename);
-                }).start();
+                File capturedImageFile = this.capturedImage;
+                if (capturedImageFile == null) return;
+                StoreCroppedImageManager.storeImage(this, capturedImageFile, croppedImageUri, filename);
             }
         });
 
@@ -239,41 +227,36 @@ public class HomeActivity extends BaseActivity {
         viewModel.observedExtractText().observe(this, extract -> {
             if (extract) {
                 //text recognition processes
-                BitmapDrawable drawable = (BitmapDrawable) binding.imvViewImage.getDrawable();
-                Bitmap bitmap = drawable.getBitmap();
+                new Thread(() -> {
+                    BitmapDrawable drawable = (BitmapDrawable) binding.imvViewImage.getDrawable();
+                    Bitmap bitmap = drawable.getBitmap();
 
-                TextRecognizer recognizer = new TextRecognizer
-                        .Builder(getApplicationContext()).build();
-                if (!recognizer.isOperational()) {
-                    Toast.makeText(this, "Cannot recognize text", Toast.LENGTH_SHORT).show();
-                } else {
-                    Frame frame = new Frame.Builder().setBitmap(bitmap).build();
-                    SparseArray<TextBlock> items = recognizer.detect(frame);
-                    StringBuilder sb = new StringBuilder();
+                    TextRecognizer recognizer = new TextRecognizer
+                            .Builder(getApplicationContext()).build();
+                    if (!recognizer.isOperational()) {
+                        Toast.makeText(this, "Cannot recognize text", Toast.LENGTH_SHORT).show();
+                    } else {
+                        Frame frame = new Frame.Builder().setBitmap(bitmap).build();
+                        SparseArray<TextBlock> items = recognizer.detect(frame);
+                        StringBuilder sb = new StringBuilder();
 
-                    for (int i = 0; i < items.size(); i++) {
-                        TextBlock item = items.valueAt(i);
-                        sb.append(item.getValue());
-                        sb.append("\n");
+                        for (int i = 0; i < items.size(); i++) {
+                            TextBlock item = items.valueAt(i);
+                            sb.append(item.getValue());
+                            sb.append("\n");
+                        }
+
+                        Log.d(TAG, "result below:\n" + sb.toString());
                     }
-
-                    Log.d(TAG, "result below:\n" + sb.toString());
-                }
+                }).start();
 
             }
         });
 
         viewModel.observedImages().observe(this, images -> {
-            Log.d(TAG, "subscribeObservers: called");
             if (images != null) {
                 adapter.refresh(images);
                 Log.d(TAG, "Images: " + images);
-//                for (int i = 0; i < images.size(); i++) {
-//                    Image image = images.get(i);
-//                    File file = image.getFileObject();
-//                    Log.d(TAG, "Image: " + image.toString());
-//                    Log.d(TAG, "File: " + file.getPath());
-//                }
             }
         });
 
@@ -314,23 +297,6 @@ public class HomeActivity extends BaseActivity {
         unbindTriggerCameraService();
     }
 
-    public static String getPath(Context context, Uri uri) {
-        String result = null;
-        String[] proj = {MediaStore.Images.Media.DATA};
-        Cursor cursor = context.getContentResolver().query(uri, proj, null, null, null);
-        if (cursor != null) {
-            if (cursor.moveToFirst()) {
-                int column_index = cursor.getColumnIndexOrThrow(proj[0]);
-                result = cursor.getString(column_index);
-            }
-            cursor.close();
-        }
-        if (result == null) {
-            result = "Not found";
-        }
-        return result;
-    }
-
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -350,31 +316,25 @@ public class HomeActivity extends BaseActivity {
             }
 
             if (requestCode == IMAGE_PICK_AUTO_CAMERA_CODE) {
+                viewModel.storeCroppedImage(imageUri);
 
-                //display
                 binding.imvViewImage.setImageURI(imageUri);
-
-                //extract text
                 viewModel.setExtractText(true);
-
             }
+
         }
 
         if (requestCode == CropImage.CROP_IMAGE_ACTIVITY_REQUEST_CODE) {
             CropImage.ActivityResult result = CropImage.getActivityResult(data);
             if (resultCode == RESULT_OK) {
                 assert result != null;
-                //retrieve
                 Uri croppedImageUri = result.getUri();
 
                 //save cropped image to app folder, replacing the initial image.
                 //should be on the background/thread
-                viewModel.setSaveCroppedImage(croppedImageUri);
+                viewModel.storeCroppedImage(croppedImageUri);
 
-                //display
                 binding.imvViewImage.setImageURI(croppedImageUri);
-
-                //text recognition processes
                 viewModel.setExtractText(true);
 
             }
@@ -472,6 +432,5 @@ public class HomeActivity extends BaseActivity {
         } else ActivityCompat.requestPermissions(this,
                 new String[]{WRITE_EXTERNAL_STORAGE}, STORAGE_REQUEST_CODE);
     }
-
 
 }
