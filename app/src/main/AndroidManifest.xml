@@ -20,20 +20,26 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.VisualImparedReadingAssistant">
         <activity
+            android:name=".ui.category.CategoryActivity"
+            android:screenOrientation="portrait"
+            android:theme="@style/Theme.VisualImparedReadingAssistant.NoActionBar">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".ui.home.HomeActivity" />
+        </activity>
+        <activity
             android:name=".ui.home.HomeActivity"
+            android:screenOrientation="portrait"
             android:theme="@style/Theme.VisualImparedReadingAssistant.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-        </activity>
-
-        <!--add in application tag-->
+        </activity> <!-- add in application tag -->
         <activity
             android:name="com.theartofdev.edmodo.cropper.CropImageActivity"
             android:theme="@style/Theme.VisualImparedReadingAssistant" /> <!-- optional (needed if default theme has no action bar) -->
-
         <service android:name=".service.TriggerCameraService" />
 
         <provider
@@ -45,7 +51,6 @@
                 android:name="android.support.FILE_PROVIDER_PATHS"
                 android:resource="@xml/provider_paths" />
         </provider>
-
     </application>
 
 </manifest>
