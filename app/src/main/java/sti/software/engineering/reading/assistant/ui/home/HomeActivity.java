@@ -43,6 +43,7 @@ import sti.software.engineering.reading.assistant.model.Image;
 import sti.software.engineering.reading.assistant.service.TriggerCameraService;
 import sti.software.engineering.reading.assistant.ui.home.selection.SelectImageFrom;
 import sti.software.engineering.reading.assistant.util.ProcessDatabaseDataManager;
+import sti.software.engineering.reading.assistant.util.SaveButtonStateHelper;
 import sti.software.engineering.reading.assistant.util.StoreCroppedImageManager;
 import sti.software.engineering.reading.assistant.util.Utility;
 import sti.software.engineering.reading.assistant.viewmodel.ViewModelProviderFactory;
@@ -123,6 +124,8 @@ public class HomeActivity extends BaseActivity implements ImageRecyclerAdapter.O
                 Image image = new Image("nickname", filename);
                 viewModel.insert(image);
                 ProcessDatabaseDataManager.refresh(viewModel, 1000, 1000).start();
+                SaveButtonStateHelper.getInstance().setSaveButtonState(this, false);
+                binding.btnSave.setEnabled(false);
             }
         });
     }
@@ -137,37 +140,7 @@ public class HomeActivity extends BaseActivity implements ImageRecyclerAdapter.O
     protected void onResume() {
         super.onResume();
         viewModel.processDatabaseData();
-        //testing image retrieving
-        //REFERENCE: https://stackoverflow.com/questions/4195660/get-list-of-photo-galleries-on-android
-        //BY: BARAKUDA
-//        DeviceImageManager.getPhoneAlbums(this, new OnPhoneImagesObtained() {
-//            @Override
-//            public void onComplete(Vector<PhoneAlbum> albums) {
-//                for (int i = 0; i < albums.size(); i++) {
-//                    PhoneAlbum album = albums.get(i);
-//                    Log.d(TAG, "ALBUM NAME: " + album.getName());
-//                    Log.d(TAG, "ALBUM ID: " + album.getId());
-//
-//                    if (album.getName().equals("VisualImpairedImages")) {
-//                        Vector<PhonePhoto> phonePhotos = album.getAlbumPhotos();
-//                        for (int j = 0; j < phonePhotos.size(); j++) {
-//                            PhonePhoto photo = phonePhotos.get(j);
-//                            Log.d(TAG, "PHOTO URI: " + photo.getPhotoUri());
-////                            Picasso.get()
-////                                    .load("file:" + photo.getPhotoUri())
-////                                    .centerCrop()
-////                                    .fit()
-////                                    .into(binding.imvViewImage);
-//                        }
-//                    }
-//                }
-//            }
-//
-//            @Override
-//            public void onError() {
-//
-//            }
-//        });
+        binding.btnSave.setEnabled(SaveButtonStateHelper.getInstance().getSaveButtonState(this));
     }
 
     private void subscribeObservers() {
@@ -234,7 +207,9 @@ public class HomeActivity extends BaseActivity implements ImageRecyclerAdapter.O
                     TextRecognizer recognizer = new TextRecognizer
                             .Builder(getApplicationContext()).build();
                     if (!recognizer.isOperational()) {
-                        Toast.makeText(this, "Cannot recognize text", Toast.LENGTH_SHORT).show();
+                        runOnUiThread(() -> {
+                            Toast.makeText(HomeActivity.this, "Cannot recognize text", Toast.LENGTH_SHORT).show();
+                        });
                     } else {
                         Frame frame = new Frame.Builder().setBitmap(bitmap).build();
                         SparseArray<TextBlock> items = recognizer.detect(frame);
@@ -307,12 +282,14 @@ public class HomeActivity extends BaseActivity implements ImageRecyclerAdapter.O
                 CropImage.activity(data.getData())
                         .setGuidelines(CropImageView.Guidelines.ON)
                         .start(this);
+                SaveButtonStateHelper.getInstance().setSaveButtonState(this, false);
             }
 
             if (requestCode == IMAGE_PICK_CAMERA_CODE) {
                 CropImage.activity(imageUri)
                         .setGuidelines(CropImageView.Guidelines.ON)
                         .start(this);
+                SaveButtonStateHelper.getInstance().setSaveButtonState(this, true);
             }
 
             if (requestCode == IMAGE_PICK_AUTO_CAMERA_CODE) {
@@ -320,6 +297,7 @@ public class HomeActivity extends BaseActivity implements ImageRecyclerAdapter.O
 
                 binding.imvViewImage.setImageURI(imageUri);
                 viewModel.setExtractText(true);
+                SaveButtonStateHelper.getInstance().setSaveButtonState(this, true);
             }
 
         }
