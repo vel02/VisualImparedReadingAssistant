@@ -102,35 +102,3 @@ public class DeviceImageManager {
         }
     }
 }
-
-//testing image retrieving
-//REFERENCE: https://stackoverflow.com/questions/4195660/get-list-of-photo-galleries-on-android
-//BY: BARAKUDA
-//        DeviceImageManager.getPhoneAlbums(this, new OnPhoneImagesObtained() {
-//            @Override
-//            public void onComplete(Vector<PhoneAlbum> albums) {
-//                for (int i = 0; i < albums.size(); i++) {
-//                    PhoneAlbum album = albums.get(i);
-//                    Log.d(TAG, "ALBUM NAME: " + album.getName());
-//                    Log.d(TAG, "ALBUM ID: " + album.getId());
-//
-//                    if (album.getName().equals("VisualImpairedImages")) {
-//                        Vector<PhonePhoto> phonePhotos = album.getAlbumPhotos();
-//                        for (int j = 0; j < phonePhotos.size(); j++) {
-//                            PhonePhoto photo = phonePhotos.get(j);
-//                            Log.d(TAG, "PHOTO URI: " + photo.getPhotoUri());
-////                            Picasso.get()
-////                                    .load("file:" + photo.getPhotoUri())
-////                                    .centerCrop()
-////                                    .fit()
-////                                    .into(binding.imvViewImage);
-//                        }
-//                    }
-//                }
-//            }
-//
-//            @Override
-//            public void onError() {
-//
-//            }
-//        });
