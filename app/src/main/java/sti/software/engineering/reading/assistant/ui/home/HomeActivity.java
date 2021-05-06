@@ -41,7 +41,6 @@ import sti.software.engineering.reading.assistant.adapter.ImageRecyclerAdapter;
 import sti.software.engineering.reading.assistant.databinding.ActivityHomeBinding;
 import sti.software.engineering.reading.assistant.model.Image;
 import sti.software.engineering.reading.assistant.service.TriggerCameraService;
-import sti.software.engineering.reading.assistant.ui.category.CategoryActivity;
 import sti.software.engineering.reading.assistant.ui.home.selection.SelectImageFrom;
 import sti.software.engineering.reading.assistant.util.ProcessDatabaseDataManager;
 import sti.software.engineering.reading.assistant.util.StoreCroppedImageManager;
@@ -235,9 +234,7 @@ public class HomeActivity extends BaseActivity implements ImageRecyclerAdapter.O
                     TextRecognizer recognizer = new TextRecognizer
                             .Builder(getApplicationContext()).build();
                     if (!recognizer.isOperational()) {
-                        runOnUiThread(() ->
-                                Toast.makeText(HomeActivity.this,
-                                        "Cannot recognize text", Toast.LENGTH_SHORT).show());
+                        Toast.makeText(this, "Cannot recognize text", Toast.LENGTH_SHORT).show();
                     } else {
                         Frame frame = new Frame.Builder().setBitmap(bitmap).build();
                         SparseArray<TextBlock> items = recognizer.detect(frame);
@@ -366,10 +363,6 @@ public class HomeActivity extends BaseActivity implements ImageRecyclerAdapter.O
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         if (item.getItemId() == R.id.action_select_image) {
             selectImageDialog();
-            return true;
-        } else if (item.getItemId() == R.id.action_category_image) {
-            Intent intent = new Intent(this, CategoryActivity.class);
-            startActivity(intent);
             return true;
         }
         return super.onOptionsItemSelected(item);
