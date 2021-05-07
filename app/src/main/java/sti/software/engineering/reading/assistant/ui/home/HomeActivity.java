@@ -39,14 +39,15 @@ import sti.software.engineering.reading.assistant.util.Utility;
 import sti.software.engineering.reading.assistant.viewmodel.ViewModelProviderFactory;
 
 import static android.Manifest.permission.WRITE_EXTERNAL_STORAGE;
-import static sti.software.engineering.reading.assistant.ui.home.HomeViewModel.SelectImageFrom.AUTO_CAMERA;
-import static sti.software.engineering.reading.assistant.ui.home.HomeViewModel.SelectImageFrom.CAMERA;
-import static sti.software.engineering.reading.assistant.ui.home.HomeViewModel.SelectImageFrom.GALLERY;
 
 /**
  * Next Functionality
  * - revision (on going)
  * - refactor codes
+ * <p>
+ * https://stackoverflow.com/questions/59965336/calling-method-on-navigation-host-fragment-inside-mainactivity
+ * https://www.google.com/search?q=android+call+method+from+activity+to+fragment+with+navigation&sxsrf=ALeKk03RKxMX8_Y1kqigXgbGjkfyLPwvTg%3A1620266059373&ei=S0yTYJjoFci5oATO0oSADw&oq=android+call+method+from+activity+to+fragment+with+navi&gs_lcp=Cgdnd3Mtd2l6EAMYADIHCCEQChCgATIHCCEQChCgAToHCAAQRxCwAzoGCAAQFhAeOgUIIRCgAVCED1jGHmD3JWgBcAJ4AIABuwKIAeUKkgEHNC42LjAuMZgBAKABAaoBB2d3cy13aXrIAQjAAQE&sclient=gws-wiz
+ * https://stackoverflow.com/questions/6147884/onactivityresult-is-not-being-called-in-fragment
  */
 public class HomeActivity extends BaseActivity implements ImageRecyclerAdapter.OnImageClickListener {
 
@@ -86,7 +87,12 @@ public class HomeActivity extends BaseActivity implements ImageRecyclerAdapter.O
                     viewModel.setShowPermissionRational(true);
                     return;
                 }
-                viewModel.setSelectImageFrom(AUTO_CAMERA);
+                if (navHostFragment != null) {
+                    HomeFragment fragment = (HomeFragment) navHostFragment.getChildFragmentManager().getFragments().get(0);
+                    fragment.selectImageFromAutoCam();
+                    intent.putExtra(TriggerCameraService.INTENT_STARTED_THROUGH_SERVICE, false);
+                }
+//                viewModel.setSelectImageFrom(AUTO_CAMERA);
             }
         }
     }
@@ -110,7 +116,7 @@ public class HomeActivity extends BaseActivity implements ImageRecyclerAdapter.O
             startService(intent);
         }
 
-        openThroughPowerButton();
+//        openThroughPowerButton();
         initImageRecyclerAdapter();
         navigate();
     }
@@ -137,6 +143,8 @@ public class HomeActivity extends BaseActivity implements ImageRecyclerAdapter.O
     @Override
     protected void onResume() {
         super.onResume();
+        openThroughPowerButton();
+
 //        viewModel.processDatabaseData();
 //        binding.btnSave.setEnabled(SaveButtonStateHelper.getInstance().getSaveButtonState(this));
     }
@@ -226,12 +234,12 @@ public class HomeActivity extends BaseActivity implements ImageRecyclerAdapter.O
             }
         });
 
-        viewModel.observedImages().observe(this, images -> {
-            if (images != null) {
-                adapter.refresh(images);
-                Log.d(TAG, "Images: " + images);
-            }
-        });
+//        viewModel.observedImages().observe(this, images -> {
+//            if (images != null) {
+//                adapter.refresh(images);
+//                Log.d(TAG, "Images: " + images);
+//            }
+//        });
 
     }
 
@@ -363,7 +371,11 @@ public class HomeActivity extends BaseActivity implements ImageRecyclerAdapter.O
                     boolean cameraAccepted = grantResults[0] == PackageManager.PERMISSION_GRANTED;
                     boolean storageAccepted = grantResults[1] == PackageManager.PERMISSION_GRANTED;
                     if (cameraAccepted && storageAccepted) {
-                        viewModel.setSelectImageFrom(CAMERA);
+                        if (navHostFragment != null) {
+                            HomeFragment fragment = (HomeFragment) navHostFragment.getChildFragmentManager().getFragments().get(0);
+                            fragment.selectImageFromCamera();
+                        }
+//                        viewModel.setSelectImageFrom(CAMERA);
                     } else viewModel.setShowPermissionRational(true);
                 }
                 break;
@@ -371,7 +383,11 @@ public class HomeActivity extends BaseActivity implements ImageRecyclerAdapter.O
                 if (grantResults.length > 0) {
                     boolean storageAccepted = grantResults[0] == PackageManager.PERMISSION_GRANTED;
                     if (storageAccepted) {
-                        viewModel.setSelectImageFrom(GALLERY);
+                        if (navHostFragment != null) {
+                            HomeFragment fragment = (HomeFragment) navHostFragment.getChildFragmentManager().getFragments().get(0);
+                            fragment.selectImageFromGallery();
+                        }
+//                        viewModel.setSelectImageFrom(GALLERY);
                     } else viewModel.setShowPermissionRational(true);
                 }
                 break;

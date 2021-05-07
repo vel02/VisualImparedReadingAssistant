@@ -15,6 +15,8 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.gms.vision.Frame;
 import com.google.android.gms.vision.text.TextBlock;
@@ -27,8 +29,11 @@ import java.io.File;
 import javax.inject.Inject;
 
 import dagger.android.support.DaggerFragment;
+import sti.software.engineering.reading.assistant.adapter.ImageRecyclerAdapter;
 import sti.software.engineering.reading.assistant.databinding.FragmentHomeBinding;
+import sti.software.engineering.reading.assistant.model.Image;
 import sti.software.engineering.reading.assistant.ui.home.selection.SelectImageFrom;
+import sti.software.engineering.reading.assistant.util.ProcessDatabaseDataManager;
 import sti.software.engineering.reading.assistant.util.SaveButtonStateHelper;
 import sti.software.engineering.reading.assistant.util.StoreCroppedImageManager;
 import sti.software.engineering.reading.assistant.viewmodel.ViewModelProviderFactory;
@@ -37,13 +42,21 @@ import static android.app.Activity.RESULT_OK;
 import static sti.software.engineering.reading.assistant.BaseActivity.IMAGE_PICK_AUTO_CAMERA_CODE;
 import static sti.software.engineering.reading.assistant.BaseActivity.IMAGE_PICK_CAMERA_CODE;
 import static sti.software.engineering.reading.assistant.BaseActivity.IMAGE_PICK_GALLERY_CODE;
+import static sti.software.engineering.reading.assistant.ui.home.sub.HomeFragmentViewModel.SelectImageFrom.AUTO_CAMERA;
 import static sti.software.engineering.reading.assistant.ui.home.sub.HomeFragmentViewModel.SelectImageFrom.CAMERA;
 import static sti.software.engineering.reading.assistant.ui.home.sub.HomeFragmentViewModel.SelectImageFrom.GALLERY;
 
 
-public class HomeFragment extends DaggerFragment {
+public class HomeFragment extends DaggerFragment implements ImageRecyclerAdapter.OnImageClickListener {
 
     private static final String TAG = "HomeFragment";
+
+    @Override
+    public void onImageClicked(Image image, Uri uri) {
+        Log.d(TAG, "IMAGE CLICKED: " + image);
+        binding.imvViewImage.setImageURI(uri);
+        viewModel.setExtractText(true);
+    }
 
     @Inject
     ViewModelProviderFactory providerFactory;
@@ -57,6 +70,8 @@ public class HomeFragment extends DaggerFragment {
     private File capturedImage;
     private String filename;
 
+    private ImageRecyclerAdapter adapter;
+
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -68,6 +83,28 @@ public class HomeFragment extends DaggerFragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         viewModel = new ViewModelProvider(requireActivity(), providerFactory).get(HomeFragmentViewModel.class);
         subscribeObservers();
+        initImageRecyclerAdapter();
+        navigate();
+    }
+
+
+    private void initImageRecyclerAdapter() {
+        binding.viewList.setLayoutManager(new LinearLayoutManager(requireActivity(), RecyclerView.HORIZONTAL, false));
+        adapter = new ImageRecyclerAdapter();
+        binding.viewList.setAdapter(adapter);
+    }
+
+    private void navigate() {
+        binding.btnSave.setOnClickListener(v -> {
+            if (filename != null) {
+                Log.d(TAG, "save: called");
+                Image image = new Image("nickname", filename);
+                viewModel.insert(image);
+                ProcessDatabaseDataManager.refresh(viewModel, 1000, 1000).start();
+                SaveButtonStateHelper.getInstance().setSaveButtonState(requireActivity(), false);
+                binding.btnSave.setEnabled(false);
+            }
+        });
     }
 
     private void subscribeObservers() {
@@ -136,6 +173,14 @@ public class HomeFragment extends DaggerFragment {
             }).start();
         });
 
+        viewModel.observedImages().removeObservers(getViewLifecycleOwner());
+        viewModel.observedImages().observe(getViewLifecycleOwner(), images -> {
+            if (images != null) {
+                adapter.refresh(images);
+                Log.d(TAG, "Images: " + images);
+            }
+        });
+
     }
 
 
@@ -147,12 +192,23 @@ public class HomeFragment extends DaggerFragment {
         viewModel.setSelectImageFrom(GALLERY);
     }
 
+    public void selectImageFromAutoCam() {
+        viewModel.setSelectImageFrom(AUTO_CAMERA);
+    }
+
     public void receiveCroppedImage(Uri cropped) {
         //save cropped image to app folder, replacing the initial image.
         //should be on the background/thread
         viewModel.storeCroppedImage(cropped);
         binding.imvViewImage.setImageURI(cropped);
         viewModel.setExtractText(true);
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        viewModel.processDatabaseData();
+        binding.btnSave.setEnabled(SaveButtonStateHelper.getInstance().getSaveButtonState(requireActivity()));
     }
 
     @Override
@@ -178,8 +234,8 @@ public class HomeFragment extends DaggerFragment {
             if (requestCode == IMAGE_PICK_AUTO_CAMERA_CODE) {
                 viewModel.storeCroppedImage(imageUri);
 
-//                binding.imvViewImage.setImageURI(imageUri);
-//                viewModel.setExtractText(true);
+                binding.imvViewImage.setImageURI(imageUri);
+                viewModel.setExtractText(true);
                 SaveButtonStateHelper.getInstance().setSaveButtonState(requireActivity(), true);
             }
         }

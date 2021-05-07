@@ -3,7 +3,9 @@ package sti.software.engineering.reading.assistant.util;
 import android.os.CountDownTimer;
 import android.util.Log;
 
-import sti.software.engineering.reading.assistant.ui.home.HomeViewModel;
+import androidx.lifecycle.ViewModel;
+
+import sti.software.engineering.reading.assistant.ui.home.sub.HomeFragmentViewModel;
 
 public class ProcessDatabaseDataManager extends CountDownTimer {
 
@@ -11,14 +13,14 @@ public class ProcessDatabaseDataManager extends CountDownTimer {
 
     private static ProcessDatabaseDataManager instance;
 
-    private final HomeViewModel viewModel;
+    private final ViewModel viewModel;
 
-    private ProcessDatabaseDataManager(HomeViewModel viewModel, long millisInFuture, long countDownInterval) {
+    private ProcessDatabaseDataManager(ViewModel viewModel, long millisInFuture, long countDownInterval) {
         super(millisInFuture, countDownInterval);
         this.viewModel = viewModel;
     }
 
-    public static ProcessDatabaseDataManager refresh(HomeViewModel viewModel, long millisInFuture, long countDownInterval) {
+    public static ProcessDatabaseDataManager refresh(ViewModel viewModel, long millisInFuture, long countDownInterval) {
         if (instance == null)
             instance = new ProcessDatabaseDataManager(viewModel, millisInFuture, countDownInterval);
         return instance;
@@ -32,6 +34,8 @@ public class ProcessDatabaseDataManager extends CountDownTimer {
 
     @Override
     public void onFinish() {
-        viewModel.processDatabaseData();
+        if (viewModel instanceof HomeFragmentViewModel) {
+            ((HomeFragmentViewModel) viewModel).processDatabaseData();
+        }
     }
 }
