@@ -47,13 +47,11 @@ import static sti.software.engineering.reading.assistant.ui.home.sub.HomeFragmen
 import static sti.software.engineering.reading.assistant.ui.home.sub.HomeFragmentViewModel.SelectImageFrom.GALLERY;
 
 
-public class HomeFragment extends DaggerFragment implements ImageRecyclerAdapter.OnImageClickListener {
+public class HomeFragment extends DaggerFragment {
 
     private static final String TAG = "HomeFragment";
 
-    @Override
     public void onImageClicked(Image image, Uri uri) {
-        Log.d(TAG, "IMAGE CLICKED: " + image);
         binding.imvViewImage.setImageURI(uri);
         viewModel.setExtractText(true);
     }
@@ -63,7 +61,6 @@ public class HomeFragment extends DaggerFragment implements ImageRecyclerAdapter
 
     private FragmentHomeBinding binding;
     private HomeFragmentViewModel viewModel;
-
     private SelectImageFrom selectImageFrom;
 
     private Uri imageUri;

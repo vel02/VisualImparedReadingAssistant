@@ -23,8 +23,6 @@ import androidx.navigation.fragment.NavHostFragment;
 import com.google.android.material.snackbar.Snackbar;
 import com.theartofdev.edmodo.cropper.CropImage;
 
-import java.io.File;
-
 import javax.inject.Inject;
 
 import sti.software.engineering.reading.assistant.BaseActivity;
@@ -33,7 +31,6 @@ import sti.software.engineering.reading.assistant.adapter.ImageRecyclerAdapter;
 import sti.software.engineering.reading.assistant.databinding.ActivityHomeBinding;
 import sti.software.engineering.reading.assistant.model.Image;
 import sti.software.engineering.reading.assistant.service.TriggerCameraService;
-import sti.software.engineering.reading.assistant.ui.home.selection.SelectImageFrom;
 import sti.software.engineering.reading.assistant.ui.home.sub.HomeFragment;
 import sti.software.engineering.reading.assistant.util.Utility;
 import sti.software.engineering.reading.assistant.viewmodel.ViewModelProviderFactory;
@@ -56,8 +53,10 @@ public class HomeActivity extends BaseActivity implements ImageRecyclerAdapter.O
     @Override
     public void onImageClicked(Image image, Uri uri) {
         Log.d(TAG, "IMAGE CLICKED: " + image);
-//        binding.imvViewImage.setImageURI(uri);
-//        viewModel.setExtractText(true);
+        if (navHostFragment != null) {
+            HomeFragment fragment = (HomeFragment) navHostFragment.getChildFragmentManager().getFragments().get(0);
+            fragment.onImageClicked(image, uri);
+        }
     }
 
     @Inject
@@ -65,17 +64,7 @@ public class HomeActivity extends BaseActivity implements ImageRecyclerAdapter.O
 
     private ActivityHomeBinding binding;
     private HomeViewModel viewModel;
-    private SelectImageFrom selectImageFrom;
-    private NavController navController;
     private NavHostFragment navHostFragment;
-
-
-    private Uri imageUri;
-    private File capturedImage;
-    private String filename;
-
-    private ImageRecyclerAdapter adapter;
-
 
     private void openThroughPowerButton() {
         Intent intent = getIntent();
@@ -92,7 +81,6 @@ public class HomeActivity extends BaseActivity implements ImageRecyclerAdapter.O
                     fragment.selectImageFromAutoCam();
                     intent.putExtra(TriggerCameraService.INTENT_STARTED_THROUGH_SERVICE, false);
                 }
-//                viewModel.setSelectImageFrom(AUTO_CAMERA);
             }
         }
     }
@@ -106,7 +94,7 @@ public class HomeActivity extends BaseActivity implements ImageRecyclerAdapter.O
         navHostFragment = (NavHostFragment) getSupportFragmentManager()
                 .findFragmentById(binding.navHostFragment.getId());
         assert navHostFragment != null;
-        navController = navHostFragment.getNavController();
+        NavController navController = navHostFragment.getNavController();
         setSupportActionBar(binding.toolbar);
 
         subscribeObservers();
@@ -116,67 +104,16 @@ public class HomeActivity extends BaseActivity implements ImageRecyclerAdapter.O
             startService(intent);
         }
 
-//        openThroughPowerButton();
-        initImageRecyclerAdapter();
-        navigate();
     }
 
-    private void navigate() {
-//        binding.btnSave.setOnClickListener(v -> {
-//            if (filename != null) {
-//                Log.d(TAG, "save: called");
-//                Image image = new Image("nickname", filename);
-//                viewModel.insert(image);
-//                ProcessDatabaseDataManager.refresh(viewModel, 1000, 1000).start();
-//                SaveButtonStateHelper.getInstance().setSaveButtonState(this, false);
-//                binding.btnSave.setEnabled(false);
-//            }
-//        });
-    }
-
-    private void initImageRecyclerAdapter() {
-//        binding.viewList.setLayoutManager(new LinearLayoutManager(this, RecyclerView.HORIZONTAL, false));
-//        adapter = new ImageRecyclerAdapter();
-//        binding.viewList.setAdapter(adapter);
-    }
 
     @Override
     protected void onResume() {
         super.onResume();
         openThroughPowerButton();
-
-//        viewModel.processDatabaseData();
-//        binding.btnSave.setEnabled(SaveButtonStateHelper.getInstance().getSaveButtonState(this));
     }
 
     private void subscribeObservers() {
-
-//        viewModel.observedSelectedImage().observe(this, selectImage -> {
-//            if (selectImage != null) {
-//                switch (selectImage) {
-//                    case AUTO_CAMERA:
-//                        selectImageFrom = new SelectImageFrom(this, SelectImageFrom.SELECT_CAMERA);
-//                        startActivityForResult(selectImageFrom.pickCamera(), IMAGE_PICK_AUTO_CAMERA_CODE);
-//                        imageUri = selectImageFrom.getImageUri();
-//                        capturedImage = selectImageFrom.getFile();
-//                        filename = selectImageFrom.getFilename();
-//                        break;
-//
-//                    case CAMERA:
-//                        selectImageFrom = new SelectImageFrom(this, SelectImageFrom.SELECT_CAMERA);
-//                        startActivityForResult(selectImageFrom.pickCamera(), IMAGE_PICK_CAMERA_CODE);
-//                        imageUri = selectImageFrom.getImageUri();
-//                        capturedImage = selectImageFrom.getFile();
-//                        filename = selectImageFrom.getFilename();
-//                        break;
-//
-//                    case GALLERY:
-//                        selectImageFrom = new SelectImageFrom(this, SelectImageFrom.SELECT_GALLERY);
-//                        startActivityForResult(selectImageFrom.pickGallery(), IMAGE_PICK_GALLERY_CODE);
-//                        break;
-//                }
-//            }
-//        });
 
         viewModel.observedShowPermissionRational().observe(this, showPermissionRational -> {
             if (showPermissionRational) {
@@ -192,54 +129,6 @@ public class HomeActivity extends BaseActivity implements ImageRecyclerAdapter.O
                         }).show();
             }
         });
-
-//        viewModel.storeCroppedImage(null);
-//        viewModel.observedStoreCroppedImage().observe(this, croppedImageUri -> {
-//            if (croppedImageUri != null) {
-//                File capturedImageFile = this.capturedImage;
-//                if (capturedImageFile == null) return;
-//                StoreCroppedImageManager.storeImage(this, capturedImageFile, croppedImageUri, filename);
-//            }
-//        });
-
-        viewModel.setExtractText(false);
-        viewModel.observedExtractText().observe(this, extract -> {
-            if (extract) {
-//                //text recognition processes
-//                new Thread(() -> {
-//                    BitmapDrawable drawable = (BitmapDrawable) binding.imvViewImage.getDrawable();
-//                    Bitmap bitmap = drawable.getBitmap();
-//
-//                    TextRecognizer recognizer = new TextRecognizer
-//                            .Builder(getApplicationContext()).build();
-//                    if (!recognizer.isOperational()) {
-//                        runOnUiThread(() -> {
-//                            Toast.makeText(HomeActivity.this, "Cannot recognize text", Toast.LENGTH_SHORT).show();
-//                        });
-//                    } else {
-//                        Frame frame = new Frame.Builder().setBitmap(bitmap).build();
-//                        SparseArray<TextBlock> items = recognizer.detect(frame);
-//                        StringBuilder sb = new StringBuilder();
-//
-//                        for (int i = 0; i < items.size(); i++) {
-//                            TextBlock item = items.valueAt(i);
-//                            sb.append(item.getValue());
-//                            sb.append("\n");
-//                        }
-//
-//                        Log.d(TAG, "result below:\n" + sb.toString());
-//                    }
-//                }).start();
-
-            }
-        });
-
-//        viewModel.observedImages().observe(this, images -> {
-//            if (images != null) {
-//                adapter.refresh(images);
-//                Log.d(TAG, "Images: " + images);
-//            }
-//        });
 
     }
 
@@ -257,7 +146,6 @@ public class HomeActivity extends BaseActivity implements ImageRecyclerAdapter.O
                     HomeFragment fragment = (HomeFragment) navHostFragment.getChildFragmentManager().getFragments().get(0);
                     fragment.selectImageFromCamera();
                 }
-//                viewModel.setSelectImageFrom(CAMERA);
             } else if (which == 1) {
                 if (checkStoragePermission()) {
                     requestStoragePermission();
@@ -267,7 +155,6 @@ public class HomeActivity extends BaseActivity implements ImageRecyclerAdapter.O
                     HomeFragment fragment = (HomeFragment) navHostFragment.getChildFragmentManager().getFragments().get(0);
                     fragment.selectImageFromGallery();
                 }
-//                viewModel.setSelectImageFrom(GALLERY);
             }
         }));
         builder.create().show();
@@ -289,33 +176,6 @@ public class HomeActivity extends BaseActivity implements ImageRecyclerAdapter.O
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-//        if (resultCode == RESULT_OK) {
-//
-//            if (requestCode == IMAGE_PICK_GALLERY_CODE) {
-//                assert data != null;
-//                CropImage.activity(data.getData())
-//                        .setGuidelines(CropImageView.Guidelines.ON)
-//                        .start(this);
-//                SaveButtonStateHelper.getInstance().setSaveButtonState(this, false);
-//            }
-//
-//            if (requestCode == IMAGE_PICK_CAMERA_CODE) {
-//                CropImage.activity(imageUri)
-//                        .setGuidelines(CropImageView.Guidelines.ON)
-//                        .start(this);
-//                SaveButtonStateHelper.getInstance().setSaveButtonState(this, true);
-//            }
-//
-//            if (requestCode == IMAGE_PICK_AUTO_CAMERA_CODE) {
-////                viewModel.storeCroppedImage(imageUri);
-////
-////                binding.imvViewImage.setImageURI(imageUri);
-////                viewModel.setExtractText(true);
-//                SaveButtonStateHelper.getInstance().setSaveButtonState(this, true);
-//            }
-//
-//        }
-
         if (requestCode == CropImage.CROP_IMAGE_ACTIVITY_REQUEST_CODE) {
             CropImage.ActivityResult result = CropImage.getActivityResult(data);
             if (resultCode == RESULT_OK) {
@@ -326,12 +186,6 @@ public class HomeActivity extends BaseActivity implements ImageRecyclerAdapter.O
                     HomeFragment fragment = (HomeFragment) navHostFragment.getChildFragmentManager().getFragments().get(0);
                     fragment.receiveCroppedImage(croppedImageUri);
                 }
-                //save cropped image to app folder, replacing the initial image.
-                //should be on the background/thread
-//                viewModel.storeCroppedImage(croppedImageUri);
-
-//                binding.imvViewImage.setImageURI(croppedImageUri);
-//                viewModel.setExtractText(true);
             }
         }
     }
@@ -375,7 +229,6 @@ public class HomeActivity extends BaseActivity implements ImageRecyclerAdapter.O
                             HomeFragment fragment = (HomeFragment) navHostFragment.getChildFragmentManager().getFragments().get(0);
                             fragment.selectImageFromCamera();
                         }
-//                        viewModel.setSelectImageFrom(CAMERA);
                     } else viewModel.setShowPermissionRational(true);
                 }
                 break;
@@ -387,7 +240,6 @@ public class HomeActivity extends BaseActivity implements ImageRecyclerAdapter.O
                             HomeFragment fragment = (HomeFragment) navHostFragment.getChildFragmentManager().getFragments().get(0);
                             fragment.selectImageFromGallery();
                         }
-//                        viewModel.setSelectImageFrom(GALLERY);
                     } else viewModel.setShowPermissionRational(true);
                 }
                 break;

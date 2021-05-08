@@ -22,7 +22,6 @@ import sti.software.engineering.reading.assistant.util.TextToSpeechHelper;
 
 public class TriggerCameraService extends Service implements DetectScreenOnReceiver.OnScreenReceiverCallback {
 
-
     public static final String INTENT_STARTED_THROUGH_SERVICE = "started_via_service";
     private static final int NOTIFICATION_TRIGGER_CAMERA_ID = 1;
 
@@ -36,7 +35,7 @@ public class TriggerCameraService extends Service implements DetectScreenOnRecei
         if (serviceIsRunningInForeground(TriggerCameraService.this, TriggerCameraService.this)) {
             textToSpeech.speak("Camera, Activated.", TextToSpeech.QUEUE_FLUSH);
             Intent intent = new Intent(TriggerCameraService.this, HomeActivity.class);
-            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
             intent.putExtra(INTENT_STARTED_THROUGH_SERVICE, true);
             startActivity(intent);
         }
