@@ -5,7 +5,7 @@ import android.util.Log;
 
 import androidx.lifecycle.ViewModel;
 
-import sti.software.engineering.reading.assistant.ui.home.sub.HomeFragmentViewModel;
+import sti.software.engineering.reading.assistant.ui.home.sub.read.HomeFragmentViewModel;
 
 public class ProcessDatabaseDataManager extends CountDownTimer {
 

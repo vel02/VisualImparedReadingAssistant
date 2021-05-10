@@ -1,4 +1,4 @@
-package sti.software.engineering.reading.assistant.ui.home.sub;
+package sti.software.engineering.reading.assistant.ui.home.sub.read;
 
 import android.net.Uri;
 

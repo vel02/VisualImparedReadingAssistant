@@ -17,10 +17,10 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.core.app.ActivityCompat;
 import androidx.databinding.DataBindingUtil;
 import androidx.lifecycle.ViewModelProvider;
-import androidx.navigation.NavController;
-import androidx.navigation.fragment.NavHostFragment;
+import androidx.viewpager2.widget.ViewPager2;
 
 import com.google.android.material.snackbar.Snackbar;
+import com.google.android.material.tabs.TabLayout;
 import com.theartofdev.edmodo.cropper.CropImage;
 
 import javax.inject.Inject;
@@ -31,7 +31,8 @@ import sti.software.engineering.reading.assistant.adapter.ImageRecyclerAdapter;
 import sti.software.engineering.reading.assistant.databinding.ActivityHomeBinding;
 import sti.software.engineering.reading.assistant.model.Image;
 import sti.software.engineering.reading.assistant.service.TriggerCameraService;
-import sti.software.engineering.reading.assistant.ui.home.sub.HomeFragment;
+import sti.software.engineering.reading.assistant.ui.home.sub.PagerAdapter;
+import sti.software.engineering.reading.assistant.ui.home.sub.read.HomeFragment;
 import sti.software.engineering.reading.assistant.util.Utility;
 import sti.software.engineering.reading.assistant.viewmodel.ViewModelProviderFactory;
 
@@ -39,12 +40,14 @@ import static android.Manifest.permission.WRITE_EXTERNAL_STORAGE;
 
 /**
  * Next Functionality
- * - revision (on going)
  * - refactor codes
+ * - camera tab implementation
  * <p>
  * https://stackoverflow.com/questions/59965336/calling-method-on-navigation-host-fragment-inside-mainactivity
  * https://www.google.com/search?q=android+call+method+from+activity+to+fragment+with+navigation&sxsrf=ALeKk03RKxMX8_Y1kqigXgbGjkfyLPwvTg%3A1620266059373&ei=S0yTYJjoFci5oATO0oSADw&oq=android+call+method+from+activity+to+fragment+with+navi&gs_lcp=Cgdnd3Mtd2l6EAMYADIHCCEQChCgATIHCCEQChCgAToHCAAQRxCwAzoGCAAQFhAeOgUIIRCgAVCED1jGHmD3JWgBcAJ4AIABuwKIAeUKkgEHNC42LjAuMZgBAKABAaoBB2d3cy13aXrIAQjAAQE&sclient=gws-wiz
  * https://stackoverflow.com/questions/6147884/onactivityresult-is-not-being-called-in-fragment
+ * <p>
+ * https://stackoverflow.com/questions/38471105/viewpager-didnt-load-the-first-page-at-the-first-time-but-will-load-it-after-s
  */
 public class HomeActivity extends BaseActivity implements ImageRecyclerAdapter.OnImageClickListener {
 
@@ -53,8 +56,9 @@ public class HomeActivity extends BaseActivity implements ImageRecyclerAdapter.O
     @Override
     public void onImageClicked(Image image, Uri uri) {
         Log.d(TAG, "IMAGE CLICKED: " + image);
-        if (navHostFragment != null) {
-            HomeFragment fragment = (HomeFragment) navHostFragment.getChildFragmentManager().getFragments().get(0);
+        Log.d(TAG, "onImageClicked: instance of? " + getSupportFragmentManager().getFragments().get(binding.viewPager.getCurrentItem()));
+        if (getSupportFragmentManager().getFragments().get(binding.viewPager.getCurrentItem()) instanceof HomeFragment) {
+            HomeFragment fragment = (HomeFragment) getSupportFragmentManager().getFragments().get(binding.viewPager.getCurrentItem());
             fragment.onImageClicked(image, uri);
         }
     }
@@ -64,7 +68,18 @@ public class HomeActivity extends BaseActivity implements ImageRecyclerAdapter.O
 
     private ActivityHomeBinding binding;
     private HomeViewModel viewModel;
-    private NavHostFragment navHostFragment;
+
+    private boolean startedThroughService;
+
+    private OnStartThroughServiceListener startThroughServiceListener;
+
+    public interface OnStartThroughServiceListener {
+        void onStartedFromService();
+    }
+
+    public void setOnStartThroughServiceListener(OnStartThroughServiceListener listener) {
+        this.startThroughServiceListener = listener;
+    }
 
     private void openThroughPowerButton() {
         Intent intent = getIntent();
@@ -76,11 +91,9 @@ public class HomeActivity extends BaseActivity implements ImageRecyclerAdapter.O
                     viewModel.setShowPermissionRational(true);
                     return;
                 }
-                if (navHostFragment != null) {
-                    HomeFragment fragment = (HomeFragment) navHostFragment.getChildFragmentManager().getFragments().get(0);
-                    fragment.selectImageFromAutoCam();
-                    intent.putExtra(TriggerCameraService.INTENT_STARTED_THROUGH_SERVICE, false);
-                }
+
+                this.startedThroughService = true;
+                intent.putExtra(TriggerCameraService.INTENT_STARTED_THROUGH_SERVICE, false);
             }
         }
     }
@@ -91,11 +104,8 @@ public class HomeActivity extends BaseActivity implements ImageRecyclerAdapter.O
         binding = DataBindingUtil.setContentView(HomeActivity.this, R.layout.activity_home);
         viewModel = new ViewModelProvider(HomeActivity.this, providerFactory).get(HomeViewModel.class);
 
-        navHostFragment = (NavHostFragment) getSupportFragmentManager()
-                .findFragmentById(binding.navHostFragment.getId());
-        assert navHostFragment != null;
-        NavController navController = navHostFragment.getNavController();
         setSupportActionBar(binding.toolbar);
+        initViewPager();
 
         subscribeObservers();
 
@@ -103,9 +113,48 @@ public class HomeActivity extends BaseActivity implements ImageRecyclerAdapter.O
             Intent intent = new Intent(this, TriggerCameraService.class);
             startService(intent);
         }
-
     }
 
+    private void initViewPager() {
+        binding.tabLayout.addTab(binding.tabLayout.newTab().setText("Read"));
+        binding.tabLayout.addTab(binding.tabLayout.newTab().setText("Camera"));
+        binding.tabLayout.addTab(binding.tabLayout.newTab().setText("Gallery"));
+
+        PagerAdapter pagerAdapter = new PagerAdapter(getSupportFragmentManager(), getLifecycle(), binding.tabLayout.getTabCount());
+        binding.viewPager.setAdapter(pagerAdapter);
+        binding.viewPager.setOffscreenPageLimit(3);
+        binding.viewPager.setUserInputEnabled(false);
+        binding.tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
+            @Override
+            public void onTabSelected(TabLayout.Tab tab) {
+                Log.d(TAG, "onTabSelected: " + tab.getPosition());
+                binding.viewPager.setCurrentItem(tab.getPosition());
+            }
+
+            @Override
+            public void onTabUnselected(TabLayout.Tab tab) {
+
+            }
+
+            @Override
+            public void onTabReselected(TabLayout.Tab tab) {
+
+            }
+        });
+
+        binding.viewPager.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback() {
+            @Override
+            public void onPageSelected(int position) {
+                binding.tabLayout.selectTab(binding.tabLayout.getTabAt(position));
+                if (position == 0 && startedThroughService) {
+                    startThroughServiceListener.onStartedFromService();
+                    startedThroughService = false;
+                }
+            }
+        });
+        Log.d(TAG, "initViewPager: count " + getSupportFragmentManager().getFragments().size());
+
+    }
 
     @Override
     protected void onResume() {
@@ -142,8 +191,8 @@ public class HomeActivity extends BaseActivity implements ImageRecyclerAdapter.O
                     requestCameraPermission();
                     return;
                 }
-                if (navHostFragment != null) {
-                    HomeFragment fragment = (HomeFragment) navHostFragment.getChildFragmentManager().getFragments().get(0);
+                if (getSupportFragmentManager().getFragments().get(binding.viewPager.getCurrentItem()) instanceof HomeFragment) {
+                    HomeFragment fragment = (HomeFragment) getSupportFragmentManager().getFragments().get(binding.viewPager.getCurrentItem());
                     fragment.selectImageFromCamera();
                 }
             } else if (which == 1) {
@@ -151,8 +200,8 @@ public class HomeActivity extends BaseActivity implements ImageRecyclerAdapter.O
                     requestStoragePermission();
                     return;
                 }
-                if (navHostFragment != null) {
-                    HomeFragment fragment = (HomeFragment) navHostFragment.getChildFragmentManager().getFragments().get(0);
+                if (getSupportFragmentManager().getFragments().get(binding.viewPager.getCurrentItem()) instanceof HomeFragment) {
+                    HomeFragment fragment = (HomeFragment) getSupportFragmentManager().getFragments().get(binding.viewPager.getCurrentItem());
                     fragment.selectImageFromGallery();
                 }
             }
@@ -176,14 +225,15 @@ public class HomeActivity extends BaseActivity implements ImageRecyclerAdapter.O
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
+
         if (requestCode == CropImage.CROP_IMAGE_ACTIVITY_REQUEST_CODE) {
             CropImage.ActivityResult result = CropImage.getActivityResult(data);
             if (resultCode == RESULT_OK) {
                 assert result != null;
                 Uri croppedImageUri = result.getUri();
 
-                if (navHostFragment != null) {
-                    HomeFragment fragment = (HomeFragment) navHostFragment.getChildFragmentManager().getFragments().get(0);
+                if (getSupportFragmentManager().getFragments().get(binding.viewPager.getCurrentItem()) instanceof HomeFragment) {
+                    HomeFragment fragment = (HomeFragment) getSupportFragmentManager().getFragments().get(binding.viewPager.getCurrentItem());
                     fragment.receiveCroppedImage(croppedImageUri);
                 }
             }
@@ -218,15 +268,16 @@ public class HomeActivity extends BaseActivity implements ImageRecyclerAdapter.O
     }
 
     @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
+                                           @NonNull int[] grantResults) {
         switch (requestCode) {
             case CAMERA_REQUEST_CODE:
                 if (grantResults.length > 0) {
                     boolean cameraAccepted = grantResults[0] == PackageManager.PERMISSION_GRANTED;
                     boolean storageAccepted = grantResults[1] == PackageManager.PERMISSION_GRANTED;
                     if (cameraAccepted && storageAccepted) {
-                        if (navHostFragment != null) {
-                            HomeFragment fragment = (HomeFragment) navHostFragment.getChildFragmentManager().getFragments().get(0);
+                        if (getSupportFragmentManager().getFragments().get(binding.viewPager.getCurrentItem()) instanceof HomeFragment) {
+                            HomeFragment fragment = (HomeFragment) getSupportFragmentManager().getFragments().get(binding.viewPager.getCurrentItem());
                             fragment.selectImageFromCamera();
                         }
                     } else viewModel.setShowPermissionRational(true);
@@ -236,8 +287,8 @@ public class HomeActivity extends BaseActivity implements ImageRecyclerAdapter.O
                 if (grantResults.length > 0) {
                     boolean storageAccepted = grantResults[0] == PackageManager.PERMISSION_GRANTED;
                     if (storageAccepted) {
-                        if (navHostFragment != null) {
-                            HomeFragment fragment = (HomeFragment) navHostFragment.getChildFragmentManager().getFragments().get(0);
+                        if (getSupportFragmentManager().getFragments().get(binding.viewPager.getCurrentItem()) instanceof HomeFragment) {
+                            HomeFragment fragment = (HomeFragment) getSupportFragmentManager().getFragments().get(binding.viewPager.getCurrentItem());
                             fragment.selectImageFromGallery();
                         }
                     } else viewModel.setShowPermissionRational(true);

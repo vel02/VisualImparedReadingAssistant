@@ -1,4 +1,4 @@
-package sti.software.engineering.reading.assistant.di.ui.home.sub;
+package sti.software.engineering.reading.assistant.di.ui.home.camera;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.Retention;
@@ -9,5 +9,5 @@ import javax.inject.Scope;
 @Scope
 @Documented
 @Retention(RetentionPolicy.RUNTIME)
-public @interface HomeFragmentScope {
+public @interface CameraFragmentScope {
 }

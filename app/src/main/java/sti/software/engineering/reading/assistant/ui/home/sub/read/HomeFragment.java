@@ -1,4 +1,4 @@
-package sti.software.engineering.reading.assistant.ui.home.sub;
+package sti.software.engineering.reading.assistant.ui.home.sub.read;
 
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -32,6 +32,7 @@ import dagger.android.support.DaggerFragment;
 import sti.software.engineering.reading.assistant.adapter.ImageRecyclerAdapter;
 import sti.software.engineering.reading.assistant.databinding.FragmentHomeBinding;
 import sti.software.engineering.reading.assistant.model.Image;
+import sti.software.engineering.reading.assistant.ui.home.HomeActivity;
 import sti.software.engineering.reading.assistant.ui.home.selection.SelectImageFrom;
 import sti.software.engineering.reading.assistant.util.ProcessDatabaseDataManager;
 import sti.software.engineering.reading.assistant.util.SaveButtonStateHelper;
@@ -42,18 +43,23 @@ import static android.app.Activity.RESULT_OK;
 import static sti.software.engineering.reading.assistant.BaseActivity.IMAGE_PICK_AUTO_CAMERA_CODE;
 import static sti.software.engineering.reading.assistant.BaseActivity.IMAGE_PICK_CAMERA_CODE;
 import static sti.software.engineering.reading.assistant.BaseActivity.IMAGE_PICK_GALLERY_CODE;
-import static sti.software.engineering.reading.assistant.ui.home.sub.HomeFragmentViewModel.SelectImageFrom.AUTO_CAMERA;
-import static sti.software.engineering.reading.assistant.ui.home.sub.HomeFragmentViewModel.SelectImageFrom.CAMERA;
-import static sti.software.engineering.reading.assistant.ui.home.sub.HomeFragmentViewModel.SelectImageFrom.GALLERY;
+import static sti.software.engineering.reading.assistant.ui.home.sub.read.HomeFragmentViewModel.SelectImageFrom.AUTO_CAMERA;
+import static sti.software.engineering.reading.assistant.ui.home.sub.read.HomeFragmentViewModel.SelectImageFrom.CAMERA;
+import static sti.software.engineering.reading.assistant.ui.home.sub.read.HomeFragmentViewModel.SelectImageFrom.GALLERY;
 
 
-public class HomeFragment extends DaggerFragment {
+public class HomeFragment extends DaggerFragment implements HomeActivity.OnStartThroughServiceListener {
 
     private static final String TAG = "HomeFragment";
 
     public void onImageClicked(Image image, Uri uri) {
         binding.imvViewImage.setImageURI(uri);
         viewModel.setExtractText(true);
+    }
+
+    @Override
+    public void onStartedFromService() {
+        viewModel.setSelectImageFrom(AUTO_CAMERA);
     }
 
     @Inject
@@ -79,6 +85,7 @@ public class HomeFragment extends DaggerFragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         viewModel = new ViewModelProvider(requireActivity(), providerFactory).get(HomeFragmentViewModel.class);
+        ((HomeActivity) requireActivity()).setOnStartThroughServiceListener(this);
         subscribeObservers();
         initImageRecyclerAdapter();
         navigate();
@@ -145,6 +152,7 @@ public class HomeFragment extends DaggerFragment {
         viewModel.observedExtractText().removeObservers(getViewLifecycleOwner());
         viewModel.observedExtractText().observe(getViewLifecycleOwner(), extract -> {
             new Thread(() -> {
+                if (!(binding.imvViewImage.getDrawable() instanceof BitmapDrawable)) return;
                 BitmapDrawable drawable = (BitmapDrawable) binding.imvViewImage.getDrawable();
                 Bitmap bitmap = drawable.getBitmap();
 
@@ -187,10 +195,6 @@ public class HomeFragment extends DaggerFragment {
 
     public void selectImageFromGallery() {
         viewModel.setSelectImageFrom(GALLERY);
-    }
-
-    public void selectImageFromAutoCam() {
-        viewModel.setSelectImageFrom(AUTO_CAMERA);
     }
 
     public void receiveCroppedImage(Uri cropped) {
@@ -237,4 +241,5 @@ public class HomeFragment extends DaggerFragment {
             }
         }
     }
+
 }
