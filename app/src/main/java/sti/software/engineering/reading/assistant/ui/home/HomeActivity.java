@@ -32,7 +32,7 @@ import sti.software.engineering.reading.assistant.databinding.ActivityHomeBindin
 import sti.software.engineering.reading.assistant.model.Image;
 import sti.software.engineering.reading.assistant.service.TriggerCameraService;
 import sti.software.engineering.reading.assistant.ui.home.sub.PagerAdapter;
-import sti.software.engineering.reading.assistant.ui.home.sub.read.HomeFragment;
+import sti.software.engineering.reading.assistant.ui.home.sub.read.ReadFragment;
 import sti.software.engineering.reading.assistant.util.Utility;
 import sti.software.engineering.reading.assistant.viewmodel.ViewModelProviderFactory;
 
@@ -57,8 +57,8 @@ public class HomeActivity extends BaseActivity implements ImageRecyclerAdapter.O
     public void onImageClicked(Image image, Uri uri) {
         Log.d(TAG, "IMAGE CLICKED: " + image);
         Log.d(TAG, "onImageClicked: instance of? " + getSupportFragmentManager().getFragments().get(binding.viewPager.getCurrentItem()));
-        if (getSupportFragmentManager().getFragments().get(binding.viewPager.getCurrentItem()) instanceof HomeFragment) {
-            HomeFragment fragment = (HomeFragment) getSupportFragmentManager().getFragments().get(binding.viewPager.getCurrentItem());
+        if (getSupportFragmentManager().getFragments().get(binding.viewPager.getCurrentItem()) instanceof ReadFragment) {
+            ReadFragment fragment = (ReadFragment) getSupportFragmentManager().getFragments().get(binding.viewPager.getCurrentItem());
             fragment.onImageClicked(image, uri);
         }
     }
@@ -191,8 +191,8 @@ public class HomeActivity extends BaseActivity implements ImageRecyclerAdapter.O
                     requestCameraPermission();
                     return;
                 }
-                if (getSupportFragmentManager().getFragments().get(binding.viewPager.getCurrentItem()) instanceof HomeFragment) {
-                    HomeFragment fragment = (HomeFragment) getSupportFragmentManager().getFragments().get(binding.viewPager.getCurrentItem());
+                if (getSupportFragmentManager().getFragments().get(binding.viewPager.getCurrentItem()) instanceof ReadFragment) {
+                    ReadFragment fragment = (ReadFragment) getSupportFragmentManager().getFragments().get(binding.viewPager.getCurrentItem());
                     fragment.selectImageFromCamera();
                 }
             } else if (which == 1) {
@@ -200,8 +200,8 @@ public class HomeActivity extends BaseActivity implements ImageRecyclerAdapter.O
                     requestStoragePermission();
                     return;
                 }
-                if (getSupportFragmentManager().getFragments().get(binding.viewPager.getCurrentItem()) instanceof HomeFragment) {
-                    HomeFragment fragment = (HomeFragment) getSupportFragmentManager().getFragments().get(binding.viewPager.getCurrentItem());
+                if (getSupportFragmentManager().getFragments().get(binding.viewPager.getCurrentItem()) instanceof ReadFragment) {
+                    ReadFragment fragment = (ReadFragment) getSupportFragmentManager().getFragments().get(binding.viewPager.getCurrentItem());
                     fragment.selectImageFromGallery();
                 }
             }
@@ -232,8 +232,8 @@ public class HomeActivity extends BaseActivity implements ImageRecyclerAdapter.O
                 assert result != null;
                 Uri croppedImageUri = result.getUri();
 
-                if (getSupportFragmentManager().getFragments().get(binding.viewPager.getCurrentItem()) instanceof HomeFragment) {
-                    HomeFragment fragment = (HomeFragment) getSupportFragmentManager().getFragments().get(binding.viewPager.getCurrentItem());
+                if (getSupportFragmentManager().getFragments().get(binding.viewPager.getCurrentItem()) instanceof ReadFragment) {
+                    ReadFragment fragment = (ReadFragment) getSupportFragmentManager().getFragments().get(binding.viewPager.getCurrentItem());
                     fragment.receiveCroppedImage(croppedImageUri);
                 }
             }
@@ -276,8 +276,8 @@ public class HomeActivity extends BaseActivity implements ImageRecyclerAdapter.O
                     boolean cameraAccepted = grantResults[0] == PackageManager.PERMISSION_GRANTED;
                     boolean storageAccepted = grantResults[1] == PackageManager.PERMISSION_GRANTED;
                     if (cameraAccepted && storageAccepted) {
-                        if (getSupportFragmentManager().getFragments().get(binding.viewPager.getCurrentItem()) instanceof HomeFragment) {
-                            HomeFragment fragment = (HomeFragment) getSupportFragmentManager().getFragments().get(binding.viewPager.getCurrentItem());
+                        if (getSupportFragmentManager().getFragments().get(binding.viewPager.getCurrentItem()) instanceof ReadFragment) {
+                            ReadFragment fragment = (ReadFragment) getSupportFragmentManager().getFragments().get(binding.viewPager.getCurrentItem());
                             fragment.selectImageFromCamera();
                         }
                     } else viewModel.setShowPermissionRational(true);
@@ -287,8 +287,8 @@ public class HomeActivity extends BaseActivity implements ImageRecyclerAdapter.O
                 if (grantResults.length > 0) {
                     boolean storageAccepted = grantResults[0] == PackageManager.PERMISSION_GRANTED;
                     if (storageAccepted) {
-                        if (getSupportFragmentManager().getFragments().get(binding.viewPager.getCurrentItem()) instanceof HomeFragment) {
-                            HomeFragment fragment = (HomeFragment) getSupportFragmentManager().getFragments().get(binding.viewPager.getCurrentItem());
+                        if (getSupportFragmentManager().getFragments().get(binding.viewPager.getCurrentItem()) instanceof ReadFragment) {
+                            ReadFragment fragment = (ReadFragment) getSupportFragmentManager().getFragments().get(binding.viewPager.getCurrentItem());
                             fragment.selectImageFromGallery();
                         }
                     } else viewModel.setShowPermissionRational(true);

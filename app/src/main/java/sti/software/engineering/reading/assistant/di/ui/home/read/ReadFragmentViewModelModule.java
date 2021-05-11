@@ -6,14 +6,14 @@ import dagger.Binds;
 import dagger.Module;
 import dagger.multibindings.IntoMap;
 import sti.software.engineering.reading.assistant.di.ViewModelKey;
-import sti.software.engineering.reading.assistant.ui.home.sub.read.HomeFragmentViewModel;
+import sti.software.engineering.reading.assistant.ui.home.sub.read.ReadFragmentViewModel;
 
 @Module
-public abstract class HomeFragmentViewModelModule {
+public abstract class ReadFragmentViewModelModule {
 
     @Binds
     @IntoMap
-    @ViewModelKey(HomeFragmentViewModel.class)
-    abstract ViewModel bindHomeFragmentViewModel(HomeFragmentViewModel viewModel);
+    @ViewModelKey(ReadFragmentViewModel.class)
+    abstract ViewModel bindReadFragmentViewModel(ReadFragmentViewModel viewModel);
 
 }

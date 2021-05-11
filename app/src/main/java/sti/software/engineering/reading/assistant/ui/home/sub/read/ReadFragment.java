@@ -30,9 +30,10 @@ import javax.inject.Inject;
 
 import dagger.android.support.DaggerFragment;
 import sti.software.engineering.reading.assistant.adapter.ImageRecyclerAdapter;
-import sti.software.engineering.reading.assistant.databinding.FragmentHomeBinding;
+import sti.software.engineering.reading.assistant.databinding.FragmentReadBinding;
 import sti.software.engineering.reading.assistant.model.Image;
 import sti.software.engineering.reading.assistant.ui.home.HomeActivity;
+import sti.software.engineering.reading.assistant.ui.home.HomeActivity.OnStartThroughServiceListener;
 import sti.software.engineering.reading.assistant.ui.home.selection.SelectImageFrom;
 import sti.software.engineering.reading.assistant.util.ProcessDatabaseDataManager;
 import sti.software.engineering.reading.assistant.util.SaveButtonStateHelper;
@@ -43,12 +44,12 @@ import static android.app.Activity.RESULT_OK;
 import static sti.software.engineering.reading.assistant.BaseActivity.IMAGE_PICK_AUTO_CAMERA_CODE;
 import static sti.software.engineering.reading.assistant.BaseActivity.IMAGE_PICK_CAMERA_CODE;
 import static sti.software.engineering.reading.assistant.BaseActivity.IMAGE_PICK_GALLERY_CODE;
-import static sti.software.engineering.reading.assistant.ui.home.sub.read.HomeFragmentViewModel.SelectImageFrom.AUTO_CAMERA;
-import static sti.software.engineering.reading.assistant.ui.home.sub.read.HomeFragmentViewModel.SelectImageFrom.CAMERA;
-import static sti.software.engineering.reading.assistant.ui.home.sub.read.HomeFragmentViewModel.SelectImageFrom.GALLERY;
+import static sti.software.engineering.reading.assistant.ui.home.sub.read.ReadFragmentViewModel.SelectImageFrom.AUTO_CAMERA;
+import static sti.software.engineering.reading.assistant.ui.home.sub.read.ReadFragmentViewModel.SelectImageFrom.CAMERA;
+import static sti.software.engineering.reading.assistant.ui.home.sub.read.ReadFragmentViewModel.SelectImageFrom.GALLERY;
 
 
-public class HomeFragment extends DaggerFragment implements HomeActivity.OnStartThroughServiceListener {
+public class ReadFragment extends DaggerFragment implements OnStartThroughServiceListener {
 
     private static final String TAG = "HomeFragment";
 
@@ -65,8 +66,8 @@ public class HomeFragment extends DaggerFragment implements HomeActivity.OnStart
     @Inject
     ViewModelProviderFactory providerFactory;
 
-    private FragmentHomeBinding binding;
-    private HomeFragmentViewModel viewModel;
+    private FragmentReadBinding binding;
+    private ReadFragmentViewModel viewModel;
     private SelectImageFrom selectImageFrom;
 
     private Uri imageUri;
@@ -78,19 +79,18 @@ public class HomeFragment extends DaggerFragment implements HomeActivity.OnStart
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        binding = FragmentHomeBinding.inflate(inflater);
+        binding = FragmentReadBinding.inflate(inflater);
         return binding.getRoot();
     }
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
-        viewModel = new ViewModelProvider(requireActivity(), providerFactory).get(HomeFragmentViewModel.class);
+        viewModel = new ViewModelProvider(requireActivity(), providerFactory).get(ReadFragmentViewModel.class);
         ((HomeActivity) requireActivity()).setOnStartThroughServiceListener(this);
         subscribeObservers();
         initImageRecyclerAdapter();
         navigate();
     }
-
 
     private void initImageRecyclerAdapter() {
         binding.viewList.setLayoutManager(new LinearLayoutManager(requireActivity(), RecyclerView.HORIZONTAL, false));

@@ -13,7 +13,7 @@ import javax.inject.Inject;
 import sti.software.engineering.reading.assistant.model.Image;
 import sti.software.engineering.reading.assistant.repository.ImageRepository;
 
-public class HomeFragmentViewModel extends ViewModel {
+public class ReadFragmentViewModel extends ViewModel {
 
     public MutableLiveData<SelectImageFrom> selectImageFrom;
     public MutableLiveData<Uri> storeCroppedImage;
@@ -22,7 +22,7 @@ public class HomeFragmentViewModel extends ViewModel {
     private final ImageRepository repository;
 
     @Inject
-    public HomeFragmentViewModel(ImageRepository repository) {
+    public ReadFragmentViewModel(ImageRepository repository) {
         this.repository = repository;
         this.selectImageFrom = new MutableLiveData<>();
         this.storeCroppedImage = new MutableLiveData<>();

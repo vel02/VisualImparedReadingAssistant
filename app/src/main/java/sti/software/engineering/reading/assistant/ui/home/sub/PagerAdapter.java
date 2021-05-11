@@ -8,7 +8,7 @@ import androidx.viewpager2.adapter.FragmentStateAdapter;
 
 import sti.software.engineering.reading.assistant.ui.home.sub.camera.CameraFragment;
 import sti.software.engineering.reading.assistant.ui.home.sub.gallery.GalleryFragment;
-import sti.software.engineering.reading.assistant.ui.home.sub.read.HomeFragment;
+import sti.software.engineering.reading.assistant.ui.home.sub.read.ReadFragment;
 
 public class PagerAdapter extends FragmentStateAdapter {
 
@@ -50,14 +50,14 @@ public class PagerAdapter extends FragmentStateAdapter {
     public Fragment createFragment(int position) {
         switch (position) {
             case 0:
-                return new HomeFragment();
+                return new ReadFragment();
             case 1:
                 return new CameraFragment();
             case 2:
                 return new GalleryFragment();
         }
 
-        return new HomeFragment();
+        return new ReadFragment();
     }
 
     @Override

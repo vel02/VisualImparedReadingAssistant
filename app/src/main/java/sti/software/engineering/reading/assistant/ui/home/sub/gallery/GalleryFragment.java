@@ -18,6 +18,7 @@ public class GalleryFragment extends DaggerFragment {
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         binding = FragmentGalleryBinding.inflate(inflater);
+
         return binding.getRoot();
     }
 }

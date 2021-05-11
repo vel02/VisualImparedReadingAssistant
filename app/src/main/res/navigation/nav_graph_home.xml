@@ -7,7 +7,7 @@
 
     <fragment
         android:id="@+id/nav_home"
-        android:name="sti.software.engineering.reading.assistant.ui.home.sub.read.HomeFragment"
+        android:name="sti.software.engineering.reading.assistant.ui.home.sub.read.ReadFragment"
         android:label="Home"
-        tools:layout="@layout/fragment_home" />
+        tools:layout="@layout/fragment_read" />
 </navigation>

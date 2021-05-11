@@ -5,7 +5,7 @@ import android.util.Log;
 
 import androidx.lifecycle.ViewModel;
 
-import sti.software.engineering.reading.assistant.ui.home.sub.read.HomeFragmentViewModel;
+import sti.software.engineering.reading.assistant.ui.home.sub.read.ReadFragmentViewModel;
 
 public class ProcessDatabaseDataManager extends CountDownTimer {
 
@@ -34,8 +34,8 @@ public class ProcessDatabaseDataManager extends CountDownTimer {
 
     @Override
     public void onFinish() {
-        if (viewModel instanceof HomeFragmentViewModel) {
-            ((HomeFragmentViewModel) viewModel).processDatabaseData();
+        if (viewModel instanceof ReadFragmentViewModel) {
+            ((ReadFragmentViewModel) viewModel).processDatabaseData();
         }
     }
 }
