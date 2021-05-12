@@ -11,6 +11,15 @@ import android.util.Log;
 
 public class Utility {
 
+    public static class Permissions {
+
+        private Permissions() {
+        }
+
+        public static final int CAMERA_REQUEST_CODE = 101;
+        public static final int STORAGE_REQUEST_CODE = 201;
+
+    }
 
     public static boolean isMyServiceRunning(Context context, Class<?> serviceClass) {
         ActivityManager manager = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);

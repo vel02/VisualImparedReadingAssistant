@@ -21,10 +21,6 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.google.android.gms.vision.Frame;
 import com.google.android.gms.vision.text.TextBlock;
 import com.google.android.gms.vision.text.TextRecognizer;
-import com.theartofdev.edmodo.cropper.CropImage;
-import com.theartofdev.edmodo.cropper.CropImageView;
-
-import java.io.File;
 
 import javax.inject.Inject;
 
@@ -35,18 +31,10 @@ import sti.software.engineering.reading.assistant.model.Image;
 import sti.software.engineering.reading.assistant.ui.home.HomeActivity;
 import sti.software.engineering.reading.assistant.ui.home.HomeActivity.OnStartThroughServiceListener;
 import sti.software.engineering.reading.assistant.ui.home.selection.SelectImageFrom;
-import sti.software.engineering.reading.assistant.util.ProcessDatabaseDataManager;
-import sti.software.engineering.reading.assistant.util.SaveButtonStateHelper;
-import sti.software.engineering.reading.assistant.util.StoreCroppedImageManager;
 import sti.software.engineering.reading.assistant.viewmodel.ViewModelProviderFactory;
 
-import static android.app.Activity.RESULT_OK;
 import static sti.software.engineering.reading.assistant.BaseActivity.IMAGE_PICK_AUTO_CAMERA_CODE;
-import static sti.software.engineering.reading.assistant.BaseActivity.IMAGE_PICK_CAMERA_CODE;
-import static sti.software.engineering.reading.assistant.BaseActivity.IMAGE_PICK_GALLERY_CODE;
 import static sti.software.engineering.reading.assistant.ui.home.sub.read.ReadFragmentViewModel.SelectImageFrom.AUTO_CAMERA;
-import static sti.software.engineering.reading.assistant.ui.home.sub.read.ReadFragmentViewModel.SelectImageFrom.CAMERA;
-import static sti.software.engineering.reading.assistant.ui.home.sub.read.ReadFragmentViewModel.SelectImageFrom.GALLERY;
 
 
 public class ReadFragment extends DaggerFragment implements OnStartThroughServiceListener {
@@ -70,9 +58,9 @@ public class ReadFragment extends DaggerFragment implements OnStartThroughServic
     private ReadFragmentViewModel viewModel;
     private SelectImageFrom selectImageFrom;
 
-    private Uri imageUri;
-    private File capturedImage;
-    private String filename;
+//    private Uri imageUri;
+//    private File capturedImage;
+//    private String filename;
 
     private ImageRecyclerAdapter adapter;
 
@@ -99,16 +87,16 @@ public class ReadFragment extends DaggerFragment implements OnStartThroughServic
     }
 
     private void navigate() {
-        binding.btnSave.setOnClickListener(v -> {
-            if (filename != null) {
-                Log.d(TAG, "save: called");
-                Image image = new Image("nickname", filename);
-                viewModel.insert(image);
-                ProcessDatabaseDataManager.refresh(viewModel, 1000, 1000).start();
-                SaveButtonStateHelper.getInstance().setSaveButtonState(requireActivity(), false);
-                binding.btnSave.setEnabled(false);
-            }
-        });
+//        binding.btnSave.setOnClickListener(v -> {
+//            if (filename != null) {
+//                Log.d(TAG, "save: called");
+//                Image image = new Image("nickname", filename);
+//                viewModel.insert(image);
+//                ProcessDatabaseDataManager.refresh(viewModel, 1000, 1000).start();
+//                SaveButtonStateHelper.getInstance().setSaveButtonState(requireActivity(), false);
+//                binding.btnSave.setEnabled(false);
+//            }
+//        });
     }
 
     private void subscribeObservers() {
@@ -119,35 +107,35 @@ public class ReadFragment extends DaggerFragment implements OnStartThroughServic
                     case AUTO_CAMERA:
                         selectImageFrom = new SelectImageFrom(requireActivity(), SelectImageFrom.SELECT_CAMERA);
                         startActivityForResult(selectImageFrom.pickCamera(), IMAGE_PICK_AUTO_CAMERA_CODE);
-                        imageUri = selectImageFrom.getImageUri();
-                        capturedImage = selectImageFrom.getFile();
-                        filename = selectImageFrom.getFilename();
+//                        imageUri = selectImageFrom.getImageUri();
+//                        capturedImage = selectImageFrom.getFile();
+//                        filename = selectImageFrom.getFilename();
                         break;
 
-                    case CAMERA:
-                        selectImageFrom = new SelectImageFrom(requireActivity(), SelectImageFrom.SELECT_CAMERA);
-                        startActivityForResult(selectImageFrom.pickCamera(), IMAGE_PICK_CAMERA_CODE);
-                        imageUri = selectImageFrom.getImageUri();
-                        capturedImage = selectImageFrom.getFile();
-                        filename = selectImageFrom.getFilename();
-                        break;
-
-                    case GALLERY:
-                        selectImageFrom = new SelectImageFrom(requireActivity(), SelectImageFrom.SELECT_GALLERY);
-                        startActivityForResult(selectImageFrom.pickGallery(), IMAGE_PICK_GALLERY_CODE);
-                        break;
+//                    case CAMERA:
+//                        selectImageFrom = new SelectImageFrom(requireActivity(), SelectImageFrom.SELECT_CAMERA);
+//                        startActivityForResult(selectImageFrom.pickCamera(), IMAGE_PICK_CAMERA_CODE);
+//                        imageUri = selectImageFrom.getImageUri();
+//                        capturedImage = selectImageFrom.getFile();
+//                        filename = selectImageFrom.getFilename();
+//                        break;
+//
+//                    case GALLERY:
+//                        selectImageFrom = new SelectImageFrom(requireActivity(), SelectImageFrom.SELECT_GALLERY);
+//                        startActivityForResult(selectImageFrom.pickGallery(), IMAGE_PICK_GALLERY_CODE);
+//                        break;
                 }
             }
         });
 
-        viewModel.observedStoreCroppedImage().removeObservers(getViewLifecycleOwner());
-        viewModel.observedStoreCroppedImage().observe(getViewLifecycleOwner(), uri -> {
-            if (uri != null) {
-                File capturedImageFile = this.capturedImage;
-                if (capturedImageFile == null) return;
-                StoreCroppedImageManager.storeImage(requireActivity(), capturedImageFile, uri, filename);
-            }
-        });
+//        viewModel.observedStoreCroppedImage().removeObservers(getViewLifecycleOwner());
+//        viewModel.observedStoreCroppedImage().observe(getViewLifecycleOwner(), uri -> {
+//            if (uri != null) {
+//                File capturedImageFile = this.capturedImage;
+//                if (capturedImageFile == null) return;
+//                StoreCroppedImageManager.storeImage(requireActivity(), capturedImageFile, uri, filename);
+//            }
+//        });
 
         viewModel.observedExtractText().removeObservers(getViewLifecycleOwner());
         viewModel.observedExtractText().observe(getViewLifecycleOwner(), extract -> {
@@ -189,13 +177,13 @@ public class ReadFragment extends DaggerFragment implements OnStartThroughServic
     }
 
 
-    public void selectImageFromCamera() {
-        viewModel.setSelectImageFrom(CAMERA);
-    }
+//    public void selectImageFromCamera() {
+//        viewModel.setSelectImageFrom(CAMERA);
+//    }
 
-    public void selectImageFromGallery() {
-        viewModel.setSelectImageFrom(GALLERY);
-    }
+//    public void selectImageFromGallery() {
+//        viewModel.setSelectImageFrom(GALLERY);
+//    }
 
     public void receiveCroppedImage(Uri cropped) {
         //save cropped image to app folder, replacing the initial image.
@@ -209,37 +197,37 @@ public class ReadFragment extends DaggerFragment implements OnStartThroughServic
     public void onResume() {
         super.onResume();
         viewModel.processDatabaseData();
-        binding.btnSave.setEnabled(SaveButtonStateHelper.getInstance().getSaveButtonState(requireActivity()));
+//        binding.btnSave.setEnabled(SaveButtonStateHelper.getInstance().getSaveButtonState(requireActivity()));
     }
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (resultCode == RESULT_OK) {
+//        if (resultCode == RESULT_OK) {
 
-            if (requestCode == IMAGE_PICK_GALLERY_CODE) {
-                assert data != null;
-                CropImage.activity(data.getData())
-                        .setGuidelines(CropImageView.Guidelines.ON)
-                        .start(requireActivity());
-                SaveButtonStateHelper.getInstance().setSaveButtonState(requireActivity(), false);
-            }
+//            if (requestCode == IMAGE_PICK_GALLERY_CODE) {
+//                assert data != null;
+//                CropImage.activity(data.getData())
+//                        .setGuidelines(CropImageView.Guidelines.ON)
+//                        .start(requireActivity());
+//                SaveButtonStateHelper.getInstance().setSaveButtonState(requireActivity(), false);
+//            }
 
-            if (requestCode == IMAGE_PICK_CAMERA_CODE) {
-                CropImage.activity(imageUri)
-                        .setGuidelines(CropImageView.Guidelines.ON)
-                        .start(requireActivity());
-                SaveButtonStateHelper.getInstance().setSaveButtonState(requireActivity(), true);
-            }
+//            if (requestCode == IMAGE_PICK_CAMERA_CODE) {
+//                CropImage.activity(imageUri)
+//                        .setGuidelines(CropImageView.Guidelines.ON)
+//                        .start(requireActivity());
+//                SaveButtonStateHelper.getInstance().setSaveButtonState(requireActivity(), true);
+//            }
 
-            if (requestCode == IMAGE_PICK_AUTO_CAMERA_CODE) {
-                viewModel.storeCroppedImage(imageUri);
-
-                binding.imvViewImage.setImageURI(imageUri);
-                viewModel.setExtractText(true);
-                SaveButtonStateHelper.getInstance().setSaveButtonState(requireActivity(), true);
-            }
-        }
+//            if (requestCode == IMAGE_PICK_AUTO_CAMERA_CODE) {
+//                viewModel.storeCroppedImage(imageUri);
+//
+//                binding.imvViewImage.setImageURI(imageUri);
+//                viewModel.setExtractText(true);
+//                SaveButtonStateHelper.getInstance().setSaveButtonState(requireActivity(), true);
+//            }
+//        }
     }
 
 }

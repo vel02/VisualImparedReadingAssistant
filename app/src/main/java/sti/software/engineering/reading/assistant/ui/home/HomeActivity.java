@@ -13,7 +13,6 @@ import android.view.MenuItem;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.appcompat.app.AlertDialog;
 import androidx.core.app.ActivityCompat;
 import androidx.databinding.DataBindingUtil;
 import androidx.lifecycle.ViewModelProvider;
@@ -40,6 +39,7 @@ import static android.Manifest.permission.WRITE_EXTERNAL_STORAGE;
 
 /**
  * Next Functionality
+ * - permission
  * - refactor codes
  * - camera tab implementation
  * <p>
@@ -56,7 +56,6 @@ public class HomeActivity extends BaseActivity implements ImageRecyclerAdapter.O
     @Override
     public void onImageClicked(Image image, Uri uri) {
         Log.d(TAG, "IMAGE CLICKED: " + image);
-        Log.d(TAG, "onImageClicked: instance of? " + getSupportFragmentManager().getFragments().get(binding.viewPager.getCurrentItem()));
         if (getSupportFragmentManager().getFragments().get(binding.viewPager.getCurrentItem()) instanceof ReadFragment) {
             ReadFragment fragment = (ReadFragment) getSupportFragmentManager().getFragments().get(binding.viewPager.getCurrentItem());
             fragment.onImageClicked(image, uri);
@@ -181,33 +180,33 @@ public class HomeActivity extends BaseActivity implements ImageRecyclerAdapter.O
 
     }
 
-    private void selectImageDialog() {
-        String[] items = {" Camera", " Gallery"};
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle(R.string.label_select_image);
-        builder.setItems(items, ((dialog, which) -> {
-            if (which == 0) {
-                if (checkCameraPermission()) {
-                    requestCameraPermission();
-                    return;
-                }
-                if (getSupportFragmentManager().getFragments().get(binding.viewPager.getCurrentItem()) instanceof ReadFragment) {
-                    ReadFragment fragment = (ReadFragment) getSupportFragmentManager().getFragments().get(binding.viewPager.getCurrentItem());
-                    fragment.selectImageFromCamera();
-                }
-            } else if (which == 1) {
-                if (checkStoragePermission()) {
-                    requestStoragePermission();
-                    return;
-                }
-                if (getSupportFragmentManager().getFragments().get(binding.viewPager.getCurrentItem()) instanceof ReadFragment) {
-                    ReadFragment fragment = (ReadFragment) getSupportFragmentManager().getFragments().get(binding.viewPager.getCurrentItem());
-                    fragment.selectImageFromGallery();
-                }
-            }
-        }));
-        builder.create().show();
-    }
+//    private void selectImageDialog() {
+//        String[] items = {" Camera", " Gallery"};
+//        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+//        builder.setTitle(R.string.label_select_image);
+//        builder.setItems(items, ((dialog, which) -> {
+//            if (which == 0) {
+//                if (checkCameraPermission()) {
+//                    requestCameraPermission();
+//                    return;
+//                }
+//                if (getSupportFragmentManager().getFragments().get(binding.viewPager.getCurrentItem()) instanceof ReadFragment) {
+//                    ReadFragment fragment = (ReadFragment) getSupportFragmentManager().getFragments().get(binding.viewPager.getCurrentItem());
+//                    fragment.selectImageFromCamera();
+//                }
+//            } else if (which == 1) {
+//                if (checkStoragePermission()) {
+//                    requestStoragePermission();
+//                    return;
+//                }
+//                if (getSupportFragmentManager().getFragments().get(binding.viewPager.getCurrentItem()) instanceof ReadFragment) {
+//                    ReadFragment fragment = (ReadFragment) getSupportFragmentManager().getFragments().get(binding.viewPager.getCurrentItem());
+//                    fragment.selectImageFromGallery();
+//                }
+//            }
+//        }));
+//        builder.create().show();
+//    }
 
 
     @Override
@@ -260,8 +259,8 @@ public class HomeActivity extends BaseActivity implements ImageRecyclerAdapter.O
 
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
-        if (item.getItemId() == R.id.action_select_image) {
-            selectImageDialog();
+        if (item.getItemId() == R.id.action_about) {
+//            selectImageDialog();
             return true;
         }
         return super.onOptionsItemSelected(item);
@@ -270,31 +269,42 @@ public class HomeActivity extends BaseActivity implements ImageRecyclerAdapter.O
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
                                            @NonNull int[] grantResults) {
-        switch (requestCode) {
-            case CAMERA_REQUEST_CODE:
-                if (grantResults.length > 0) {
-                    boolean cameraAccepted = grantResults[0] == PackageManager.PERMISSION_GRANTED;
-                    boolean storageAccepted = grantResults[1] == PackageManager.PERMISSION_GRANTED;
-                    if (cameraAccepted && storageAccepted) {
-                        if (getSupportFragmentManager().getFragments().get(binding.viewPager.getCurrentItem()) instanceof ReadFragment) {
-                            ReadFragment fragment = (ReadFragment) getSupportFragmentManager().getFragments().get(binding.viewPager.getCurrentItem());
-                            fragment.selectImageFromCamera();
-                        }
-                    } else viewModel.setShowPermissionRational(true);
-                }
-                break;
-            case STORAGE_REQUEST_CODE:
-                if (grantResults.length > 0) {
-                    boolean storageAccepted = grantResults[0] == PackageManager.PERMISSION_GRANTED;
-                    if (storageAccepted) {
-                        if (getSupportFragmentManager().getFragments().get(binding.viewPager.getCurrentItem()) instanceof ReadFragment) {
-                            ReadFragment fragment = (ReadFragment) getSupportFragmentManager().getFragments().get(binding.viewPager.getCurrentItem());
-                            fragment.selectImageFromGallery();
-                        }
-                    } else viewModel.setShowPermissionRational(true);
-                }
-                break;
+
+        if (requestCode == CAMERA_REQUEST_CODE) {
+            if (grantResults.length > 0) {
+                boolean cameraAccepted = grantResults[0] == PackageManager.PERMISSION_GRANTED;
+                boolean storageAccepted = grantResults[1] == PackageManager.PERMISSION_GRANTED;
+                Log.d(TAG, "onRequestPermissionsResult: camera should work!" + (cameraAccepted == storageAccepted));
+                if (cameraAccepted && storageAccepted) {
+//                    selectImageFromCamera();
+                } else viewModel.setShowPermissionRational(true);
+            }
         }
+//        switch (requestCode) {
+//            case CAMERA_REQUEST_CODE:
+//                if (grantResults.length > 0) {
+//                    boolean cameraAccepted = grantResults[0] == PackageManager.PERMISSION_GRANTED;
+//                    boolean storageAccepted = grantResults[1] == PackageManager.PERMISSION_GRANTED;
+//                    if (cameraAccepted && storageAccepted) {
+//                        if (getSupportFragmentManager().getFragments().get(binding.viewPager.getCurrentItem()) instanceof ReadFragment) {
+//                            ReadFragment fragment = (ReadFragment) getSupportFragmentManager().getFragments().get(binding.viewPager.getCurrentItem());
+//                            fragment.selectImageFromCamera();
+//                        }
+//                    } else viewModel.setShowPermissionRational(true);
+//                }
+//                break;
+//            case STORAGE_REQUEST_CODE:
+//                if (grantResults.length > 0) {
+//                    boolean storageAccepted = grantResults[0] == PackageManager.PERMISSION_GRANTED;
+//                    if (storageAccepted) {
+//                        if (getSupportFragmentManager().getFragments().get(binding.viewPager.getCurrentItem()) instanceof ReadFragment) {
+//                            ReadFragment fragment = (ReadFragment) getSupportFragmentManager().getFragments().get(binding.viewPager.getCurrentItem());
+//                            fragment.selectImageFromGallery();
+//                        }
+//                    } else viewModel.setShowPermissionRational(true);
+//                }
+//                break;
+//        }
     }
 
     private boolean checkCameraPermission() {

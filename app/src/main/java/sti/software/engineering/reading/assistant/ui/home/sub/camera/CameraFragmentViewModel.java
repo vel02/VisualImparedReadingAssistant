@@ -15,6 +15,8 @@ public class CameraFragmentViewModel extends ViewModel {
 
     private final MutableLiveData<Uri> imageUriLiveData;
     private final MutableLiveData<Uri> storeCroppedImageLiveData;
+    public MutableLiveData<Boolean> showPermissionRational;
+
 
 
     private final ImageRepository repository;
@@ -24,6 +26,8 @@ public class CameraFragmentViewModel extends ViewModel {
         this.repository = repository;
         this.imageUriLiveData = new MutableLiveData<>();
         this.storeCroppedImageLiveData = new MutableLiveData<>();
+        this.showPermissionRational = new MutableLiveData<>();
+
     }
 
     public void insert(Image image) {
@@ -33,6 +37,15 @@ public class CameraFragmentViewModel extends ViewModel {
     public void storeCroppedImage(Uri uri) {
         this.storeCroppedImageLiveData.setValue(uri);
     }
+
+    public void setShowPermissionRational(boolean showPermissionRational) {
+        this.showPermissionRational.setValue(showPermissionRational);
+    }
+
+    public LiveData<Boolean> observedShowPermissionRational() {
+        return showPermissionRational;
+    }
+
 
     public LiveData<Uri> observedStoreCroppedImage() {
         return storeCroppedImageLiveData;
