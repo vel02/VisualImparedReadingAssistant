@@ -30,7 +30,9 @@ import sti.software.engineering.reading.assistant.adapter.ImageRecyclerAdapter;
 import sti.software.engineering.reading.assistant.databinding.ActivityHomeBinding;
 import sti.software.engineering.reading.assistant.model.Image;
 import sti.software.engineering.reading.assistant.service.TriggerCameraService;
+import sti.software.engineering.reading.assistant.ui.OnHostPermissionListener;
 import sti.software.engineering.reading.assistant.ui.home.sub.PagerAdapter;
+import sti.software.engineering.reading.assistant.ui.home.sub.camera.CameraFragment;
 import sti.software.engineering.reading.assistant.ui.home.sub.read.ReadFragment;
 import sti.software.engineering.reading.assistant.util.Utility;
 import sti.software.engineering.reading.assistant.viewmodel.ViewModelProviderFactory;
@@ -49,7 +51,9 @@ import static android.Manifest.permission.WRITE_EXTERNAL_STORAGE;
  * <p>
  * https://stackoverflow.com/questions/38471105/viewpager-didnt-load-the-first-page-at-the-first-time-but-will-load-it-after-s
  */
-public class HomeActivity extends BaseActivity implements ImageRecyclerAdapter.OnImageClickListener {
+public class HomeActivity extends BaseActivity implements
+        OnHostPermissionListener,
+        ImageRecyclerAdapter.OnImageClickListener {
 
     private static final String TAG = "HomeActivity";
 
@@ -62,6 +66,11 @@ public class HomeActivity extends BaseActivity implements ImageRecyclerAdapter.O
         }
     }
 
+    @Override
+    public void onRequestCameraPermission() {
+        this.requestCameraPermission();
+    }
+
     @Inject
     ViewModelProviderFactory providerFactory;
 
@@ -71,6 +80,7 @@ public class HomeActivity extends BaseActivity implements ImageRecyclerAdapter.O
     private boolean startedThroughService;
 
     private OnStartThroughServiceListener startThroughServiceListener;
+
 
     public interface OnStartThroughServiceListener {
         void onStartedFromService();
@@ -145,7 +155,9 @@ public class HomeActivity extends BaseActivity implements ImageRecyclerAdapter.O
             @Override
             public void onPageSelected(int position) {
                 binding.tabLayout.selectTab(binding.tabLayout.getTabAt(position));
+                Log.d(TAG, "onPageSelected: called " + position + " " + startedThroughService);
                 if (position == 0 && startedThroughService) {
+                    Log.d(TAG, "onPageSelected: called");
                     startThroughServiceListener.onStartedFromService();
                     startedThroughService = false;
                 }
@@ -277,6 +289,10 @@ public class HomeActivity extends BaseActivity implements ImageRecyclerAdapter.O
                 Log.d(TAG, "onRequestPermissionsResult: camera should work!" + (cameraAccepted == storageAccepted));
                 if (cameraAccepted && storageAccepted) {
 //                    selectImageFromCamera();
+                    if (getSupportFragmentManager().getFragments().get(binding.viewPager.getCurrentItem()) instanceof CameraFragment) {
+                        CameraFragment fragment = (CameraFragment) getSupportFragmentManager().getFragments().get(binding.viewPager.getCurrentItem());
+                        fragment.selectImageFromCamera();
+                    }
                 } else viewModel.setShowPermissionRational(true);
             }
         }
@@ -330,23 +346,23 @@ public class HomeActivity extends BaseActivity implements ImageRecyclerAdapter.O
                 CAMERA_REQUEST_CODE);
     }
 
-    private boolean checkStoragePermission() {
-        return PackageManager.PERMISSION_DENIED == ActivityCompat
-                .checkSelfPermission(this, WRITE_EXTERNAL_STORAGE);
-    }
-
-    private void requestStoragePermission() {
-        boolean shouldProvideRational = ActivityCompat
-                .shouldShowRequestPermissionRationale(this, WRITE_EXTERNAL_STORAGE);
-
-        if (shouldProvideRational) {
-            Snackbar.make(binding.getRoot(),
-                    R.string.label_permission_rational, Snackbar.LENGTH_INDEFINITE)
-                    .setAction(R.string.label_ok, v ->
-                            ActivityCompat.requestPermissions(this,
-                                    new String[]{WRITE_EXTERNAL_STORAGE}, STORAGE_REQUEST_CODE)).show();
-        } else ActivityCompat.requestPermissions(this,
-                new String[]{WRITE_EXTERNAL_STORAGE}, STORAGE_REQUEST_CODE);
-    }
+//    private boolean checkStoragePermission() {
+//        return PackageManager.PERMISSION_DENIED == ActivityCompat
+//                .checkSelfPermission(this, WRITE_EXTERNAL_STORAGE);
+//    }
+//
+//    private void requestStoragePermission() {
+//        boolean shouldProvideRational = ActivityCompat
+//                .shouldShowRequestPermissionRationale(this, WRITE_EXTERNAL_STORAGE);
+//
+//        if (shouldProvideRational) {
+//            Snackbar.make(binding.getRoot(),
+//                    R.string.label_permission_rational, Snackbar.LENGTH_INDEFINITE)
+//                    .setAction(R.string.label_ok, v ->
+//                            ActivityCompat.requestPermissions(this,
+//                                    new String[]{WRITE_EXTERNAL_STORAGE}, STORAGE_REQUEST_CODE)).show();
+//        } else ActivityCompat.requestPermissions(this,
+//                new String[]{WRITE_EXTERNAL_STORAGE}, STORAGE_REQUEST_CODE);
+//    }
 
 }

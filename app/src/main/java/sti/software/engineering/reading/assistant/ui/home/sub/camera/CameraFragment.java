@@ -1,6 +1,8 @@
 package sti.software.engineering.reading.assistant.ui.home.sub.camera;
 
 import android.Manifest;
+import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
@@ -28,6 +30,7 @@ import dagger.android.support.DaggerFragment;
 import sti.software.engineering.reading.assistant.R;
 import sti.software.engineering.reading.assistant.databinding.FragmentCameraBinding;
 import sti.software.engineering.reading.assistant.model.Image;
+import sti.software.engineering.reading.assistant.ui.OnHostPermissionListener;
 import sti.software.engineering.reading.assistant.ui.home.selection.SelectImageFrom;
 import sti.software.engineering.reading.assistant.util.StoreCroppedImageManager;
 import sti.software.engineering.reading.assistant.viewmodel.ViewModelProviderFactory;
@@ -35,7 +38,6 @@ import sti.software.engineering.reading.assistant.viewmodel.ViewModelProviderFac
 import static android.Manifest.permission.WRITE_EXTERNAL_STORAGE;
 import static android.app.Activity.RESULT_OK;
 import static sti.software.engineering.reading.assistant.BaseActivity.IMAGE_PICK_CAMERA_CODE;
-import static sti.software.engineering.reading.assistant.util.Utility.Permissions.CAMERA_REQUEST_CODE;
 
 
 public class CameraFragment extends DaggerFragment {
@@ -49,6 +51,8 @@ public class CameraFragment extends DaggerFragment {
 
     private CameraFragmentViewModel viewModel;
     private SelectImageFrom selectImageFrom;
+    private OnHostPermissionListener hostPermission;
+    private Activity activity;
 
     private Uri imageUri;
     private File capturedImage;
@@ -108,12 +112,11 @@ public class CameraFragment extends DaggerFragment {
 
     private void navigate() {
         binding.imvCaptureImage.setOnClickListener(v -> {
-            if (checkCameraPermission()) {
-                requestCameraPermission();
+            if (this.checkCameraPermission()) {
+                hostPermission.onRequestCameraPermission();
                 return;
             }
-            selectImageFromCamera();
-
+            this.selectImageFromCamera();
         });
 
         binding.btnEdit.setOnClickListener(v -> {
@@ -137,12 +140,30 @@ public class CameraFragment extends DaggerFragment {
         });
     }
 
-    private void selectImageFromCamera() {
+    public void selectImageFromCamera() {
         selectImageFrom = new SelectImageFrom(requireActivity(), SelectImageFrom.SELECT_CAMERA);
         startActivityForResult(selectImageFrom.pickCamera(), IMAGE_PICK_CAMERA_CODE);
         imageUri = selectImageFrom.getImageUri();
         capturedImage = selectImageFrom.getFile();
         filename = selectImageFrom.getFilename();
+    }
+
+    @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+        activity = getActivity();
+        if (!(activity instanceof OnHostPermissionListener)) {
+            assert activity != null;
+            throw new ClassCastException(activity.getClass().getSimpleName()
+                    + " must implement OnHostPermissionListener interface.");
+        }
+        hostPermission = (OnHostPermissionListener) activity;
+    }
+
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        hostPermission = null;
     }
 
     @Override
@@ -194,21 +215,21 @@ public class CameraFragment extends DaggerFragment {
                 .checkSelfPermission(requireContext(), WRITE_EXTERNAL_STORAGE));
     }
 
-    private void requestCameraPermission() {
-        boolean shouldProvideRational = (shouldShowRequestPermissionRationale(Manifest.permission.CAMERA)
-                || shouldShowRequestPermissionRationale(WRITE_EXTERNAL_STORAGE));
-
-        if (shouldProvideRational) {
-            Snackbar.make(binding.getRoot(),
-                    R.string.label_permission_rational, Snackbar.LENGTH_INDEFINITE)
-                    .setAction(R.string.label_ok, v ->
-                            requestPermissions(new String[]{
-                                            Manifest.permission.CAMERA, WRITE_EXTERNAL_STORAGE},
-                                    CAMERA_REQUEST_CODE)).show();
-        } else requestPermissions(new String[]{
-                        Manifest.permission.CAMERA, WRITE_EXTERNAL_STORAGE},
-                CAMERA_REQUEST_CODE);
-    }
+//    private void requestCameraPermission() {
+//        boolean shouldProvideRational = (shouldShowRequestPermissionRationale(Manifest.permission.CAMERA)
+//                || shouldShowRequestPermissionRationale(WRITE_EXTERNAL_STORAGE));
+//
+//        if (shouldProvideRational) {
+//            Snackbar.make(binding.getRoot(),
+//                    R.string.label_permission_rational, Snackbar.LENGTH_INDEFINITE)
+//                    .setAction(R.string.label_ok, v ->
+//                            requestPermissions(new String[]{
+//                                            Manifest.permission.CAMERA, WRITE_EXTERNAL_STORAGE},
+//                                    CAMERA_REQUEST_CODE)).show();
+//        } else requestPermissions(new String[]{
+//                        Manifest.permission.CAMERA, WRITE_EXTERNAL_STORAGE},
+//                CAMERA_REQUEST_CODE);
+//    }
 
     private void resetImageCapture() {
         if (binding.imvCaptureImage.getDrawable() == null) {

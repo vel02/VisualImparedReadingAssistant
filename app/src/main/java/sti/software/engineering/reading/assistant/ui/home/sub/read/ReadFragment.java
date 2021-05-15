@@ -33,6 +33,7 @@ import sti.software.engineering.reading.assistant.ui.home.HomeActivity.OnStartTh
 import sti.software.engineering.reading.assistant.ui.home.selection.SelectImageFrom;
 import sti.software.engineering.reading.assistant.viewmodel.ViewModelProviderFactory;
 
+import static android.app.Activity.RESULT_OK;
 import static sti.software.engineering.reading.assistant.BaseActivity.IMAGE_PICK_AUTO_CAMERA_CODE;
 import static sti.software.engineering.reading.assistant.ui.home.sub.read.ReadFragmentViewModel.SelectImageFrom.AUTO_CAMERA;
 
@@ -58,7 +59,7 @@ public class ReadFragment extends DaggerFragment implements OnStartThroughServic
     private ReadFragmentViewModel viewModel;
     private SelectImageFrom selectImageFrom;
 
-//    private Uri imageUri;
+    private Uri imageUri;
 //    private File capturedImage;
 //    private String filename;
 
@@ -107,7 +108,7 @@ public class ReadFragment extends DaggerFragment implements OnStartThroughServic
                     case AUTO_CAMERA:
                         selectImageFrom = new SelectImageFrom(requireActivity(), SelectImageFrom.SELECT_CAMERA);
                         startActivityForResult(selectImageFrom.pickCamera(), IMAGE_PICK_AUTO_CAMERA_CODE);
-//                        imageUri = selectImageFrom.getImageUri();
+                        imageUri = selectImageFrom.getImageUri();
 //                        capturedImage = selectImageFrom.getFile();
 //                        filename = selectImageFrom.getFilename();
                         break;
@@ -203,7 +204,7 @@ public class ReadFragment extends DaggerFragment implements OnStartThroughServic
     @Override
     public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-//        if (resultCode == RESULT_OK) {
+        if (resultCode == RESULT_OK) {
 
 //            if (requestCode == IMAGE_PICK_GALLERY_CODE) {
 //                assert data != null;
@@ -220,14 +221,14 @@ public class ReadFragment extends DaggerFragment implements OnStartThroughServic
 //                SaveButtonStateHelper.getInstance().setSaveButtonState(requireActivity(), true);
 //            }
 
-//            if (requestCode == IMAGE_PICK_AUTO_CAMERA_CODE) {
-//                viewModel.storeCroppedImage(imageUri);
-//
-//                binding.imvViewImage.setImageURI(imageUri);
-//                viewModel.setExtractText(true);
+            if (requestCode == IMAGE_PICK_AUTO_CAMERA_CODE) {
+                viewModel.storeCroppedImage(imageUri);
+
+                binding.imvViewImage.setImageURI(imageUri);
+                viewModel.setExtractText(true);
 //                SaveButtonStateHelper.getInstance().setSaveButtonState(requireActivity(), true);
-//            }
-//        }
+            }
+        }
     }
 
 }
