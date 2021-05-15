@@ -9,6 +9,7 @@ import androidx.databinding.DataBindingUtil;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import sti.software.engineering.reading.assistant.R;
@@ -20,6 +21,7 @@ public class ImageRecyclerAdapter extends RecyclerView.Adapter<ImageBindHolder> 
     private List<Image> images = new ArrayList<>();
 
     public void refresh(List<Image> images) {
+        Collections.reverse(images);
         this.images = images;
         notifyDataSetChanged();
     }

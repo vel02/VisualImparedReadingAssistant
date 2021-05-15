@@ -67,6 +67,11 @@ public class HomeActivity extends BaseActivity implements
     }
 
     @Override
+    public boolean onCheckCameraPermission() {
+        return this.checkCameraPermission();
+    }
+
+    @Override
     public void onRequestCameraPermission() {
         this.requestCameraPermission();
     }
@@ -80,7 +85,6 @@ public class HomeActivity extends BaseActivity implements
     private boolean startedThroughService;
 
     private OnStartThroughServiceListener startThroughServiceListener;
-
 
     public interface OnStartThroughServiceListener {
         void onStartedFromService();
@@ -192,35 +196,6 @@ public class HomeActivity extends BaseActivity implements
 
     }
 
-//    private void selectImageDialog() {
-//        String[] items = {" Camera", " Gallery"};
-//        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-//        builder.setTitle(R.string.label_select_image);
-//        builder.setItems(items, ((dialog, which) -> {
-//            if (which == 0) {
-//                if (checkCameraPermission()) {
-//                    requestCameraPermission();
-//                    return;
-//                }
-//                if (getSupportFragmentManager().getFragments().get(binding.viewPager.getCurrentItem()) instanceof ReadFragment) {
-//                    ReadFragment fragment = (ReadFragment) getSupportFragmentManager().getFragments().get(binding.viewPager.getCurrentItem());
-//                    fragment.selectImageFromCamera();
-//                }
-//            } else if (which == 1) {
-//                if (checkStoragePermission()) {
-//                    requestStoragePermission();
-//                    return;
-//                }
-//                if (getSupportFragmentManager().getFragments().get(binding.viewPager.getCurrentItem()) instanceof ReadFragment) {
-//                    ReadFragment fragment = (ReadFragment) getSupportFragmentManager().getFragments().get(binding.viewPager.getCurrentItem());
-//                    fragment.selectImageFromGallery();
-//                }
-//            }
-//        }));
-//        builder.create().show();
-//    }
-
-
     @Override
     protected void onStart() {
         super.onStart();
@@ -272,7 +247,6 @@ public class HomeActivity extends BaseActivity implements
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         if (item.getItemId() == R.id.action_about) {
-//            selectImageDialog();
             return true;
         }
         return super.onOptionsItemSelected(item);
@@ -288,7 +262,6 @@ public class HomeActivity extends BaseActivity implements
                 boolean storageAccepted = grantResults[1] == PackageManager.PERMISSION_GRANTED;
                 Log.d(TAG, "onRequestPermissionsResult: camera should work!" + (cameraAccepted == storageAccepted));
                 if (cameraAccepted && storageAccepted) {
-//                    selectImageFromCamera();
                     if (getSupportFragmentManager().getFragments().get(binding.viewPager.getCurrentItem()) instanceof CameraFragment) {
                         CameraFragment fragment = (CameraFragment) getSupportFragmentManager().getFragments().get(binding.viewPager.getCurrentItem());
                         fragment.selectImageFromCamera();
@@ -296,31 +269,6 @@ public class HomeActivity extends BaseActivity implements
                 } else viewModel.setShowPermissionRational(true);
             }
         }
-//        switch (requestCode) {
-//            case CAMERA_REQUEST_CODE:
-//                if (grantResults.length > 0) {
-//                    boolean cameraAccepted = grantResults[0] == PackageManager.PERMISSION_GRANTED;
-//                    boolean storageAccepted = grantResults[1] == PackageManager.PERMISSION_GRANTED;
-//                    if (cameraAccepted && storageAccepted) {
-//                        if (getSupportFragmentManager().getFragments().get(binding.viewPager.getCurrentItem()) instanceof ReadFragment) {
-//                            ReadFragment fragment = (ReadFragment) getSupportFragmentManager().getFragments().get(binding.viewPager.getCurrentItem());
-//                            fragment.selectImageFromCamera();
-//                        }
-//                    } else viewModel.setShowPermissionRational(true);
-//                }
-//                break;
-//            case STORAGE_REQUEST_CODE:
-//                if (grantResults.length > 0) {
-//                    boolean storageAccepted = grantResults[0] == PackageManager.PERMISSION_GRANTED;
-//                    if (storageAccepted) {
-//                        if (getSupportFragmentManager().getFragments().get(binding.viewPager.getCurrentItem()) instanceof ReadFragment) {
-//                            ReadFragment fragment = (ReadFragment) getSupportFragmentManager().getFragments().get(binding.viewPager.getCurrentItem());
-//                            fragment.selectImageFromGallery();
-//                        }
-//                    } else viewModel.setShowPermissionRational(true);
-//                }
-//                break;
-//        }
     }
 
     private boolean checkCameraPermission() {
@@ -345,24 +293,5 @@ public class HomeActivity extends BaseActivity implements
                         Manifest.permission.CAMERA, WRITE_EXTERNAL_STORAGE},
                 CAMERA_REQUEST_CODE);
     }
-
-//    private boolean checkStoragePermission() {
-//        return PackageManager.PERMISSION_DENIED == ActivityCompat
-//                .checkSelfPermission(this, WRITE_EXTERNAL_STORAGE);
-//    }
-//
-//    private void requestStoragePermission() {
-//        boolean shouldProvideRational = ActivityCompat
-//                .shouldShowRequestPermissionRationale(this, WRITE_EXTERNAL_STORAGE);
-//
-//        if (shouldProvideRational) {
-//            Snackbar.make(binding.getRoot(),
-//                    R.string.label_permission_rational, Snackbar.LENGTH_INDEFINITE)
-//                    .setAction(R.string.label_ok, v ->
-//                            ActivityCompat.requestPermissions(this,
-//                                    new String[]{WRITE_EXTERNAL_STORAGE}, STORAGE_REQUEST_CODE)).show();
-//        } else ActivityCompat.requestPermissions(this,
-//                new String[]{WRITE_EXTERNAL_STORAGE}, STORAGE_REQUEST_CODE);
-//    }
 
 }

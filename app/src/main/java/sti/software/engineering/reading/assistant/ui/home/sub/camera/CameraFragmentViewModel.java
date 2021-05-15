@@ -15,8 +15,8 @@ public class CameraFragmentViewModel extends ViewModel {
 
     private final MutableLiveData<Uri> imageUriLiveData;
     private final MutableLiveData<Uri> storeCroppedImageLiveData;
-    public MutableLiveData<Boolean> showPermissionRational;
-
+    private final MutableLiveData<Boolean> buttonSaveStateLiveData;
+    private final MutableLiveData<Boolean> buttonEditStateLiveData;
 
 
     private final ImageRepository repository;
@@ -26,8 +26,8 @@ public class CameraFragmentViewModel extends ViewModel {
         this.repository = repository;
         this.imageUriLiveData = new MutableLiveData<>();
         this.storeCroppedImageLiveData = new MutableLiveData<>();
-        this.showPermissionRational = new MutableLiveData<>();
-
+        this.buttonSaveStateLiveData = new MutableLiveData<>();
+        this.buttonEditStateLiveData = new MutableLiveData<>();
     }
 
     public void insert(Image image) {
@@ -38,12 +38,20 @@ public class CameraFragmentViewModel extends ViewModel {
         this.storeCroppedImageLiveData.setValue(uri);
     }
 
-    public void setShowPermissionRational(boolean showPermissionRational) {
-        this.showPermissionRational.setValue(showPermissionRational);
+    public void setButtonEditState(boolean state) {
+        this.buttonEditStateLiveData.setValue(state);
     }
 
-    public LiveData<Boolean> observedShowPermissionRational() {
-        return showPermissionRational;
+    public LiveData<Boolean> observedButtonEditState() {
+        return this.buttonEditStateLiveData;
+    }
+
+    public void setButtonSaveState(boolean state) {
+        this.buttonSaveStateLiveData.setValue(state);
+    }
+
+    public LiveData<Boolean> observedButtonSaveState() {
+        return this.buttonSaveStateLiveData;
     }
 
 
@@ -58,5 +66,6 @@ public class CameraFragmentViewModel extends ViewModel {
     public LiveData<Uri> observedImageUri() {
         return this.imageUriLiveData;
     }
+
 
 }
