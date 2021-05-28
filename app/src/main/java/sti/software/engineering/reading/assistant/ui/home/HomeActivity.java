@@ -41,9 +41,11 @@ import static android.Manifest.permission.WRITE_EXTERNAL_STORAGE;
 
 /**
  * Next Functionality
- * - permission
- * - refactor codes
+ * - rename file
+ * - file description add more information (directory, uri)
  * - camera tab implementation
+ * <p>
+ * https://stackoverflow.com/questions/10424997/android-how-to-rename-a-file
  * <p>
  * https://stackoverflow.com/questions/59965336/calling-method-on-navigation-host-fragment-inside-mainactivity
  * https://www.google.com/search?q=android+call+method+from+activity+to+fragment+with+navigation&sxsrf=ALeKk03RKxMX8_Y1kqigXgbGjkfyLPwvTg%3A1620266059373&ei=S0yTYJjoFci5oATO0oSADw&oq=android+call+method+from+activity+to+fragment+with+navi&gs_lcp=Cgdnd3Mtd2l6EAMYADIHCCEQChCgATIHCCEQChCgAToHCAAQRxCwAzoGCAAQFhAeOgUIIRCgAVCED1jGHmD3JWgBcAJ4AIABuwKIAeUKkgEHNC42LjAuMZgBAKABAaoBB2d3cy13aXrIAQjAAQE&sclient=gws-wiz
