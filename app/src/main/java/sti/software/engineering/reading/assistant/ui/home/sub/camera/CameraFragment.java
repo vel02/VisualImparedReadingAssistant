@@ -10,10 +10,13 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.EditText;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
+import androidx.core.content.FileProvider;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.bumptech.glide.Glide;
@@ -25,6 +28,7 @@ import com.theartofdev.edmodo.cropper.CropImage;
 import com.theartofdev.edmodo.cropper.CropImageView;
 
 import java.io.File;
+import java.util.Objects;
 
 import javax.inject.Inject;
 
@@ -152,17 +156,54 @@ public class CameraFragment extends DaggerFragment {
         });
     }
 
+    private boolean rename(File from, File to) {
+        return Objects.requireNonNull(from.getParentFile()).exists() && from.exists() && from.renameTo(to);
+    }
+
     private void saveImageDialog() {
+
+        final View view = getLayoutInflater().inflate(R.layout.dialog_save_image, null);
 
         AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
         builder.setTitle("Captured Image");
-        builder.setMessage("Do you want to save this image?");
+        builder.setMessage("Do you want to save this image and with its current filename?");
+
+        final EditText edt_filename = view.findViewById(R.id.edt_filename);
+        edt_filename.setText(filename);
+
         builder.setPositiveButton("Save", (dialog, which) -> {
 
-            Image image = new Image();
-            image.setFilename(filename);
-            image.setNickname("nickname");
-            viewModel.insert(image);
+            String preferred_filename = edt_filename.getText().toString();
+            if (preferred_filename.isEmpty()) {
+                Toast.makeText(requireContext(), "Failed to save, filename is empty or not valid", Toast.LENGTH_LONG).show();
+                return;
+            }
+
+            File newFilename = new File(capturedImage.getParent() + "/" + preferred_filename);
+
+            if (!preferred_filename.equalsIgnoreCase(filename) && rename(capturedImage, newFilename)) {
+                //Success
+                Uri uri = FileProvider.getUriForFile(requireContext(),
+                        requireContext().getApplicationContext().getPackageName()
+                                + ".provider", newFilename);
+
+                Log.i(TAG, "Success");
+                Image image = new Image();
+                image.setFilename(preferred_filename);
+                image.setUri(uri.toString());
+                image.setFile(newFilename.toString());
+                viewModel.insert(image);
+
+            } else {
+                //Fail
+                Log.i(TAG, "Fail");
+                Image image = new Image();
+                image.setFilename(filename);
+                image.setUri(imageUri.toString());
+                image.setFile(capturedImage.toString());
+                viewModel.insert(image);
+            }
+
 
             //reset
             binding.imvCaptureImage.setImageResource(R.drawable.ic_capture_image);
@@ -170,9 +211,12 @@ public class CameraFragment extends DaggerFragment {
             viewModel.setButtonEditState(false);
             imageUri = null;
         });
+
         builder.setNegativeButton("Don't save", (dialog, which) -> {
             dialog.dismiss();
         });
+
+        builder.setView(view);
         builder.create().show();
 
     }
@@ -215,6 +259,7 @@ public class CameraFragment extends DaggerFragment {
 
         if (requestCode == IMAGE_PICK_CAMERA_CODE) {
             Log.d(TAG, "onActivityResult: " + imageUri);
+            Log.d(TAG, "onActivityResult: " + capturedImage);
             viewModel.setImageUriLiveData(imageUri);
         }
 

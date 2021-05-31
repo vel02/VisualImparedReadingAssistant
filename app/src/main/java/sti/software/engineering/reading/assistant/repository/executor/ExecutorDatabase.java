@@ -55,8 +55,9 @@ public class ExecutorDatabase {
                 Log.d(TAG, "SUCCESSFULLY UPDATED");
                 database.getImageDao().updateImage(
                         image.getId(),
-                        image.getNickname(),
-                        image.getFilename());
+                        image.getFilename(),
+                        image.getUri(),
+                        image.getFile());
             }
 
             @Override

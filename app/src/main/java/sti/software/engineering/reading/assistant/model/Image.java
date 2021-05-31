@@ -17,15 +17,18 @@ public class Image implements Parcelable {
 
     @PrimaryKey(autoGenerate = true)
     private int id;
-    @ColumnInfo(name = "nickname")
-    private String nickname;
     @ColumnInfo(name = "filename")
     private String filename;
+    @ColumnInfo(name = "uri")
+    private String uri;
+    @ColumnInfo(name = "file")
+    private String file;
 
 
-    public Image(String nickname, String filename) {
-        this.nickname = nickname;
+    public Image(String filename, String uri, String file) {
         this.filename = filename;
+        this.uri = uri;
+        this.file = file;
     }
 
     @Ignore
@@ -34,15 +37,18 @@ public class Image implements Parcelable {
 
     protected Image(Parcel in) {
         id = in.readInt();
-        nickname = in.readString();
         filename = in.readString();
+        uri = in.readString();
+        file = in.readString();
+
     }
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeInt(id);
-        dest.writeString(nickname);
         dest.writeString(filename);
+        dest.writeString(uri);
+        dest.writeString(file);
     }
 
     @Override
@@ -70,20 +76,28 @@ public class Image implements Parcelable {
         this.id = id;
     }
 
-    public String getNickname() {
-        return nickname;
-    }
-
-    public void setNickname(String nickname) {
-        this.nickname = nickname;
-    }
-
     public String getFilename() {
         return filename;
     }
 
     public void setFilename(String filename) {
         this.filename = filename;
+    }
+
+    public String getUri() {
+        return uri;
+    }
+
+    public void setUri(String uri) {
+        this.uri = uri;
+    }
+
+    public String getFile() {
+        return file;
+    }
+
+    public void setFile(String file) {
+        this.file = file;
     }
 
     public File getFileObject() {
@@ -102,8 +116,9 @@ public class Image implements Parcelable {
     public String toString() {
         return "Image{" +
                 "id=" + id +
-                ", nickname='" + nickname + '\'' +
                 ", filename='" + filename + '\'' +
+                ", uri='" + uri + '\'' +
+                ", file='" + file + '\'' +
                 '}';
     }
 }
