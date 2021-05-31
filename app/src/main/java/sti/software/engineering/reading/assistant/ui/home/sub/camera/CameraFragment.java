@@ -16,7 +16,6 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
-import androidx.core.content.FileProvider;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.bumptech.glide.Glide;
@@ -39,6 +38,7 @@ import sti.software.engineering.reading.assistant.model.Image;
 import sti.software.engineering.reading.assistant.ui.OnHostPermissionListener;
 import sti.software.engineering.reading.assistant.ui.home.selection.SelectImageFrom;
 import sti.software.engineering.reading.assistant.util.StoreCroppedImageManager;
+import sti.software.engineering.reading.assistant.util.Utility;
 import sti.software.engineering.reading.assistant.viewmodel.ViewModelProviderFactory;
 
 import static android.app.Activity.RESULT_OK;
@@ -169,7 +169,8 @@ public class CameraFragment extends DaggerFragment {
         builder.setMessage("Do you want to save this image and with its current filename?");
 
         final EditText edt_filename = view.findViewById(R.id.edt_filename);
-        edt_filename.setText(filename);
+        String current_filename = filename.substring(0, filename.indexOf("."));
+        edt_filename.setText(current_filename);
 
         builder.setPositiveButton("Save", (dialog, which) -> {
 
@@ -179,30 +180,24 @@ public class CameraFragment extends DaggerFragment {
                 return;
             }
 
+            preferred_filename = preferred_filename + ".jpg";
             File newFilename = new File(capturedImage.getParent() + "/" + preferred_filename);
 
+            Image image = new Image();
             if (!preferred_filename.equalsIgnoreCase(filename) && rename(capturedImage, newFilename)) {
-                //Success
-                Uri uri = FileProvider.getUriForFile(requireContext(),
-                        requireContext().getApplicationContext().getPackageName()
-                                + ".provider", newFilename);
-
-                Log.i(TAG, "Success");
-                Image image = new Image();
+                Log.i(TAG, "RENAMED");
+                Uri uri = Utility.getUriForFile(requireContext(), newFilename);
                 image.setFilename(preferred_filename);
                 image.setUri(uri.toString());
                 image.setFile(newFilename.toString());
-                viewModel.insert(image);
-
             } else {
-                //Fail
-                Log.i(TAG, "Fail");
-                Image image = new Image();
+                Log.i(TAG, "NOT RENAMED");
                 image.setFilename(filename);
                 image.setUri(imageUri.toString());
                 image.setFile(capturedImage.toString());
-                viewModel.insert(image);
             }
+
+            viewModel.insert(image);
 
 
             //reset

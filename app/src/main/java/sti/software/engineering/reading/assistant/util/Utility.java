@@ -9,6 +9,10 @@ import android.os.Environment;
 import android.provider.MediaStore;
 import android.util.Log;
 
+import androidx.core.content.FileProvider;
+
+import java.io.File;
+
 public class Utility {
 
     public static class Permissions {
@@ -29,6 +33,12 @@ public class Utility {
             }
         }
         return false;
+    }
+
+    public static Uri getUriForFile(Context context, File file) {
+        return FileProvider.getUriForFile(context,
+                context.getApplicationContext().getPackageName()
+                        + ".provider", file);
     }
 
     public static void refreshGallery(Context context, String filename) {

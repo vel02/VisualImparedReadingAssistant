@@ -15,14 +15,14 @@ public interface ImageDao {
     @Insert
     void insertImage(Image image);
 
-    @Query("UPDATE images SET filename = :filename, uri = :uri, file = :file " +
+    @Query("UPDATE images SET filename = :filename, uri = :uri, file = :file, selected = :selected " +
             "WHERE id = :id")
-    void updateImage(int id, String filename, String uri, String file);
+    void updateImage(int id, String filename, String uri, String file, boolean selected);
 
     @Query("DELETE FROM images WHERE id = :id")
     void deleteImage(int id);
 
-    @Query("SELECT * FROM images ORDER BY filename DESC")
+    @Query("SELECT * FROM images ORDER BY id DESC")
     LiveData<List<Image>> selectImages();
 
 }

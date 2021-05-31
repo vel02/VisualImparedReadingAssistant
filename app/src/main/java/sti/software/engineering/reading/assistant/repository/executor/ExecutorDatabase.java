@@ -57,7 +57,8 @@ public class ExecutorDatabase {
                         image.getId(),
                         image.getFilename(),
                         image.getUri(),
-                        image.getFile());
+                        image.getFile(),
+                        image.isSelected());
             }
 
             @Override

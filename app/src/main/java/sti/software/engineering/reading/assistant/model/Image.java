@@ -23,24 +23,28 @@ public class Image implements Parcelable {
     private String uri;
     @ColumnInfo(name = "file")
     private String file;
+    @ColumnInfo(name = "selected")
+    private boolean selected = false;
 
 
-    public Image(String filename, String uri, String file) {
+    public Image(String filename, String uri, String file, boolean selected) {
         this.filename = filename;
         this.uri = uri;
         this.file = file;
+        this.selected = selected;
     }
 
     @Ignore
     public Image() {
     }
 
+
     protected Image(Parcel in) {
         id = in.readInt();
         filename = in.readString();
         uri = in.readString();
         file = in.readString();
-
+        selected = in.readByte() != 0;
     }
 
     @Override
@@ -49,6 +53,7 @@ public class Image implements Parcelable {
         dest.writeString(filename);
         dest.writeString(uri);
         dest.writeString(file);
+        dest.writeByte((byte) (selected ? 1 : 0));
     }
 
     @Override
@@ -100,6 +105,14 @@ public class Image implements Parcelable {
         this.file = file;
     }
 
+    public boolean isSelected() {
+        return selected;
+    }
+
+    public void setSelected(boolean selected) {
+        this.selected = selected;
+    }
+
     public File getFileObject() {
         final String SEPARATOR = File.separator;
         final String FOLDER_NAME = "VisualImpairedImages";
@@ -119,6 +132,7 @@ public class Image implements Parcelable {
                 ", filename='" + filename + '\'' +
                 ", uri='" + uri + '\'' +
                 ", file='" + file + '\'' +
+                ", selected='" + selected + '\'' +
                 '}';
     }
 }

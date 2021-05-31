@@ -102,10 +102,13 @@ public class ReadFragment extends DaggerFragment implements OnStartThroughServic
             }
         });
 
+        viewModel.setExtractText(false);
         viewModel.observedExtractText().removeObservers(getViewLifecycleOwner());
-        viewModel.observedExtractText().observe(getViewLifecycleOwner(), extract ->
+        viewModel.observedExtractText().observe(getViewLifecycleOwner(), extract -> {
+            if (extract) {
                 new Thread(() -> {
                     if (!(binding.imvViewImage.getDrawable() instanceof BitmapDrawable)) return;
+
                     BitmapDrawable drawable = (BitmapDrawable) binding.imvViewImage.getDrawable();
                     Bitmap bitmap = drawable.getBitmap();
 
@@ -126,9 +129,12 @@ public class ReadFragment extends DaggerFragment implements OnStartThroughServic
                         }
 
                         Log.d(TAG, "result below:\n" + sb.toString());
+                        requireActivity().runOnUiThread(() ->
+                                Toast.makeText(requireContext(), "result below:\n" + sb.toString(), Toast.LENGTH_LONG).show());
                     }
-                }).start()
-        );
+                }).start();
+            }
+        });
 
         viewModel.observedImages().removeObservers(getViewLifecycleOwner());
         viewModel.observedImages().observe(getViewLifecycleOwner(), images -> {
@@ -159,7 +165,7 @@ public class ReadFragment extends DaggerFragment implements OnStartThroughServic
         super.onActivityResult(requestCode, resultCode, data);
         if (resultCode == RESULT_OK) {
             if (requestCode == IMAGE_PICK_AUTO_CAMERA_CODE) {
-                viewModel.storeCroppedImage(imageUri);
+//                viewModel.storeCroppedImage(imageUri);
                 Glide.with(this).load(imageUri).into(binding.imvViewImage);
                 viewModel.setExtractText(true);
             }

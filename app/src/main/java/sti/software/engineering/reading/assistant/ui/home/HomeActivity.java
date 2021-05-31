@@ -45,6 +45,8 @@ import static android.Manifest.permission.WRITE_EXTERNAL_STORAGE;
  * - file description add more information (directory, uri)
  * - camera tab implementation
  * <p>
+ * https://stackoverflow.com/questions/36369913/how-to-implement-multi-select-in-recyclerview
+ * <p>
  * https://stackoverflow.com/questions/10424997/android-how-to-rename-a-file
  * <p>
  * https://stackoverflow.com/questions/59965336/calling-method-on-navigation-host-fragment-inside-mainactivity
