@@ -44,9 +44,8 @@ public class ReadFragment extends DaggerFragment implements OnStartThroughServic
     private static final String TAG = "HomeFragment";
 
     public void onImageClicked(Image image, Uri uri) {
-        binding.imvViewImage.setImageURI(uri);
         Glide.with(this).load(uri).into(binding.imvViewImage);
-        viewModel.setExtractText(true);
+//        viewModel.setExtractText(true);
     }
 
     @Override
@@ -78,8 +77,21 @@ public class ReadFragment extends DaggerFragment implements OnStartThroughServic
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         viewModel = new ViewModelProvider(requireActivity(), providerFactory).get(ReadFragmentViewModel.class);
         ((HomeActivity) requireActivity()).setOnStartThroughServiceListener(this);
+        navigate();
         subscribeObservers();
         initImageRecyclerAdapter();
+    }
+
+    private void navigate() {
+        binding.imvViewImage.setOnClickListener(v -> {
+            if (!(binding.imvViewImage.getDrawable() instanceof BitmapDrawable)) return;
+            viewModel.setExtractText(true);
+        });
+
+        binding.btnRead.setOnClickListener(v -> {
+            if (!(binding.imvViewImage.getDrawable() instanceof BitmapDrawable)) return;
+            viewModel.setExtractText(true);
+        });
     }
 
     private void initImageRecyclerAdapter() {
@@ -107,7 +119,10 @@ public class ReadFragment extends DaggerFragment implements OnStartThroughServic
         viewModel.observedExtractText().observe(getViewLifecycleOwner(), extract -> {
             if (extract) {
                 new Thread(() -> {
-                    if (!(binding.imvViewImage.getDrawable() instanceof BitmapDrawable)) return;
+                    if (!(binding.imvViewImage.getDrawable() instanceof BitmapDrawable)) {
+                        Log.d(TAG, "subscribeObservers: imvViewImage = " + binding.imvViewImage.getDrawable());
+                        return;
+                    }
 
                     BitmapDrawable drawable = (BitmapDrawable) binding.imvViewImage.getDrawable();
                     Bitmap bitmap = drawable.getBitmap();
@@ -165,9 +180,8 @@ public class ReadFragment extends DaggerFragment implements OnStartThroughServic
         super.onActivityResult(requestCode, resultCode, data);
         if (resultCode == RESULT_OK) {
             if (requestCode == IMAGE_PICK_AUTO_CAMERA_CODE) {
-//                viewModel.storeCroppedImage(imageUri);
                 Glide.with(this).load(imageUri).into(binding.imvViewImage);
-                viewModel.setExtractText(true);
+//                viewModel.setExtractText(true);
             }
         }
     }

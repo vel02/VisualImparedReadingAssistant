@@ -133,7 +133,7 @@ public class HomeActivity extends BaseActivity implements
     }
 
     private void initViewPager() {
-        binding.tabLayout.addTab(binding.tabLayout.newTab().setText("Read"));
+        binding.tabLayout.addTab(binding.tabLayout.newTab().setText("View"));
         binding.tabLayout.addTab(binding.tabLayout.newTab().setText("Camera"));
         binding.tabLayout.addTab(binding.tabLayout.newTab().setText("Gallery"));
 
