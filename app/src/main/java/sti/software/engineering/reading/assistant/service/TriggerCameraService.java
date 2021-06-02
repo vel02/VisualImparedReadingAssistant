@@ -82,7 +82,7 @@ public class TriggerCameraService extends Service implements DetectScreenOnRecei
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
 
-        textToSpeech = TextToSpeechHelper.getInstance(this);
+        textToSpeech = new TextToSpeechHelper(this);//TextToSpeechHelper.getInstance(this);
         screenOnReceiver = new DetectScreenOnReceiver();
         screenOnReceiver.onScreenReceiverCallback(this);
         registerScreenOnReceiver();

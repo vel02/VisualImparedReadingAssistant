@@ -5,6 +5,7 @@ import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
 import android.os.Bundle;
+import android.speech.tts.TextToSpeech;
 import android.util.Log;
 import android.util.SparseArray;
 import android.view.LayoutInflater;
@@ -32,6 +33,7 @@ import sti.software.engineering.reading.assistant.model.Image;
 import sti.software.engineering.reading.assistant.ui.home.HomeActivity;
 import sti.software.engineering.reading.assistant.ui.home.HomeActivity.OnStartThroughServiceListener;
 import sti.software.engineering.reading.assistant.ui.home.selection.SelectImageFrom;
+import sti.software.engineering.reading.assistant.util.TextToSpeechHelper;
 import sti.software.engineering.reading.assistant.viewmodel.ViewModelProviderFactory;
 
 import static android.app.Activity.RESULT_OK;
@@ -45,7 +47,6 @@ public class ReadFragment extends DaggerFragment implements OnStartThroughServic
 
     public void onImageClicked(Image image, Uri uri) {
         Glide.with(this).load(uri).into(binding.imvViewImage);
-//        viewModel.setExtractText(true);
     }
 
     @Override
@@ -65,6 +66,7 @@ public class ReadFragment extends DaggerFragment implements OnStartThroughServic
 //    private String filename;
 
     private ImageRecyclerAdapter adapter;
+    private TextToSpeechHelper textToSpeech;
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
@@ -77,6 +79,7 @@ public class ReadFragment extends DaggerFragment implements OnStartThroughServic
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         viewModel = new ViewModelProvider(requireActivity(), providerFactory).get(ReadFragmentViewModel.class);
         ((HomeActivity) requireActivity()).setOnStartThroughServiceListener(this);
+        textToSpeech = new TextToSpeechHelper(requireContext());//TextToSpeechHelper.getInstance(requireContext());
         navigate();
         subscribeObservers();
         initImageRecyclerAdapter();
@@ -91,6 +94,15 @@ public class ReadFragment extends DaggerFragment implements OnStartThroughServic
         binding.btnRead.setOnClickListener(v -> {
             if (!(binding.imvViewImage.getDrawable() instanceof BitmapDrawable)) return;
             viewModel.setExtractText(true);
+        });
+
+        binding.btnStop.setOnClickListener(v -> {
+            //Temporary location open TTS settings using intent
+            //https://stackoverflow.com/questions/3160447/how-to-show-up-the-settings-for-text-to-speech-in-my-app
+//            Intent intent = new Intent();
+//            intent.setAction("com.android.settings.TTS_SETTINGS");
+//            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+//            startActivity(intent);
         });
     }
 
@@ -144,8 +156,7 @@ public class ReadFragment extends DaggerFragment implements OnStartThroughServic
                         }
 
                         Log.d(TAG, "result below:\n" + sb.toString());
-                        requireActivity().runOnUiThread(() ->
-                                Toast.makeText(requireContext(), "result below:\n" + sb.toString(), Toast.LENGTH_LONG).show());
+                        textToSpeech.speak(sb.toString(), TextToSpeech.QUEUE_FLUSH);
                     }
                 }).start();
             }
@@ -176,12 +187,19 @@ public class ReadFragment extends DaggerFragment implements OnStartThroughServic
     }
 
     @Override
+    public void onDestroy() {
+        if (textToSpeech != null) {
+            textToSpeech.destroy();
+        }
+        super.onDestroy();
+    }
+
+    @Override
     public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (resultCode == RESULT_OK) {
             if (requestCode == IMAGE_PICK_AUTO_CAMERA_CODE) {
                 Glide.with(this).load(imageUri).into(binding.imvViewImage);
-//                viewModel.setExtractText(true);
             }
         }
     }

@@ -13,9 +13,12 @@ public class ImageAdapter {
 
     @BindingAdapter({"sti:placeholder"})
     public static void setPlaceholder(ImageView view, Uri uri) {
-        if (uri != null) {
-            Glide.with(view.getContext()).load(uri).into(view);
-        } else view.setImageResource(R.drawable.image_placeholder);
+//        if (uri != null) {
+        Glide.with(view.getContext())
+                .load(uri)
+                .error(R.drawable.image_placeholder)
+                .into(view);
+//        } else view.setImageResource(R.drawable.image_placeholder);
     }
 
 }

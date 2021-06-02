@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.util.Log;
@@ -130,6 +131,7 @@ public class HomeActivity extends BaseActivity implements
             Intent intent = new Intent(this, TriggerCameraService.class);
             startService(intent);
         }
+
     }
 
     private void initViewPager() {
@@ -179,6 +181,15 @@ public class HomeActivity extends BaseActivity implements
     protected void onResume() {
         super.onResume();
         openThroughPowerButton();
+
+        //permission temporary location
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q &&
+                !Settings.canDrawOverlays(this)) {
+            Snackbar.make(binding.getRoot(), "Allow \"Display over other app\" to grant camera access in the background", Snackbar.LENGTH_INDEFINITE)
+                    .setAction("OK", v -> {
+                        requestPermission();
+                    }).show();
+        }
     }
 
     private void subscribeObservers() {
@@ -212,6 +223,21 @@ public class HomeActivity extends BaseActivity implements
         unbindTriggerCameraService();
     }
 
+
+    //https://stackoverflow.com/questions/59419653/cannot-start-activity-background-in-android-10-android-q
+    public static int ACTION_MANAGE_OVERLAY_PERMISSION_REQUEST_CODE = 2323;
+
+    private void requestPermission() {
+        // Check if Android M or higher
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            // Show alert dialog to the user saying a separate permission is needed
+            // Launch the settings activity if the user prefers
+            Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
+                    Uri.parse("package:" + this.getPackageName()));
+            startActivityForResult(intent, ACTION_MANAGE_OVERLAY_PERMISSION_REQUEST_CODE);
+        }
+    }
+
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -226,6 +252,16 @@ public class HomeActivity extends BaseActivity implements
                     ReadFragment fragment = (ReadFragment) getSupportFragmentManager().getFragments().get(binding.viewPager.getCurrentItem());
                     fragment.receiveCroppedImage(croppedImageUri);
                 }
+            }
+        } else if (requestCode == ACTION_MANAGE_OVERLAY_PERMISSION_REQUEST_CODE) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                if (!Settings.canDrawOverlays(this)) {
+                    Log.d(TAG, "onActivityResult: permission denied");
+                } else {
+                    // Permission Granted-System will work
+                    Log.d(TAG, "onActivityResult: permission granted");
+                }
+
             }
         }
     }
