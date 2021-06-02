@@ -8,12 +8,15 @@ import android.net.Uri;
 import android.os.Environment;
 import android.provider.MediaStore;
 import android.util.Log;
+import android.widget.Toast;
 
 import androidx.core.content.FileProvider;
 
 import java.io.File;
+import java.util.Objects;
 
 public class Utility {
+
 
     public static class Permissions {
 
@@ -25,6 +28,39 @@ public class Utility {
 
     }
 
+    public static class Files {
+
+        public static final String FILE_EXTENSION_JPG = ".jpg";
+        public static final String FILE_PATH_SEPARATOR_SLASH = "/";
+        public static final String FILE_PATH_DOT = ".";
+
+        private Files() {
+        }
+
+        public static boolean renameFile(File from, File to) {
+            return Objects.requireNonNull(from.getParentFile()).exists() && from.exists() && from.renameTo(to);
+        }
+
+        public static Uri getUriForFile(Context context, File file) {
+            return FileProvider.getUriForFile(context,
+                    context.getApplicationContext().getPackageName()
+                            + ".provider", file);
+        }
+    }
+
+    public static class Messages {
+        private Messages() {
+        }
+
+        public static void toastMessage(Context context, String message) {
+            Toast.makeText(context, message, Toast.LENGTH_SHORT).show();
+        }
+
+        public static void toastMessage(Context context, String message, int length) {
+            Toast.makeText(context, message, Toast.LENGTH_SHORT).show();
+        }
+    }
+
     public static boolean isMyServiceRunning(Context context, Class<?> serviceClass) {
         ActivityManager manager = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
         for (ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
@@ -33,12 +69,6 @@ public class Utility {
             }
         }
         return false;
-    }
-
-    public static Uri getUriForFile(Context context, File file) {
-        return FileProvider.getUriForFile(context,
-                context.getApplicationContext().getPackageName()
-                        + ".provider", file);
     }
 
     public static void refreshGallery(Context context, String filename) {

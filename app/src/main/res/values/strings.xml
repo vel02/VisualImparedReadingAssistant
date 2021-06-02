@@ -11,4 +11,8 @@
     <string name="label_enter_filename_required">Enter filename (required)</string>
     <string name="label_read">Read</string>
     <string name="label_stop">Stop</string>
+    <string name="dialog_title">Captured Image</string>
+    <string name="dialog_message">Do you want to save this image and with its current filename?</string>
+    <string name="dialog_possitive_save">Save</string>
+    <string name="dialog_negative_save">Don\'t save</string>
 </resources>

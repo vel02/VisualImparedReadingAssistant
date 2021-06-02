@@ -27,7 +27,6 @@ import com.theartofdev.edmodo.cropper.CropImage;
 import com.theartofdev.edmodo.cropper.CropImageView;
 
 import java.io.File;
-import java.util.Objects;
 
 import javax.inject.Inject;
 
@@ -38,11 +37,16 @@ import sti.software.engineering.reading.assistant.model.Image;
 import sti.software.engineering.reading.assistant.ui.OnHostPermissionListener;
 import sti.software.engineering.reading.assistant.ui.home.selection.SelectImageFrom;
 import sti.software.engineering.reading.assistant.util.StoreCroppedImageManager;
-import sti.software.engineering.reading.assistant.util.Utility;
 import sti.software.engineering.reading.assistant.viewmodel.ViewModelProviderFactory;
 
 import static android.app.Activity.RESULT_OK;
 import static sti.software.engineering.reading.assistant.BaseActivity.IMAGE_PICK_CAMERA_CODE;
+import static sti.software.engineering.reading.assistant.util.Utility.Files.FILE_EXTENSION_JPG;
+import static sti.software.engineering.reading.assistant.util.Utility.Files.FILE_PATH_DOT;
+import static sti.software.engineering.reading.assistant.util.Utility.Files.FILE_PATH_SEPARATOR_SLASH;
+import static sti.software.engineering.reading.assistant.util.Utility.Files.getUriForFile;
+import static sti.software.engineering.reading.assistant.util.Utility.Files.renameFile;
+import static sti.software.engineering.reading.assistant.util.Utility.Messages.toastMessage;
 
 
 public class CameraFragment extends DaggerFragment {
@@ -150,43 +154,39 @@ public class CameraFragment extends DaggerFragment {
         binding.btnSave.setOnClickListener(v -> {
 
             if (filename != null) {
-                this.saveImageDialog();
+                this.dialogSaveImage();
             }
 
         });
     }
 
-    private boolean rename(File from, File to) {
-        return Objects.requireNonNull(from.getParentFile()).exists() && from.exists() && from.renameTo(to);
-    }
-
-    private void saveImageDialog() {
+    private void dialogSaveImage() {
 
         final View view = getLayoutInflater().inflate(R.layout.dialog_save_image, null);
 
         AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
-        builder.setTitle("Captured Image");
-        builder.setMessage("Do you want to save this image and with its current filename?");
+        builder.setTitle(R.string.dialog_title);
+        builder.setMessage(R.string.dialog_message);
 
         final EditText edt_filename = view.findViewById(R.id.edt_filename);
-        String current_filename = filename.substring(0, filename.indexOf("."));
+        String current_filename = filename.substring(0, filename.indexOf(FILE_PATH_DOT));
         edt_filename.setText(current_filename);
 
-        builder.setPositiveButton("Save", (dialog, which) -> {
+        builder.setPositiveButton(R.string.dialog_possitive_save, (dialog, which) -> {
 
             String preferred_filename = edt_filename.getText().toString();
             if (preferred_filename.isEmpty()) {
-                Toast.makeText(requireContext(), "Failed to save, filename is empty or not valid", Toast.LENGTH_LONG).show();
+                toastMessage(requireContext(), "Failed to save, filename is empty or not valid", Toast.LENGTH_LONG);
                 return;
             }
 
-            preferred_filename = preferred_filename + ".jpg";
-            File newFilename = new File(capturedImage.getParent() + "/" + preferred_filename);
+            preferred_filename = preferred_filename + FILE_EXTENSION_JPG;
+            File newFilename = new File(capturedImage.getParent() + FILE_PATH_SEPARATOR_SLASH + preferred_filename);
 
             Image image = new Image();
-            if (!preferred_filename.equalsIgnoreCase(filename) && rename(capturedImage, newFilename)) {
+            if (!preferred_filename.equalsIgnoreCase(filename) && renameFile(capturedImage, newFilename)) {
                 Log.i(TAG, "RENAMED");
-                Uri uri = Utility.getUriForFile(requireContext(), newFilename);
+                Uri uri = getUriForFile(requireContext(), newFilename);
                 image.setFilename(preferred_filename);
                 image.setUri(uri.toString());
                 image.setFile(newFilename.toString());
@@ -207,7 +207,7 @@ public class CameraFragment extends DaggerFragment {
             imageUri = null;
         });
 
-        builder.setNegativeButton("Don't save", (dialog, which) -> {
+        builder.setNegativeButton(R.string.dialog_negative_save, (dialog, which) -> {
             dialog.dismiss();
         });
 

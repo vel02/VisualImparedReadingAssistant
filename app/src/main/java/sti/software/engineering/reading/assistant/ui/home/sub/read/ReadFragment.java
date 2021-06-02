@@ -11,7 +11,6 @@ import android.util.SparseArray;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -39,6 +38,7 @@ import sti.software.engineering.reading.assistant.viewmodel.ViewModelProviderFac
 import static android.app.Activity.RESULT_OK;
 import static sti.software.engineering.reading.assistant.BaseActivity.IMAGE_PICK_AUTO_CAMERA_CODE;
 import static sti.software.engineering.reading.assistant.ui.home.sub.read.ReadFragmentViewModel.SelectImageFrom.AUTO_CAMERA;
+import static sti.software.engineering.reading.assistant.util.Utility.Messages.toastMessage;
 
 
 public class ReadFragment extends DaggerFragment implements OnStartThroughServiceListener {
@@ -79,7 +79,7 @@ public class ReadFragment extends DaggerFragment implements OnStartThroughServic
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         viewModel = new ViewModelProvider(requireActivity(), providerFactory).get(ReadFragmentViewModel.class);
         ((HomeActivity) requireActivity()).setOnStartThroughServiceListener(this);
-        textToSpeech = new TextToSpeechHelper(requireContext());//TextToSpeechHelper.getInstance(requireContext());
+        textToSpeech = new TextToSpeechHelper(requireContext());
         navigate();
         subscribeObservers();
         initImageRecyclerAdapter();
@@ -143,7 +143,7 @@ public class ReadFragment extends DaggerFragment implements OnStartThroughServic
                             .Builder(requireActivity()).build();
                     if (!recognizer.isOperational()) {
                         requireActivity().runOnUiThread(() ->
-                                Toast.makeText(requireActivity(), "Cannot recognize text", Toast.LENGTH_SHORT).show());
+                                toastMessage(requireActivity(), "Cannot recognize text"));
                     } else {
                         Frame frame = new Frame.Builder().setBitmap(bitmap).build();
                         SparseArray<TextBlock> items = recognizer.detect(frame);
@@ -175,9 +175,9 @@ public class ReadFragment extends DaggerFragment implements OnStartThroughServic
     public void receiveCroppedImage(Uri cropped) {
         //save cropped image to app folder, replacing the initial image.
         //should be on the background/thread
-        viewModel.storeCroppedImage(cropped);
+//        viewModel.storeCroppedImage(cropped);
         Glide.with(this).load(cropped).into(binding.imvViewImage);
-        viewModel.setExtractText(true);
+//        viewModel.setExtractText(true);
     }
 
     @Override
