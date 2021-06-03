@@ -8,9 +8,12 @@ import android.net.Uri;
 import android.os.Environment;
 import android.provider.MediaStore;
 import android.util.Log;
+import android.view.View;
 import android.widget.Toast;
 
 import androidx.core.content.FileProvider;
+
+import com.google.android.material.snackbar.Snackbar;
 
 import java.io.File;
 import java.util.Objects;
@@ -26,6 +29,13 @@ public class Utility {
         public static final int CAMERA_REQUEST_CODE = 101;
         public static final int STORAGE_REQUEST_CODE = 201;
 
+    }
+
+    public static class Strings {
+        private Strings() {
+        }
+
+        public static final String CHAR_SEQUENCE_WHITESPACE = " ";
     }
 
     public static class Files {
@@ -52,13 +62,29 @@ public class Utility {
         private Messages() {
         }
 
-        public static void toastMessage(Context context, String message) {
+        public static void toastMessage(Context context, CharSequence message) {
             Toast.makeText(context, message, Toast.LENGTH_SHORT).show();
         }
 
-        public static void toastMessage(Context context, String message, int length) {
-            Toast.makeText(context, message, Toast.LENGTH_SHORT).show();
+        public static void toastMessage(Context context, CharSequence message, int length) {
+            Toast.makeText(context, message, length).show();
         }
+
+        public static void snackMessage(View view, CharSequence message) {
+            Snackbar.make(view, message, Snackbar.LENGTH_SHORT).show();
+        }
+
+        public static void snackMessage(View view, CharSequence message, int length) {
+            Snackbar.make(view, message, length).show();
+        }
+
+        public static void snackMessage(View view, CharSequence message, String positiveAction, int length) {
+            Snackbar.make(view, message, length)
+                    .setAction(positiveAction, v -> {
+                    }).show();
+        }
+
+
     }
 
     public static boolean isMyServiceRunning(Context context, Class<?> serviceClass) {

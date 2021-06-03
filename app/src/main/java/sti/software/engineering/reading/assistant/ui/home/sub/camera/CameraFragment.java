@@ -11,7 +11,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -23,6 +22,7 @@ import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.engine.GlideException;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.Target;
+import com.google.android.material.snackbar.Snackbar;
 import com.theartofdev.edmodo.cropper.CropImage;
 import com.theartofdev.edmodo.cropper.CropImageView;
 
@@ -46,7 +46,8 @@ import static sti.software.engineering.reading.assistant.util.Utility.Files.FILE
 import static sti.software.engineering.reading.assistant.util.Utility.Files.FILE_PATH_SEPARATOR_SLASH;
 import static sti.software.engineering.reading.assistant.util.Utility.Files.getUriForFile;
 import static sti.software.engineering.reading.assistant.util.Utility.Files.renameFile;
-import static sti.software.engineering.reading.assistant.util.Utility.Messages.toastMessage;
+import static sti.software.engineering.reading.assistant.util.Utility.Messages.snackMessage;
+import static sti.software.engineering.reading.assistant.util.Utility.Strings.CHAR_SEQUENCE_WHITESPACE;
 
 
 public class CameraFragment extends DaggerFragment {
@@ -139,7 +140,16 @@ public class CameraFragment extends DaggerFragment {
                 hostPermission.onRequestCameraPermission();
                 return;
             }
-            this.selectImageFromCamera();
+
+            if ((binding.imageView.getDrawable() != null) && (imageUri != null)) {
+                AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
+                builder.setTitle(R.string.dialog_title_retake);
+                builder.setMessage(R.string.dialog_message_retake);
+                builder.setPositiveButton(R.string.dialog_positive_yes, (dialog, which) -> this.selectImageFromCamera());
+                builder.setNegativeButton(R.string.dialog_negative_no, (dialog, which) -> dialog.dismiss());
+                builder.create().show();
+            } else this.selectImageFromCamera();
+
         });
 
         binding.btnEdit.setOnClickListener(v -> {
@@ -165,8 +175,8 @@ public class CameraFragment extends DaggerFragment {
         final View view = getLayoutInflater().inflate(R.layout.dialog_save_image, null);
 
         AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
-        builder.setTitle(R.string.dialog_title);
-        builder.setMessage(R.string.dialog_message);
+        builder.setTitle(R.string.dialog_title_save_image);
+        builder.setMessage(R.string.dialog_message_save_image);
 
         final EditText edt_filename = view.findViewById(R.id.edt_filename);
         String current_filename = filename.substring(0, filename.indexOf(FILE_PATH_DOT));
@@ -174,9 +184,10 @@ public class CameraFragment extends DaggerFragment {
 
         builder.setPositiveButton(R.string.dialog_possitive_save, (dialog, which) -> {
 
-            String preferred_filename = edt_filename.getText().toString();
-            if (preferred_filename.isEmpty()) {
-                toastMessage(requireContext(), "Failed to save, filename is empty or not valid", Toast.LENGTH_LONG);
+            String preferred_filename = edt_filename.getText().toString().trim();
+            if (preferred_filename.isEmpty() || preferred_filename.contains(FILE_PATH_DOT) || preferred_filename.contains(CHAR_SEQUENCE_WHITESPACE)) {
+                snackMessage(binding.getRoot(), "Failed to save, entered filename is not valid",
+                        getString(R.string.label_ok), Snackbar.LENGTH_INDEFINITE);
                 return;
             }
 

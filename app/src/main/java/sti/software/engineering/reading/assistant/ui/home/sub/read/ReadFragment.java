@@ -172,10 +172,6 @@ public class ReadFragment extends DaggerFragment implements OnStartThroughServic
 
     }
 
-//    public void receiveCroppedImage(Uri cropped) {
-//        Glide.with(this).load(cropped).into(binding.imvViewImage);
-//    }
-
     @Override
     public void onResume() {
         super.onResume();
