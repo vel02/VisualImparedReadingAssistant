@@ -12,6 +12,7 @@ import sti.software.engineering.reading.assistant.model.PhoneAlbum;
 import sti.software.engineering.reading.assistant.model.PhonePhoto;
 import sti.software.engineering.reading.assistant.ui.OnPhoneImagesObtained;
 
+@Deprecated
 public class DeviceImageManager {
 
     static class MediaColumns {

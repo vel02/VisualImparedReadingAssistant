@@ -1,7 +1,5 @@
 package sti.software.engineering.reading.assistant.ui.home.sub.read;
 
-import android.net.Uri;
-
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
@@ -15,18 +13,22 @@ import sti.software.engineering.reading.assistant.repository.ImageRepository;
 
 public class ReadFragmentViewModel extends ViewModel {
 
-    public MutableLiveData<SelectImageFrom> selectImageFrom;
-    public MutableLiveData<Uri> storeCroppedImage;
-    public MutableLiveData<Boolean> extractText;
+    private final MutableLiveData<UtteranceProgress> utteranceProgressLiveData;
+    private final MutableLiveData<SelectImageFrom> selectImageFromLiveData;
+    private final MutableLiveData<Boolean> extractTextLiveData;
+    private final MutableLiveData<Boolean> buttonStopStateLiveData;
+    private final MutableLiveData<Boolean> buttonReadStateLiveData;
 
     private final ImageRepository repository;
 
     @Inject
     public ReadFragmentViewModel(ImageRepository repository) {
         this.repository = repository;
-        this.selectImageFrom = new MutableLiveData<>();
-        this.storeCroppedImage = new MutableLiveData<>();
-        this.extractText = new MutableLiveData<>();
+        this.utteranceProgressLiveData = new MutableLiveData<>();
+        this.selectImageFromLiveData = new MutableLiveData<>();
+        this.extractTextLiveData = new MutableLiveData<>();
+        this.buttonReadStateLiveData = new MutableLiveData<>();
+        this.buttonStopStateLiveData = new MutableLiveData<>();
     }
 
     public void processDatabaseData() {
@@ -37,41 +39,67 @@ public class ReadFragmentViewModel extends ViewModel {
         this.repository.insert(image);
     }
 
-    public void update(Image image) {
-        this.repository.update(image);
-    }
-
-    public void delete(Image image) {
-        this.repository.delete(image);
-    }
-
     public LiveData<List<Image>> observedImages() {
         return this.repository.getImages();
     }
 
-    public void setExtractText(boolean extract) {
-        this.extractText.setValue(extract);
-    }
-
-    public LiveData<Boolean> observedExtractText() {
-        return extractText;
-    }
-
-    public void storeCroppedImage(Uri uri) {
-        this.storeCroppedImage.setValue(uri);
-    }
-
-    public LiveData<Uri> observedStoreCroppedImage() {
-        return storeCroppedImage;
-    }
-
-    public void setSelectImageFrom(SelectImageFrom selectImageFrom) {
-        this.selectImageFrom.setValue(selectImageFrom);
+    public void setSelectImageFrom(SelectImageFrom selectImageFromLiveData) {
+        this.selectImageFromLiveData.setValue(selectImageFromLiveData);
     }
 
     public LiveData<SelectImageFrom> observedSelectedImage() {
-        return selectImageFrom;
+        return selectImageFromLiveData;
     }
 
-    public enum SelectImageFrom {AUTO_CAMERA, CAMERA, GALLERY}
+    public void setExtractText(boolean extract) {
+        this.extractTextLiveData.setValue(extract);
+    }
+
+    public void postExtractText(boolean extract) {
+        this.extractTextLiveData.postValue(extract);
+    }
+
+    public LiveData<Boolean> observedExtractText() {
+        return extractTextLiveData;
+    }
+
+    public void setButtonReadState(boolean enable) {
+        this.buttonReadStateLiveData.setValue(enable);
+    }
+
+    public void postButtonReadState(boolean enable) {
+        this.buttonReadStateLiveData.postValue(enable);
+    }
+
+    public LiveData<Boolean> observedButtonReadState() {
+        return buttonReadStateLiveData;
+    }
+
+    public void setButtonStopState(boolean enable) {
+        this.buttonStopStateLiveData.setValue(enable);
+    }
+
+    public void postButtonStopState(boolean enable) {
+        this.buttonStopStateLiveData.postValue(enable);
+    }
+
+    public LiveData<Boolean> observedButtonStopState() {
+        return buttonStopStateLiveData;
+    }
+
+    public void setUtteranceProgress(UtteranceProgress progress) {
+        this.utteranceProgressLiveData.setValue(progress);
+    }
+
+    public void postUtteranceProgress(UtteranceProgress progress) {
+        this.utteranceProgressLiveData.postValue(progress);
+    }
+
+    public LiveData<UtteranceProgress> observedUtteranceProgress() {
+        return this.utteranceProgressLiveData;
+    }
+
+    public enum SelectImageFrom {AUTO_CAMERA}
+
+    public enum UtteranceProgress {UTTERANCE_START_READING, UTTERANCE_DONE_READING}
 }

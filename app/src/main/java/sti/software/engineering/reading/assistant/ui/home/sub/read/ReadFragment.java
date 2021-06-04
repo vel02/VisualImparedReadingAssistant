@@ -1,5 +1,6 @@
 package sti.software.engineering.reading.assistant.ui.home.sub.read;
 
+import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
@@ -8,7 +9,9 @@ import android.os.Bundle;
 import android.speech.tts.TextToSpeech;
 import android.util.Log;
 import android.util.SparseArray;
+import android.view.GestureDetector;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 
@@ -38,15 +41,54 @@ import sti.software.engineering.reading.assistant.viewmodel.ViewModelProviderFac
 import static android.app.Activity.RESULT_OK;
 import static sti.software.engineering.reading.assistant.BaseActivity.IMAGE_PICK_AUTO_CAMERA_CODE;
 import static sti.software.engineering.reading.assistant.ui.home.sub.read.ReadFragmentViewModel.SelectImageFrom.AUTO_CAMERA;
+import static sti.software.engineering.reading.assistant.ui.home.sub.read.ReadFragmentViewModel.UtteranceProgress.UTTERANCE_DONE_READING;
+import static sti.software.engineering.reading.assistant.ui.home.sub.read.ReadFragmentViewModel.UtteranceProgress.UTTERANCE_START_READING;
+import static sti.software.engineering.reading.assistant.util.TextToSpeechHelper.UTTERANCE_ID_READING_TEXT;
 import static sti.software.engineering.reading.assistant.util.Utility.Messages.toastMessage;
 
 
-public class ReadFragment extends DaggerFragment implements OnStartThroughServiceListener {
+public class ReadFragment extends DaggerFragment implements
+        OnStartThroughServiceListener,
+        HomeActivity.OnVoiceChangeListener {
 
     private static final String TAG = "HomeFragment";
 
+    @Override
+    public void onVoiceChanged() {
+        textToSpeech = new TextToSpeechHelper(requireContext());
+        textToSpeech.setOnUtteranceProgressListener(utteranceProgressListener);
+    }
+
+    private final TextToSpeechHelper.OnUtteranceProgressListener utteranceProgressListener = new TextToSpeechHelper.OnUtteranceProgressListener() {
+        @Override
+        public void onStart(String utteranceId) {
+            if (utteranceId.equalsIgnoreCase(UTTERANCE_ID_READING_TEXT)) {
+                viewModel.postUtteranceProgress(UTTERANCE_START_READING);
+                viewModel.postButtonStopState(true);
+                viewModel.postButtonReadState(false);
+            }
+        }
+
+        @Override
+        public void onDone(String utteranceId) {
+            if (utteranceId.equalsIgnoreCase(UTTERANCE_ID_READING_TEXT)) {
+                viewModel.postUtteranceProgress(UTTERANCE_DONE_READING);
+                viewModel.postButtonStopState(false);
+                viewModel.postButtonReadState(true);
+            }
+        }
+
+        @Override
+        public void onError(String utteranceId) {
+            if (utteranceId.equalsIgnoreCase(UTTERANCE_ID_READING_TEXT)) {
+                viewModel.postButtonStopState(false);
+            }
+        }
+    };
+
     public void onImageClicked(Image image, Uri uri) {
         Glide.with(this).load(uri).into(binding.imvViewImage);
+        viewModel.setButtonReadState(true);
     }
 
     @Override
@@ -67,6 +109,7 @@ public class ReadFragment extends DaggerFragment implements OnStartThroughServic
 
     private ImageRecyclerAdapter adapter;
     private TextToSpeechHelper textToSpeech;
+    private boolean isReading;
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
@@ -79,16 +122,41 @@ public class ReadFragment extends DaggerFragment implements OnStartThroughServic
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         viewModel = new ViewModelProvider(requireActivity(), providerFactory).get(ReadFragmentViewModel.class);
         ((HomeActivity) requireActivity()).setOnStartThroughServiceListener(this);
+        ((HomeActivity) requireActivity()).setOnVoiceChangeListener(this);
         textToSpeech = new TextToSpeechHelper(requireContext());
+        textToSpeech.setOnUtteranceProgressListener(utteranceProgressListener);
         navigate();
         subscribeObservers();
         initImageRecyclerAdapter();
     }
 
+    @SuppressLint("ClickableViewAccessibility")
     private void navigate() {
-        binding.imvViewImage.setOnClickListener(v -> {
-            if (!(binding.imvViewImage.getDrawable() instanceof BitmapDrawable)) return;
-            viewModel.setExtractText(true);
+
+        final GestureDetector gestureDetector = new GestureDetector(requireContext(), new GestureDetector.SimpleOnGestureListener() {
+            @Override
+            public boolean onSingleTapConfirmed(MotionEvent e) {
+                if (!(binding.imvViewImage.getDrawable() instanceof BitmapDrawable))
+                    return true;
+                if (!isReading) viewModel.setExtractText(true);
+                return true;
+            }
+
+            @Override
+            public boolean onDoubleTap(MotionEvent e) {
+                if (!(binding.imvViewImage.getDrawable() instanceof BitmapDrawable))
+                    return true;
+                textToSpeech.stop();
+                viewModel.setButtonStopState(false);
+                viewModel.setButtonReadState(true);
+                viewModel.setUtteranceProgress(UTTERANCE_DONE_READING);
+                return true;
+            }
+        });
+
+        binding.imvViewImage.setOnTouchListener((v, event) -> {
+            gestureDetector.onTouchEvent(event);
+            return true;
         });
 
         binding.btnRead.setOnClickListener(v -> {
@@ -97,12 +165,12 @@ public class ReadFragment extends DaggerFragment implements OnStartThroughServic
         });
 
         binding.btnStop.setOnClickListener(v -> {
-            //Temporary location open TTS settings using intent
-            //https://stackoverflow.com/questions/3160447/how-to-show-up-the-settings-for-text-to-speech-in-my-app
-//            Intent intent = new Intent();
-//            intent.setAction("com.android.settings.TTS_SETTINGS");
-//            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
-//            startActivity(intent);
+            textToSpeech.stop();
+            viewModel.setButtonStopState(false);
+            viewModel.setButtonReadState(true);
+            viewModel.setUtteranceProgress(UTTERANCE_DONE_READING);
+
+
         });
     }
 
@@ -152,11 +220,13 @@ public class ReadFragment extends DaggerFragment implements OnStartThroughServic
                         for (int i = 0; i < items.size(); i++) {
                             TextBlock item = items.valueAt(i);
                             sb.append(item.getValue());
-                            sb.append("\n");
+                            sb.append(" ");
+//                            sb.append("\n");
                         }
 
-                        Log.d(TAG, "result below:\n" + sb.toString());
-                        textToSpeech.speak(sb.toString(), TextToSpeech.QUEUE_FLUSH);
+                        String text = sb.toString().replaceAll("\n", " ");
+                        Log.d(TAG, "TEXT: " + text);
+                        textToSpeech.speak(text, UTTERANCE_ID_READING_TEXT, TextToSpeech.QUEUE_FLUSH);
                     }
                 }).start();
             }
@@ -167,6 +237,36 @@ public class ReadFragment extends DaggerFragment implements OnStartThroughServic
             if (images != null) {
                 adapter.refresh(images);
                 Log.d(TAG, "Images: " + images);
+            }
+        });
+
+        viewModel.setButtonReadState(false);
+        viewModel.observedButtonReadState().removeObservers(getViewLifecycleOwner());
+        viewModel.observedButtonReadState().observe(getViewLifecycleOwner(), enable -> {
+            if (enable != null) {
+                binding.btnRead.setEnabled(enable);
+            }
+        });
+
+        viewModel.setButtonStopState(false);
+        viewModel.observedButtonStopState().removeObservers(getViewLifecycleOwner());
+        viewModel.observedButtonStopState().observe(getViewLifecycleOwner(), enable -> {
+            if (enable != null) {
+                binding.btnStop.setEnabled(enable);
+            }
+        });
+
+        viewModel.observedUtteranceProgress().removeObservers(getViewLifecycleOwner());
+        viewModel.observedUtteranceProgress().observe(getViewLifecycleOwner(), progress -> {
+            if (progress != null) {
+                switch (progress) {
+                    case UTTERANCE_START_READING:
+                        this.isReading = true;
+                        break;
+                    case UTTERANCE_DONE_READING:
+                        this.isReading = false;
+                        break;
+                }
             }
         });
 
@@ -192,6 +292,7 @@ public class ReadFragment extends DaggerFragment implements OnStartThroughServic
         if (resultCode == RESULT_OK) {
             if (requestCode == IMAGE_PICK_AUTO_CAMERA_CODE) {
                 Glide.with(this).load(imageUri).into(binding.imvViewImage);
+                viewModel.setButtonReadState(true);
             }
         }
     }

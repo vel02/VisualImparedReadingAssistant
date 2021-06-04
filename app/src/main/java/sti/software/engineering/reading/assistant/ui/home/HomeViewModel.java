@@ -8,7 +8,7 @@ import javax.inject.Inject;
 
 public class HomeViewModel extends ViewModel {
 
-    public MutableLiveData<Boolean> showPermissionRational;
+    private final MutableLiveData<Boolean> showPermissionRational;
 
     @Inject
     public HomeViewModel() {

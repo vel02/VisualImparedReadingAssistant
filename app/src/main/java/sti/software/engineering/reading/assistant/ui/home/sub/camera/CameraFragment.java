@@ -142,12 +142,7 @@ public class CameraFragment extends DaggerFragment {
             }
 
             if ((binding.imageView.getDrawable() != null) && (imageUri != null)) {
-                AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
-                builder.setTitle(R.string.dialog_title_retake);
-                builder.setMessage(R.string.dialog_message_retake);
-                builder.setPositiveButton(R.string.dialog_positive_yes, (dialog, which) -> this.selectImageFromCamera());
-                builder.setNegativeButton(R.string.dialog_negative_no, (dialog, which) -> dialog.dismiss());
-                builder.create().show();
+                this.dialogRetakeImage();
             } else this.selectImageFromCamera();
 
         });
@@ -168,6 +163,15 @@ public class CameraFragment extends DaggerFragment {
             }
 
         });
+    }
+
+    private void dialogRetakeImage() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
+        builder.setTitle(R.string.dialog_title_retake);
+        builder.setMessage(R.string.dialog_message_retake);
+        builder.setPositiveButton(R.string.dialog_positive_yes, (dialog, which) -> this.selectImageFromCamera());
+        builder.setNegativeButton(R.string.dialog_negative_no, (dialog, which) -> dialog.dismiss());
+        builder.create().show();
     }
 
     private void dialogSaveImage() {

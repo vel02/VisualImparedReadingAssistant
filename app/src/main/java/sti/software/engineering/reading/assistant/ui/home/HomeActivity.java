@@ -34,6 +34,7 @@ import sti.software.engineering.reading.assistant.ui.OnHostPermissionListener;
 import sti.software.engineering.reading.assistant.ui.home.sub.PagerAdapter;
 import sti.software.engineering.reading.assistant.ui.home.sub.camera.CameraFragment;
 import sti.software.engineering.reading.assistant.ui.home.sub.read.ReadFragment;
+import sti.software.engineering.reading.assistant.util.ApplicationSettings;
 import sti.software.engineering.reading.assistant.util.Utility;
 import sti.software.engineering.reading.assistant.viewmodel.ViewModelProviderFactory;
 
@@ -85,6 +86,7 @@ public class HomeActivity extends BaseActivity implements
 
     private ActivityHomeBinding binding;
     private HomeViewModel viewModel;
+    private Menu menu;
 
     private boolean startedThroughService;
 
@@ -96,6 +98,16 @@ public class HomeActivity extends BaseActivity implements
 
     public void setOnStartThroughServiceListener(OnStartThroughServiceListener listener) {
         this.startThroughServiceListener = listener;
+    }
+
+    private OnVoiceChangeListener listener;
+
+    public interface OnVoiceChangeListener {
+        void onVoiceChanged();
+    }
+
+    public void setOnVoiceChangeListener(OnVoiceChangeListener listener) {
+        this.listener = listener;
     }
 
     private void openThroughPowerButton() {
@@ -269,12 +281,35 @@ public class HomeActivity extends BaseActivity implements
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_home, menu);
+        this.menu = menu;
+        MenuItem app_voice = menu.findItem(R.id.action_app_voice);
+        MenuItem accessibility = menu.findItem(R.id.action_accessibility);
+        if (app_voice != null) accessibility.setVisible(!app_voice.isChecked());
         return true;
     }
 
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         if (item.getItemId() == R.id.action_about) {
+            return true;
+        }
+        if (item.getItemId() == R.id.action_app_voice) {
+            listener.onVoiceChanged();
+            boolean checked = !item.isChecked();
+            item.setChecked(checked);
+            ApplicationSettings.setInputVoiceSettings(this, checked);
+            if (menu != null) {
+                MenuItem accessibility = menu.findItem(R.id.action_accessibility);
+                accessibility.setVisible(!item.isChecked());
+            }
+            return true;
+        }
+        if (item.getItemId() == R.id.action_accessibility) {
+            //https://stackoverflow.com/questions/3160447/how-to-show-up-the-settings-for-text-to-speech-in-my-app
+            Intent intent = new Intent();
+            intent.setAction("com.android.settings.TTS_SETTINGS");
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            startActivity(intent);
             return true;
         }
         return super.onOptionsItemSelected(item);

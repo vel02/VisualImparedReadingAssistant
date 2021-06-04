@@ -31,27 +31,7 @@
             <com.google.android.material.tabs.TabLayout
                 android:id="@+id/tab_layout"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content">
-
-<!--                <com.google.android.material.tabs.TabItem-->
-<!--                    android:id="@+id/read_layout"-->
-<!--                    android:layout_width="wrap_content"-->
-<!--                    android:layout_height="wrap_content"-->
-<!--                    android:text="Read" />-->
-
-<!--                <com.google.android.material.tabs.TabItem-->
-<!--                    android:id="@+id/camera_layout"-->
-<!--                    android:layout_width="wrap_content"-->
-<!--                    android:layout_height="wrap_content"-->
-<!--                    android:text="Camera" />-->
-
-<!--                <com.google.android.material.tabs.TabItem-->
-<!--                    android:id="@+id/gallery_layout"-->
-<!--                    android:layout_width="wrap_content"-->
-<!--                    android:layout_height="wrap_content"-->
-<!--                    android:text="Gallery" />-->
-
-            </com.google.android.material.tabs.TabLayout>
+                android:layout_height="wrap_content"/>
 
             <androidx.viewpager2.widget.ViewPager2
                 android:id="@+id/view_pager"

@@ -15,5 +15,19 @@
         android:title="@string/label_about"
         app:showAsAction="never" />
 
+    <item
+        android:id="@+id/action_app_voice"
+        android:checkable="true"
+        android:checked="true"
+        android:orderInCategory="200"
+        android:title="App Voice"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/action_accessibility"
+        android:orderInCategory="300"
+        android:title="Accessibility"
+        app:showAsAction="never" />
+
 
 </menu>

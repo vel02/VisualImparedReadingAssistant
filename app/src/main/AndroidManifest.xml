@@ -35,7 +35,8 @@
             android:name="com.theartofdev.edmodo.cropper.CropImageActivity"
             android:theme="@style/Theme.VisualImparedReadingAssistant" /> <!-- optional (needed if default theme has no action bar) -->
 
-        <service android:name=".service.TriggerCameraService" />
+        <service android:name=".service.TriggerCameraService"
+            android:exported="false"/>
 
         <provider
             android:name="androidx.core.content.FileProvider"
