@@ -1,5 +1,6 @@
 <resources>
     <string name="app_name">Visual Impaired Reading Assistant</string>
+    <string name="app_accessibility">Accessibility</string>
     <string name="label_about">About</string>
     <string name="label_view_image">View Image</string>
     <string name="label_permission_rational">Required Permissions are needed for core functionality</string>
@@ -19,4 +20,12 @@
     <string name="dialog_message_retake">Are you sure you want to re-take the image?</string>
     <string name="dialog_positive_yes">Yes</string>
     <string name="dialog_negative_no">No</string>
+    <string name="label_language">Language</string>
+    <string name="label_app_language">Use App Language</string>
+    <string name="label_system_language">Use System Language</string>
+    <string name="label_select_language">Select preferred application language</string>
+    <string name="label_speech_rate">Speech rate</string>
+    <string name="label_pitch">Pitch</string>
+    <string name="label_play">Play</string>
+    <string name="label_reset">Reset</string>
 </resources>

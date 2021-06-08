@@ -3,7 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     package="sti.software.engineering.reading.assistant">
 
-    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW"/>
+    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.VIBRATE" />
@@ -21,22 +21,29 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.VisualImparedReadingAssistant">
         <activity
+            android:name=".ui.accessibility.AccessibilityActivity"
+            android:label="@string/app_accessibility"
+            android:screenOrientation="portrait"
+            android:theme="@style/Theme.VisualImparedReadingAssistant.NoActionBar"
+            tools:ignore="LockedOrientationActivity" />
+
+        <activity
             android:name=".ui.home.HomeActivity"
-            android:theme="@style/Theme.VisualImparedReadingAssistant.NoActionBar">
+            android:screenOrientation="portrait"
+            android:theme="@style/Theme.VisualImparedReadingAssistant.NoActionBar"
+            tools:ignore="LockedOrientationActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-        </activity>
-
-        <!--add in application tag-->
+        </activity> <!-- add in application tag -->
         <activity
             android:name="com.theartofdev.edmodo.cropper.CropImageActivity"
             android:theme="@style/Theme.VisualImparedReadingAssistant" /> <!-- optional (needed if default theme has no action bar) -->
-
-        <service android:name=".service.TriggerCameraService"
-            android:exported="false"/>
+        <service
+            android:name=".service.TriggerCameraService"
+            android:exported="false" />
 
         <provider
             android:name="androidx.core.content.FileProvider"
@@ -47,7 +54,6 @@
                 android:name="android.support.FILE_PROVIDER_PATHS"
                 android:resource="@xml/provider_paths" />
         </provider>
-
     </application>
 
 </manifest>

@@ -48,16 +48,16 @@ import static sti.software.engineering.reading.assistant.util.Utility.Messages.t
 
 
 public class ReadFragment extends DaggerFragment implements
-        OnStartThroughServiceListener,
-        HomeActivity.OnVoiceChangeListener {
+        OnStartThroughServiceListener//  HomeActivity.OnVoiceChangeListener
+{
 
     private static final String TAG = "HomeFragment";
 
-    @Override
-    public void onVoiceChanged() {
-        textToSpeech = new TextToSpeechHelper(requireContext());
-        textToSpeech.setOnUtteranceProgressListener(utteranceProgressListener);
-    }
+//    @Override
+//    public void onVoiceChanged() {
+//        textToSpeech = new TextToSpeechHelper(requireContext());
+//        textToSpeech.setOnUtteranceProgressListener(utteranceProgressListener);
+//    }
 
     private final TextToSpeechHelper.OnUtteranceProgressListener utteranceProgressListener = new TextToSpeechHelper.OnUtteranceProgressListener() {
         @Override
@@ -122,9 +122,7 @@ public class ReadFragment extends DaggerFragment implements
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         viewModel = new ViewModelProvider(requireActivity(), providerFactory).get(ReadFragmentViewModel.class);
         ((HomeActivity) requireActivity()).setOnStartThroughServiceListener(this);
-        ((HomeActivity) requireActivity()).setOnVoiceChangeListener(this);
-        textToSpeech = new TextToSpeechHelper(requireContext());
-        textToSpeech.setOnUtteranceProgressListener(utteranceProgressListener);
+//        ((HomeActivity) requireActivity()).setOnVoiceChangeListener(this);
         navigate();
         subscribeObservers();
         initImageRecyclerAdapter();
@@ -275,7 +273,23 @@ public class ReadFragment extends DaggerFragment implements
     @Override
     public void onResume() {
         super.onResume();
+        textToSpeech = new TextToSpeechHelper(requireContext());
+        textToSpeech.setOnUtteranceProgressListener(utteranceProgressListener);
+
         viewModel.processDatabaseData();
+    }
+
+    @Override
+    public void onStop() {
+        if (textToSpeech != null) {
+            textToSpeech.destroy();
+        }
+
+        //update stop ui when onStop() was called while AI is reading.
+        viewModel.setUtteranceProgress(UTTERANCE_DONE_READING);
+        viewModel.setButtonStopState(false);
+        viewModel.setButtonReadState(true);
+        super.onStop();
     }
 
     @Override
@@ -283,6 +297,7 @@ public class ReadFragment extends DaggerFragment implements
         if (textToSpeech != null) {
             textToSpeech.destroy();
         }
+
         super.onDestroy();
     }
 
