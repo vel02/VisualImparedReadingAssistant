@@ -16,18 +16,18 @@ import androidx.core.app.NotificationCompat;
 
 import sti.software.engineering.reading.assistant.BaseApplication;
 import sti.software.engineering.reading.assistant.R;
-import sti.software.engineering.reading.assistant.receiver.DetectScreenOnReceiver;
+import sti.software.engineering.reading.assistant.receiver.DetectPowerClickedReceiver;
 import sti.software.engineering.reading.assistant.ui.home.HomeActivity;
 import sti.software.engineering.reading.assistant.util.TextToSpeechHelper;
 
-public class TriggerCameraService extends Service implements DetectScreenOnReceiver.OnScreenReceiverCallback {
+public class TriggerCameraService extends Service implements DetectPowerClickedReceiver.OnScreenReceiverCallback {
 
     public static final String INTENT_STARTED_THROUGH_SERVICE = "started_via_service";
     private static final int NOTIFICATION_TRIGGER_CAMERA_ID = 1;
 
     private boolean isChangeConfiguration;
 
-    private DetectScreenOnReceiver screenOnReceiver;
+    private DetectPowerClickedReceiver screenOnReceiver;
     private TextToSpeechHelper textToSpeech;
 
     @Override
@@ -83,7 +83,7 @@ public class TriggerCameraService extends Service implements DetectScreenOnRecei
     public int onStartCommand(Intent intent, int flags, int startId) {
 
         textToSpeech = new TextToSpeechHelper(this);//TextToSpeechHelper.getInstance(this);
-        screenOnReceiver = new DetectScreenOnReceiver();
+        screenOnReceiver = new DetectPowerClickedReceiver();
         screenOnReceiver.onScreenReceiverCallback(this);
         registerScreenOnReceiver();
 
@@ -93,6 +93,7 @@ public class TriggerCameraService extends Service implements DetectScreenOnRecei
     private void registerScreenOnReceiver() {
         IntentFilter filter = new IntentFilter();
         filter.addAction(Intent.ACTION_SCREEN_ON);
+        filter.addAction(Intent.ACTION_SCREEN_OFF);
         registerReceiver(screenOnReceiver, filter);
     }
 

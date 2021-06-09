@@ -23,17 +23,16 @@ import android.os.VibrationEffect;
 import android.os.Vibrator;
 import android.util.Log;
 
-@Deprecated
-public class DetectScreenOnReceiver extends BroadcastReceiver {
+public class DetectPowerClickedReceiver extends BroadcastReceiver {
 
     private static final String TAG = "DetectScreenOnReceiver";
-    private static final int THRESHOLD_SCREEN_ON = 3;
+    private static final int THRESHOLD = 3;
 
     private Vibrator vibrator;
     private OnScreenReceiverCallback callback;
 
-    private int screenOnCount = 0;
-    private long timestamp = 0;
+    private int clickCount = 0;
+    private long startTimeSecond = 0;
 
     public void onScreenReceiverCallback(OnScreenReceiverCallback callback) {
         this.callback = callback;
@@ -44,30 +43,56 @@ public class DetectScreenOnReceiver extends BroadcastReceiver {
         if (vibrator == null)
             vibrator = (Vibrator) context.getSystemService(Context.VIBRATOR_SERVICE);
 
-        if (timestamp == 0) timestamp = (System.currentTimeMillis() / 1000);
-
-        int count = 0;
-        if (timestamp != 0) {
+        if (startTimeSecond == 0) startTimeSecond = (System.currentTimeMillis() / 1000);
+        int timelapse = 0;
+        if (startTimeSecond != 0) {
             long time = (System.currentTimeMillis() / 1000);
-            count = (int) (time - timestamp);
+            timelapse = (int) (time - startTimeSecond);
 
-            if (count > 5) {
-                screenOnCount = 0;
-                timestamp = 0;
+            if (timelapse > 2) {
+                reset();
             }
+
         }
 
+
+        Log.d(TAG, "onReceive: TIMELAPSE: " + timelapse);
         if (intent.getAction().equals(Intent.ACTION_SCREEN_ON)) {
             Log.d(TAG, "onReceive: SCREEN ON CALLED");
-            Log.d(TAG, "onReceive: INTERVAL: " + count);
-            screenOnCount++;
-            if (screenOnCount == THRESHOLD_SCREEN_ON) {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                    vibrator.vibrate(VibrationEffect.createOneShot(500, VibrationEffect.DEFAULT_AMPLITUDE));
-                } else vibrator.vibrate(500);
-                callback.onTriggered();
-            }
+            clickCount++;
+
+            Log.d(TAG, "onReceive: COUNT: " + clickCount);
+            triggerCamera(timelapse);
+
+        } else if (intent.getAction().equals(Intent.ACTION_SCREEN_OFF)) {
+            Log.d(TAG, "onReceive: SCREEN OFF CALLED");
+            clickCount++;
+
+            Log.d(TAG, "onReceive: COUNT: " + clickCount);
+            triggerCamera(timelapse);
+
         }
+
+    }
+
+    private void triggerCamera(int timelapse) {
+        if (clickCount == THRESHOLD && timelapse < 3) {
+            Log.d(TAG, "onReceive: ### TRIGGERED ###");
+            callback.onTriggered();
+            vibrate();
+            reset();
+        }
+    }
+
+    private void vibrate() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            vibrator.vibrate(VibrationEffect.createOneShot(500, VibrationEffect.DEFAULT_AMPLITUDE));
+        } else vibrator.vibrate(500);
+    }
+
+    private void reset() {
+        clickCount = 0;
+        startTimeSecond = 0;
     }
 
     public interface OnScreenReceiverCallback {
