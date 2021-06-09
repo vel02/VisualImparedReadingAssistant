@@ -11,6 +11,7 @@ public class BaseActivity extends DaggerAppCompatActivity {
 
     public static final int CAMERA_REQUEST_CODE = 101;
     public static final int STORAGE_REQUEST_CODE = 201;
+    public static int ACTION_MANAGE_OVERLAY_PERMISSION_REQUEST_CODE = 301;
 
     public static final int IMAGE_PICK_CAMERA_CODE = 1001;
     public static final int IMAGE_PICK_AUTO_CAMERA_CODE = 1002;

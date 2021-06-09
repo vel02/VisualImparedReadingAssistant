@@ -14,6 +14,7 @@ import android.view.MenuItem;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 import androidx.core.app.ActivityCompat;
 import androidx.databinding.DataBindingUtil;
 import androidx.lifecycle.ViewModelProvider;
@@ -40,22 +41,6 @@ import sti.software.engineering.reading.assistant.viewmodel.ViewModelProviderFac
 
 import static android.Manifest.permission.WRITE_EXTERNAL_STORAGE;
 
-/**
- * Next Functionality
- * - rename file
- * - file description add more information (directory, uri)
- * - camera tab implementation
- * <p>
- * https://stackoverflow.com/questions/36369913/how-to-implement-multi-select-in-recyclerview
- * <p>
- * https://stackoverflow.com/questions/10424997/android-how-to-rename-a-file
- * <p>
- * https://stackoverflow.com/questions/59965336/calling-method-on-navigation-host-fragment-inside-mainactivity
- * https://www.google.com/search?q=android+call+method+from+activity+to+fragment+with+navigation&sxsrf=ALeKk03RKxMX8_Y1kqigXgbGjkfyLPwvTg%3A1620266059373&ei=S0yTYJjoFci5oATO0oSADw&oq=android+call+method+from+activity+to+fragment+with+navi&gs_lcp=Cgdnd3Mtd2l6EAMYADIHCCEQChCgATIHCCEQChCgAToHCAAQRxCwAzoGCAAQFhAeOgUIIRCgAVCED1jGHmD3JWgBcAJ4AIABuwKIAeUKkgEHNC42LjAuMZgBAKABAaoBB2d3cy13aXrIAQjAAQE&sclient=gws-wiz
- * https://stackoverflow.com/questions/6147884/onactivityresult-is-not-being-called-in-fragment
- * <p>
- * https://stackoverflow.com/questions/38471105/viewpager-didnt-load-the-first-page-at-the-first-time-but-will-load-it-after-s
- */
 public class HomeActivity extends BaseActivity implements
         OnHostPermissionListener,
         ImageRecyclerAdapter.OnImageClickListener {
@@ -86,7 +71,6 @@ public class HomeActivity extends BaseActivity implements
 
     private ActivityHomeBinding binding;
     private HomeViewModel viewModel;
-    private Menu menu;
 
     private boolean startedThroughService;
 
@@ -99,16 +83,6 @@ public class HomeActivity extends BaseActivity implements
     public void setOnStartThroughServiceListener(OnStartThroughServiceListener listener) {
         this.startThroughServiceListener = listener;
     }
-
-//    private OnVoiceChangeListener listener;
-//
-//    public interface OnVoiceChangeListener {
-//        void onVoiceChanged();
-//    }
-//
-//    public void setOnVoiceChangeListener(OnVoiceChangeListener listener) {
-//        this.listener = listener;
-//    }
 
     private void openThroughPowerButton() {
         Intent intent = getIntent();
@@ -143,9 +117,23 @@ public class HomeActivity extends BaseActivity implements
             startService(intent);
         }
 
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q &&
+                !Settings.canDrawOverlays(this)) {
+            //https://stackoverflow.com/questions/59419653/cannot-start-activity-background-in-android-10-android-q
+            AlertDialog.Builder builder = new AlertDialog.Builder(this);
+            builder.setTitle("Display over other app");
+            builder.setMessage("Allow \"Display over other app\" to grant camera access in the background");
+            builder.setPositiveButton("OK", (dialog, which) -> {
+                dialog.dismiss();
+                requestPermission();
+            });
+            builder.setCancelable(false);
+            builder.create().show();
+        }
     }
 
     private void initViewPager() {
+
         binding.tabLayout.addTab(binding.tabLayout.newTab().setText("View"));
         binding.tabLayout.addTab(binding.tabLayout.newTab().setText("Camera"));
         binding.tabLayout.addTab(binding.tabLayout.newTab().setText("Gallery"));
@@ -157,7 +145,6 @@ public class HomeActivity extends BaseActivity implements
         binding.tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
             @Override
             public void onTabSelected(TabLayout.Tab tab) {
-                Log.d(TAG, "onTabSelected: " + tab.getPosition());
                 binding.viewPager.setCurrentItem(tab.getPosition());
             }
 
@@ -176,15 +163,12 @@ public class HomeActivity extends BaseActivity implements
             @Override
             public void onPageSelected(int position) {
                 binding.tabLayout.selectTab(binding.tabLayout.getTabAt(position));
-                Log.d(TAG, "onPageSelected: called " + position + " " + startedThroughService);
                 if (position == 0 && startedThroughService) {
-                    Log.d(TAG, "onPageSelected: called");
                     startThroughServiceListener.onStartedFromService();
                     startedThroughService = false;
                 }
             }
         });
-        Log.d(TAG, "initViewPager: count " + getSupportFragmentManager().getFragments().size());
 
     }
 
@@ -193,13 +177,8 @@ public class HomeActivity extends BaseActivity implements
         super.onResume();
         openThroughPowerButton();
 
-        //permission temporary location
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q &&
-                !Settings.canDrawOverlays(this)) {
-            Snackbar.make(binding.getRoot(), "Allow \"Display over other app\" to grant camera access in the background", Snackbar.LENGTH_INDEFINITE)
-                    .setAction("OK", v -> {
-                        requestPermission();
-                    }).show();
+        if (checkCameraPermission()) {
+            requestCameraPermission();
         }
     }
 
@@ -234,21 +213,6 @@ public class HomeActivity extends BaseActivity implements
         unbindTriggerCameraService();
     }
 
-
-    //https://stackoverflow.com/questions/59419653/cannot-start-activity-background-in-android-10-android-q
-    public static int ACTION_MANAGE_OVERLAY_PERMISSION_REQUEST_CODE = 2323;
-
-    private void requestPermission() {
-        // Check if Android M or higher
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            // Show alert dialog to the user saying a separate permission is needed
-            // Launch the settings activity if the user prefers
-            Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
-                    Uri.parse("package:" + this.getPackageName()));
-            startActivityForResult(intent, ACTION_MANAGE_OVERLAY_PERMISSION_REQUEST_CODE);
-        }
-    }
-
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -258,7 +222,6 @@ public class HomeActivity extends BaseActivity implements
                 if (!Settings.canDrawOverlays(this)) {
                     Log.d(TAG, "onActivityResult: permission denied");
                 } else {
-                    // Permission Granted-System will work
                     Log.d(TAG, "onActivityResult: permission granted");
                 }
 
@@ -295,13 +258,6 @@ public class HomeActivity extends BaseActivity implements
             startActivity(intent);
             return true;
         }
-//        if (item.getItemId() == R.id.action_accessibility) {
-//            Intent intent = new Intent();
-//            intent.setAction("com.android.settings.TTS_SETTINGS");
-//            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
-//            startActivity(intent);
-//            return true;
-//        }
         return super.onOptionsItemSelected(item);
     }
 
@@ -313,7 +269,6 @@ public class HomeActivity extends BaseActivity implements
             if (grantResults.length > 0) {
                 boolean cameraAccepted = grantResults[0] == PackageManager.PERMISSION_GRANTED;
                 boolean storageAccepted = grantResults[1] == PackageManager.PERMISSION_GRANTED;
-                Log.d(TAG, "onRequestPermissionsResult: camera should work!" + (cameraAccepted == storageAccepted));
                 if (cameraAccepted && storageAccepted) {
                     if (getSupportFragmentManager().getFragments().get(binding.viewPager.getCurrentItem()) instanceof CameraFragment) {
                         CameraFragment fragment = (CameraFragment) getSupportFragmentManager().getFragments().get(binding.viewPager.getCurrentItem());
@@ -347,4 +302,34 @@ public class HomeActivity extends BaseActivity implements
                 CAMERA_REQUEST_CODE);
     }
 
+    private void requestPermission() {
+        // Check if Android M or higher
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            // Show alert dialog to the user saying a separate permission is needed
+            // Launch the settings activity if the user prefers
+            Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
+                    Uri.parse("package:" + this.getPackageName()));
+            startActivityForResult(intent, ACTION_MANAGE_OVERLAY_PERMISSION_REQUEST_CODE);
+        }
+    }
+
+
 }
+
+
+/*
+ * Next Functionality
+ * - rename file
+ * - file description add more information (directory, uri)
+ * - camera tab implementation
+ * <p>
+ * https://stackoverflow.com/questions/36369913/how-to-implement-multi-select-in-recyclerview
+ * <p>
+ * https://stackoverflow.com/questions/10424997/android-how-to-rename-a-file
+ * <p>
+ * https://stackoverflow.com/questions/59965336/calling-method-on-navigation-host-fragment-inside-mainactivity
+ * https://www.google.com/search?q=android+call+method+from+activity+to+fragment+with+navigation&sxsrf=ALeKk03RKxMX8_Y1kqigXgbGjkfyLPwvTg%3A1620266059373&ei=S0yTYJjoFci5oATO0oSADw&oq=android+call+method+from+activity+to+fragment+with+navi&gs_lcp=Cgdnd3Mtd2l6EAMYADIHCCEQChCgATIHCCEQChCgAToHCAAQRxCwAzoGCAAQFhAeOgUIIRCgAVCED1jGHmD3JWgBcAJ4AIABuwKIAeUKkgEHNC42LjAuMZgBAKABAaoBB2d3cy13aXrIAQjAAQE&sclient=gws-wiz
+ * https://stackoverflow.com/questions/6147884/onactivityresult-is-not-being-called-in-fragment
+ * <p>
+ * https://stackoverflow.com/questions/38471105/viewpager-didnt-load-the-first-page-at-the-first-time-but-will-load-it-after-s
+ */

@@ -28,4 +28,5 @@
     <string name="label_pitch">Pitch</string>
     <string name="label_play">Play</string>
     <string name="label_reset">Reset</string>
+    <string name="label_mini_gallery">Mini Gallery</string>
 </resources>

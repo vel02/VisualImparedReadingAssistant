@@ -35,6 +35,7 @@ import sti.software.engineering.reading.assistant.model.Image;
 import sti.software.engineering.reading.assistant.ui.home.HomeActivity;
 import sti.software.engineering.reading.assistant.ui.home.HomeActivity.OnStartThroughServiceListener;
 import sti.software.engineering.reading.assistant.ui.home.selection.SelectImageFrom;
+import sti.software.engineering.reading.assistant.util.ApplicationSettings;
 import sti.software.engineering.reading.assistant.util.TextToSpeechHelper;
 import sti.software.engineering.reading.assistant.viewmodel.ViewModelProviderFactory;
 
@@ -48,16 +49,10 @@ import static sti.software.engineering.reading.assistant.util.Utility.Messages.t
 
 
 public class ReadFragment extends DaggerFragment implements
-        OnStartThroughServiceListener//  HomeActivity.OnVoiceChangeListener
-{
+        OnStartThroughServiceListener {
 
     private static final String TAG = "HomeFragment";
 
-//    @Override
-//    public void onVoiceChanged() {
-//        textToSpeech = new TextToSpeechHelper(requireContext());
-//        textToSpeech.setOnUtteranceProgressListener(utteranceProgressListener);
-//    }
 
     private final TextToSpeechHelper.OnUtteranceProgressListener utteranceProgressListener = new TextToSpeechHelper.OnUtteranceProgressListener() {
         @Override
@@ -87,7 +82,7 @@ public class ReadFragment extends DaggerFragment implements
     };
 
     public void onImageClicked(Image image, Uri uri) {
-        Glide.with(this).load(uri).into(binding.imvViewImage);
+        Glide.with(this).load(uri).into(binding.contentReadViewImage.imvViewImage);
         viewModel.setButtonReadState(true);
     }
 
@@ -121,8 +116,11 @@ public class ReadFragment extends DaggerFragment implements
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         viewModel = new ViewModelProvider(requireActivity(), providerFactory).get(ReadFragmentViewModel.class);
+
+        textToSpeech = new TextToSpeechHelper(requireContext());
+        textToSpeech.setOnUtteranceProgressListener(utteranceProgressListener);
+
         ((HomeActivity) requireActivity()).setOnStartThroughServiceListener(this);
-//        ((HomeActivity) requireActivity()).setOnVoiceChangeListener(this);
         navigate();
         subscribeObservers();
         initImageRecyclerAdapter();
@@ -134,7 +132,7 @@ public class ReadFragment extends DaggerFragment implements
         final GestureDetector gestureDetector = new GestureDetector(requireContext(), new GestureDetector.SimpleOnGestureListener() {
             @Override
             public boolean onSingleTapConfirmed(MotionEvent e) {
-                if (!(binding.imvViewImage.getDrawable() instanceof BitmapDrawable))
+                if (!(binding.contentReadViewImage.imvViewImage.getDrawable() instanceof BitmapDrawable))
                     return true;
                 if (!isReading) viewModel.setExtractText(true);
                 return true;
@@ -142,7 +140,7 @@ public class ReadFragment extends DaggerFragment implements
 
             @Override
             public boolean onDoubleTap(MotionEvent e) {
-                if (!(binding.imvViewImage.getDrawable() instanceof BitmapDrawable))
+                if (!(binding.contentReadViewImage.imvViewImage.getDrawable() instanceof BitmapDrawable))
                     return true;
                 textToSpeech.stop();
                 viewModel.setButtonStopState(false);
@@ -152,13 +150,14 @@ public class ReadFragment extends DaggerFragment implements
             }
         });
 
-        binding.imvViewImage.setOnTouchListener((v, event) -> {
+        binding.contentReadViewImage.imvViewImage.setOnTouchListener((v, event) -> {
             gestureDetector.onTouchEvent(event);
             return true;
         });
 
         binding.btnRead.setOnClickListener(v -> {
-            if (!(binding.imvViewImage.getDrawable() instanceof BitmapDrawable)) return;
+            if (!(binding.contentReadViewImage.imvViewImage.getDrawable() instanceof BitmapDrawable))
+                return;
             viewModel.setExtractText(true);
         });
 
@@ -167,15 +166,13 @@ public class ReadFragment extends DaggerFragment implements
             viewModel.setButtonStopState(false);
             viewModel.setButtonReadState(true);
             viewModel.setUtteranceProgress(UTTERANCE_DONE_READING);
-
-
         });
     }
 
     private void initImageRecyclerAdapter() {
-        binding.viewList.setLayoutManager(new LinearLayoutManager(requireActivity(), RecyclerView.HORIZONTAL, false));
+        binding.contentReadViewList.viewList.setLayoutManager(new LinearLayoutManager(requireActivity(), RecyclerView.HORIZONTAL, false));
         adapter = new ImageRecyclerAdapter();
-        binding.viewList.setAdapter(adapter);
+        binding.contentReadViewList.viewList.setAdapter(adapter);
     }
 
     private void subscribeObservers() {
@@ -197,12 +194,11 @@ public class ReadFragment extends DaggerFragment implements
         viewModel.observedExtractText().observe(getViewLifecycleOwner(), extract -> {
             if (extract) {
                 new Thread(() -> {
-                    if (!(binding.imvViewImage.getDrawable() instanceof BitmapDrawable)) {
-                        Log.d(TAG, "subscribeObservers: imvViewImage = " + binding.imvViewImage.getDrawable());
+                    if (!(binding.contentReadViewImage.imvViewImage.getDrawable() instanceof BitmapDrawable)) {
                         return;
                     }
 
-                    BitmapDrawable drawable = (BitmapDrawable) binding.imvViewImage.getDrawable();
+                    BitmapDrawable drawable = (BitmapDrawable) binding.contentReadViewImage.imvViewImage.getDrawable();
                     Bitmap bitmap = drawable.getBitmap();
 
                     TextRecognizer recognizer = new TextRecognizer
@@ -219,7 +215,6 @@ public class ReadFragment extends DaggerFragment implements
                             TextBlock item = items.valueAt(i);
                             sb.append(item.getValue());
                             sb.append(" ");
-//                            sb.append("\n");
                         }
 
                         String text = sb.toString().replaceAll("\n", " ");
@@ -233,8 +228,16 @@ public class ReadFragment extends DaggerFragment implements
         viewModel.observedImages().removeObservers(getViewLifecycleOwner());
         viewModel.observedImages().observe(getViewLifecycleOwner(), images -> {
             if (images != null) {
+                if (images.size() > 0) {
+                    binding.tvMiniGalleryLabel.setVisibility(View.VISIBLE);
+                    binding.contentReadViewList.cardRecyclerParent.setVisibility(View.VISIBLE);
+                    binding.guidelineBottom.setGuidelinePercent(0.8F);
+                } else {
+                    binding.tvMiniGalleryLabel.setVisibility(View.GONE);
+                    binding.contentReadViewList.cardRecyclerParent.setVisibility(View.GONE);
+                    binding.guidelineBottom.setGuidelinePercent(1F);
+                }
                 adapter.refresh(images);
-                Log.d(TAG, "Images: " + images);
             }
         });
 
@@ -273,19 +276,29 @@ public class ReadFragment extends DaggerFragment implements
     @Override
     public void onResume() {
         super.onResume();
-        textToSpeech = new TextToSpeechHelper(requireContext());
-        textToSpeech.setOnUtteranceProgressListener(utteranceProgressListener);
-
         viewModel.processDatabaseData();
+        if (ApplicationSettings.getOutputReInstantiateTTSSettings(requireContext()).equals(ApplicationSettings.SETTINGS_INSTANTIATE_TTS_YES)) {
+            ApplicationSettings.setInputReInstantiateTTSSettings(requireContext(), ApplicationSettings.SETTINGS_INSTANTIATE_TTS_NO);
+            textToSpeech = new TextToSpeechHelper(requireContext());
+            textToSpeech.setOnUtteranceProgressListener(utteranceProgressListener);
+        }
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+
     }
 
     @Override
     public void onStop() {
-        if (textToSpeech != null) {
-            textToSpeech.destroy();
-        }
 
+//        if (textToSpeech != null) {
+//            textToSpeech.destroy();
+//        }
+//
         //update stop ui when onStop() was called while AI is reading.
+        if (textToSpeech != null) textToSpeech.stop();
         viewModel.setUtteranceProgress(UTTERANCE_DONE_READING);
         viewModel.setButtonStopState(false);
         viewModel.setButtonReadState(true);
@@ -297,7 +310,6 @@ public class ReadFragment extends DaggerFragment implements
         if (textToSpeech != null) {
             textToSpeech.destroy();
         }
-
         super.onDestroy();
     }
 
@@ -306,7 +318,7 @@ public class ReadFragment extends DaggerFragment implements
         super.onActivityResult(requestCode, resultCode, data);
         if (resultCode == RESULT_OK) {
             if (requestCode == IMAGE_PICK_AUTO_CAMERA_CODE) {
-                Glide.with(this).load(imageUri).into(binding.imvViewImage);
+                Glide.with(this).load(imageUri).into(binding.contentReadViewImage.imvViewImage);
                 viewModel.setButtonReadState(true);
             }
         }

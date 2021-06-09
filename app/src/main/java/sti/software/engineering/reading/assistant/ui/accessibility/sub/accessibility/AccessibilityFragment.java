@@ -112,6 +112,8 @@ public class AccessibilityFragment extends DaggerFragment {
                 displayApplicationSettings();
             }
 
+            ApplicationSettings.setInputReInstantiateTTSSettings(requireContext(), ApplicationSettings.SETTINGS_INSTANTIATE_TTS_YES);
+
         });
 
         binding.applicationSeekSpeed.incrementProgressBy(1);
@@ -129,6 +131,9 @@ public class AccessibilityFragment extends DaggerFragment {
                         difference = speed_progress - currentSpeed;
                         Log.d(TAG, speed_progress + " - " + currentSpeed + " = " + difference);
                         currentSpeed = currentSpeed - difference;
+                        if (currentSpeed == 0.0) {
+                            currentSpeed = 0.01F;
+                        }
                     } else if (currentSpeed > speed_progress) {
                         difference = currentSpeed - speed_progress;
                         currentSpeed = currentSpeed + difference;

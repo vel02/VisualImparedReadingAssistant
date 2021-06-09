@@ -11,6 +11,11 @@ public class ApplicationSettings {
     public static final String SETTINGS_VOICE_APPLICATION = "APPLICATION_VOICE";
     public static final String SETTINGS_VOICE_SYSTEM = "SYSTEM_VOICE";
 
+    public static final String INSTANTIATE_SETTINGS_TTS = "sti.software.engineering.reading.assistant.INSTANTIATE_TTS";
+
+    public static final String SETTINGS_INSTANTIATE_TTS_YES = "INSTANTIATE_TTS_YES";
+    public static final String SETTINGS_INSTANTIATE_TTS_NO = "INSTANTIATE_TTS_NO";
+
 
     public static final String APPLICATION_SETTINGS_CHANGE_PROGRESS_SPEED = "sti.software.engineering.reading.assistant.CHANGE_APPLICATION_PROGRESS_SPEED";
     public static final String APPLICATION_SETTINGS_CHANGE_PROGRESS_PITCH = "sti.software.engineering.reading.assistant.CHANGE_APPLICATION_PROGRESS_PITCH";
@@ -42,6 +47,17 @@ public class ApplicationSettings {
     public static String getOutputVoiceSettings(Context context) {
         return PreferenceManager.getDefaultSharedPreferences(context)
                 .getString(APPLICATION_SETTINGS_CHANGE_VOICE, SETTINGS_VOICE_APPLICATION);
+    }
+
+    public static void setInputReInstantiateTTSSettings(Context context, String settings) {
+        PreferenceManager.getDefaultSharedPreferences(context).edit()
+                .putString(INSTANTIATE_SETTINGS_TTS, settings)
+                .apply();
+    }
+
+    public static String getOutputReInstantiateTTSSettings(Context context) {
+        return PreferenceManager.getDefaultSharedPreferences(context)
+                .getString(INSTANTIATE_SETTINGS_TTS, SETTINGS_INSTANTIATE_TTS_NO);
     }
 
 
