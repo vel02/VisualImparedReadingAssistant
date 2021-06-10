@@ -1,4 +1,4 @@
-package sti.software.engineering.reading.assistant.ui.accessibility;
+package sti.software.engineering.reading.assistant.ui;
 
 import android.view.View;
 

@@ -7,7 +7,7 @@
 
     <fragment
         android:id="@+id/nav_accessibility"
-        android:name="sti.software.engineering.reading.assistant.ui.accessibility.sub.accessibility.AccessibilityFragment"
+        android:name="sti.software.engineering.reading.assistant.ui.accessibility.sub.AccessibilityFragment"
         android:label="Accessibility"
         tools:layout="@layout/fragment_accessibility" />
 

@@ -29,4 +29,12 @@
     <string name="label_play">Play</string>
     <string name="label_reset">Reset</string>
     <string name="label_mini_gallery">Mini Gallery</string>
+    <string name="label_instructions">Instructions</string>
+    <string name="desctiption_instruction">Detailed information on how to use the application</string>
+    <string name="label_contact_us">Contact Us</string>
+    <string name="description_contact_us">Help us make Visual Impaired Reading Assistant better</string>
+    <string name="label_app_version">App Version</string>
+    <string name="description_licensed">Copyright Visual Impaired Reading Assistant<br />Licensed under the MIT License</string>
+    <string name="tag_fragment_instruction">tag_fragment_instruction</string>
+    <string name="tag_fragment_contact_us">tag_fragment_contact_us</string>
 </resources>

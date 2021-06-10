@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/nav_graph_about"
+    app:startDestination="@id/nav_about">
+
+    <fragment
+        android:id="@+id/nav_about"
+        android:name="sti.software.engineering.reading.assistant.ui.about.sub.AboutFragment"
+        android:label="About"
+        tools:layout="@layout/fragment_about">
+        <action
+            android:id="@+id/action_nav_about_to_instructionsFragment"
+            app:destination="@id/nav_instructions"
+            app:enterAnim="@anim/slide_in_right"
+            app:exitAnim="@anim/slide_out_left"
+            app:popEnterAnim="@anim/slide_in_left"
+            app:popExitAnim="@anim/slide_out_right" />
+        <action
+            android:id="@+id/action_nav_about_to_contactUsFragment"
+            app:destination="@id/nav_contact_us"
+            app:enterAnim="@anim/slide_in_right"
+            app:exitAnim="@anim/slide_out_left"
+            app:popEnterAnim="@anim/slide_in_left"
+            app:popExitAnim="@anim/slide_out_right" />
+
+    </fragment>
+
+
+    <fragment
+        android:id="@+id/nav_instructions"
+        android:name="sti.software.engineering.reading.assistant.ui.about.sub.InstructionsFragment"
+        android:label="Instructions"
+        tools:layout="@layout/fragment_instructions" />
+
+    <fragment
+        android:id="@+id/nav_contact_us"
+        android:name="sti.software.engineering.reading.assistant.ui.about.sub.ContactUsFragment"
+        android:label="Contact Us"
+        tools:layout="@layout/fragment_contact_us" />
+
+</navigation>

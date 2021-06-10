@@ -2,6 +2,7 @@ package sti.software.engineering.reading.assistant.ui.home;
 
 import android.Manifest;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
@@ -23,6 +24,8 @@ import androidx.viewpager2.widget.ViewPager2;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.tabs.TabLayout;
 
+import java.util.Locale;
+
 import javax.inject.Inject;
 
 import sti.software.engineering.reading.assistant.BaseActivity;
@@ -32,6 +35,7 @@ import sti.software.engineering.reading.assistant.databinding.ActivityHomeBindin
 import sti.software.engineering.reading.assistant.model.Image;
 import sti.software.engineering.reading.assistant.service.TriggerCameraService;
 import sti.software.engineering.reading.assistant.ui.OnHostPermissionListener;
+import sti.software.engineering.reading.assistant.ui.about.AboutActivity;
 import sti.software.engineering.reading.assistant.ui.accessibility.AccessibilityActivity;
 import sti.software.engineering.reading.assistant.ui.home.sub.PagerAdapter;
 import sti.software.engineering.reading.assistant.ui.home.sub.camera.CameraFragment;
@@ -46,6 +50,7 @@ public class HomeActivity extends BaseActivity implements
         ImageRecyclerAdapter.OnImageClickListener {
 
     private static final String TAG = "HomeActivity";
+    private static final int OVERLAY_REQUEST_CODE = 401;
 
     @Override
     public void onImageClicked(Image image, Uri uri) {
@@ -117,18 +122,56 @@ public class HomeActivity extends BaseActivity implements
             startService(intent);
         }
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q &&
-                !Settings.canDrawOverlays(this)) {
-            //https://stackoverflow.com/questions/59419653/cannot-start-activity-background-in-android-10-android-q
-            AlertDialog.Builder builder = new AlertDialog.Builder(this);
-            builder.setTitle("Display over other app");
-            builder.setMessage("Allow \"Display over other app\" to grant camera access in the background");
-            builder.setPositiveButton("OK", (dialog, which) -> {
-                dialog.dismiss();
-                requestPermission();
-            });
-            builder.setCancelable(false);
-            builder.create().show();
+//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q &&
+//                !Settings.canDrawOverlays(this)) {
+//            //https://stackoverflow.com/questions/59419653/cannot-start-activity-background-in-android-10-android-q
+//            AlertDialog.Builder builder = new AlertDialog.Builder(this);
+//            builder.setTitle("Display over other app");
+//            builder.setMessage("Allow \"Display over other app\" to grant camera access in the background");
+//            builder.setPositiveButton("OK", (dialog, which) -> {
+//                dialog.dismiss();
+//                requestPermission();
+//            });
+//            builder.setCancelable(false);
+//            builder.create().show();
+//        }
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            if (!Settings.canDrawOverlays(this)) {
+                if ("xiaomi".equals(Build.MANUFACTURER.toLowerCase(Locale.ROOT))) {
+                    final Intent intent = new Intent("miui.intent.action.APP_PERM_EDITOR");
+                    intent.setClassName("com.miui.securitycenter",
+                            "com.miui.permcenter.permissions.PermissionsEditorActivity");
+                    intent.putExtra("extra_pkgname", getPackageName());
+                    new AlertDialog.Builder(this)
+                            .setTitle("Please Enable the additional permissions")
+                            .setMessage("You will not receive notifications while the app is in background if you disable these permissions")
+                            .setPositiveButton("Go to Settings", new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog, int which) {
+                                    startActivity(intent);
+                                }
+                            })
+                            .setIcon(android.R.drawable.ic_dialog_info)
+                            .setCancelable(false)
+                            .show();
+                } else {
+//                    Intent overlaySettings = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:" + getPackageName()));
+//                    startActivityForResult(overlaySettings, OVERLAY_REQUEST_CODE);
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q &&
+                            !Settings.canDrawOverlays(this)) {
+                        //https://stackoverflow.com/questions/59419653/cannot-start-activity-background-in-android-10-android-q
+                        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+                        builder.setTitle("Display over other app");
+                        builder.setMessage("Allow \"Display over other app\" to grant camera access in the background");
+                        builder.setPositiveButton("OK", (dialog, which) -> {
+                            dialog.dismiss();
+                            requestPermission();
+                        });
+                        builder.setCancelable(false);
+                        builder.create().show();
+                    }
+                }
+            }
         }
     }
 
@@ -226,6 +269,8 @@ public class HomeActivity extends BaseActivity implements
                 }
 
             }
+        } else if (requestCode == OVERLAY_REQUEST_CODE) {
+            Log.d(TAG, "onActivityResult: activated");
         }
     }
 
@@ -250,6 +295,9 @@ public class HomeActivity extends BaseActivity implements
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         if (item.getItemId() == R.id.action_about) {
+            Intent intent = new Intent(this, AboutActivity.class);
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            startActivity(intent);
             return true;
         }
         if (item.getItemId() == R.id.action_accessibility) {
@@ -265,6 +313,7 @@ public class HomeActivity extends BaseActivity implements
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
                                            @NonNull int[] grantResults) {
 
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         if (requestCode == CAMERA_REQUEST_CODE) {
             if (grantResults.length > 0) {
                 boolean cameraAccepted = grantResults[0] == PackageManager.PERMISSION_GRANTED;

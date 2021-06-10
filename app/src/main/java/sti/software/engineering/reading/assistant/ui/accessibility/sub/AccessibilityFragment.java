@@ -1,4 +1,4 @@
-package sti.software.engineering.reading.assistant.ui.accessibility.sub.accessibility;
+package sti.software.engineering.reading.assistant.ui.accessibility.sub;
 
 import android.os.Bundle;
 import android.speech.tts.TextToSpeech;
@@ -69,13 +69,6 @@ public class AccessibilityFragment extends DaggerFragment {
         }
 
         navigate();
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-
-
     }
 
     private void displaySystemSettings() {
