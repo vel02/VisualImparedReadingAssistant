@@ -16,6 +16,11 @@ public class ApplicationSettings {
     public static final String SETTINGS_INSTANTIATE_TTS_YES = "INSTANTIATE_TTS_YES";
     public static final String SETTINGS_INSTANTIATE_TTS_NO = "INSTANTIATE_TTS_NO";
 
+    public static final String READING_SETTINGS_STATE_TTS = "sti.software.engineering.reading.assistant.SETTINGS_STATE_TTS";
+
+    public static final String SETTINGS_READING_STATE_TTS_YES = "READING_YES";
+    public static final String SETTINGS_READING_STATE_TTS_NO = "READING_NO";
+
 
     public static final String APPLICATION_SETTINGS_CHANGE_PROGRESS_SPEED = "sti.software.engineering.reading.assistant.CHANGE_APPLICATION_PROGRESS_SPEED";
     public static final String APPLICATION_SETTINGS_CHANGE_PROGRESS_PITCH = "sti.software.engineering.reading.assistant.CHANGE_APPLICATION_PROGRESS_PITCH";
@@ -60,6 +65,16 @@ public class ApplicationSettings {
                 .getString(INSTANTIATE_SETTINGS_TTS, SETTINGS_INSTANTIATE_TTS_NO);
     }
 
+    public static void setInputReadingStateTTSSettings(Context context, String settings) {
+        PreferenceManager.getDefaultSharedPreferences(context).edit()
+                .putString(READING_SETTINGS_STATE_TTS, settings)
+                .apply();
+    }
+
+    public static String getOutputReadingStateTTSSettings(Context context) {
+        return PreferenceManager.getDefaultSharedPreferences(context)
+                .getString(READING_SETTINGS_STATE_TTS, SETTINGS_READING_STATE_TTS_NO);
+    }
 
     //Application language
 

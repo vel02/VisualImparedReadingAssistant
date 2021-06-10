@@ -64,6 +64,7 @@
             android:id="@+id/tv_mini_gallery_label"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:visibility="gone"
             android:text="@string/label_mini_gallery"
             android:textAppearance="?attr/textAppearanceBody1"
             app:layout_constraintBottom_toTopOf="@+id/content_read_view_list"

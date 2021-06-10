@@ -35,7 +35,6 @@ import sti.software.engineering.reading.assistant.model.Image;
 import sti.software.engineering.reading.assistant.ui.home.HomeActivity;
 import sti.software.engineering.reading.assistant.ui.home.HomeActivity.OnStartThroughServiceListener;
 import sti.software.engineering.reading.assistant.ui.home.selection.SelectImageFrom;
-import sti.software.engineering.reading.assistant.util.ApplicationSettings;
 import sti.software.engineering.reading.assistant.util.TextToSpeechHelper;
 import sti.software.engineering.reading.assistant.viewmodel.ViewModelProviderFactory;
 
@@ -44,6 +43,14 @@ import static sti.software.engineering.reading.assistant.BaseActivity.IMAGE_PICK
 import static sti.software.engineering.reading.assistant.ui.home.sub.read.ReadFragmentViewModel.SelectImageFrom.AUTO_CAMERA;
 import static sti.software.engineering.reading.assistant.ui.home.sub.read.ReadFragmentViewModel.UtteranceProgress.UTTERANCE_DONE_READING;
 import static sti.software.engineering.reading.assistant.ui.home.sub.read.ReadFragmentViewModel.UtteranceProgress.UTTERANCE_START_READING;
+import static sti.software.engineering.reading.assistant.util.ApplicationSettings.SETTINGS_INSTANTIATE_TTS_NO;
+import static sti.software.engineering.reading.assistant.util.ApplicationSettings.SETTINGS_INSTANTIATE_TTS_YES;
+import static sti.software.engineering.reading.assistant.util.ApplicationSettings.SETTINGS_READING_STATE_TTS_NO;
+import static sti.software.engineering.reading.assistant.util.ApplicationSettings.SETTINGS_READING_STATE_TTS_YES;
+import static sti.software.engineering.reading.assistant.util.ApplicationSettings.getOutputReInstantiateTTSSettings;
+import static sti.software.engineering.reading.assistant.util.ApplicationSettings.getOutputReadingStateTTSSettings;
+import static sti.software.engineering.reading.assistant.util.ApplicationSettings.setInputReInstantiateTTSSettings;
+import static sti.software.engineering.reading.assistant.util.ApplicationSettings.setInputReadingStateTTSSettings;
 import static sti.software.engineering.reading.assistant.util.TextToSpeechHelper.UTTERANCE_ID_READING_TEXT;
 import static sti.software.engineering.reading.assistant.util.Utility.Messages.toastMessage;
 
@@ -51,7 +58,7 @@ import static sti.software.engineering.reading.assistant.util.Utility.Messages.t
 public class ReadFragment extends DaggerFragment implements
         OnStartThroughServiceListener {
 
-    private static final String TAG = "HomeFragment";
+    private static final String TAG = "ReadFragment";
 
 
     private final TextToSpeechHelper.OnUtteranceProgressListener utteranceProgressListener = new TextToSpeechHelper.OnUtteranceProgressListener() {
@@ -229,14 +236,11 @@ public class ReadFragment extends DaggerFragment implements
         viewModel.observedImages().observe(getViewLifecycleOwner(), images -> {
             if (images != null) {
                 if (images.size() > 0) {
-                    binding.tvMiniGalleryLabel.setVisibility(View.VISIBLE);
-                    binding.contentReadViewList.cardRecyclerParent.setVisibility(View.VISIBLE);
-                    binding.guidelineBottom.setGuidelinePercent(0.8F);
-                } else {
-                    binding.tvMiniGalleryLabel.setVisibility(View.GONE);
-                    binding.contentReadViewList.cardRecyclerParent.setVisibility(View.GONE);
-                    binding.guidelineBottom.setGuidelinePercent(1F);
-                }
+                    this.setVisibilityMiniGallery(View.VISIBLE, 0.8F);
+                    if (getOutputReadingStateTTSSettings(requireContext()).equals(SETTINGS_READING_STATE_TTS_YES)) {
+                        this.setVisibilityMiniGallery(View.GONE, 1F);
+                    }
+                } else this.setVisibilityMiniGallery(View.GONE, 1F);
                 adapter.refresh(images);
             }
         });
@@ -263,9 +267,13 @@ public class ReadFragment extends DaggerFragment implements
                 switch (progress) {
                     case UTTERANCE_START_READING:
                         this.isReading = true;
+                        setInputReadingStateTTSSettings(requireContext(), SETTINGS_READING_STATE_TTS_YES);
+                        this.setVisibilityMiniGallery(View.GONE, 1F);
                         break;
                     case UTTERANCE_DONE_READING:
                         this.isReading = false;
+                        setInputReadingStateTTSSettings(requireContext(), SETTINGS_READING_STATE_TTS_NO);
+                        this.setVisibilityMiniGallery(View.VISIBLE, 0.8F);
                         break;
                 }
             }
@@ -273,35 +281,37 @@ public class ReadFragment extends DaggerFragment implements
 
     }
 
+    private void setVisibilityMiniGallery(int gone, float v) {
+        binding.tvMiniGalleryLabel.setVisibility(gone);
+        binding.contentReadViewList.cardRecyclerParent.setVisibility(gone);
+        binding.guidelineBottom.setGuidelinePercent(v);
+    }
+
     @Override
     public void onResume() {
         super.onResume();
         viewModel.processDatabaseData();
-        if (ApplicationSettings.getOutputReInstantiateTTSSettings(requireContext()).equals(ApplicationSettings.SETTINGS_INSTANTIATE_TTS_YES)) {
-            ApplicationSettings.setInputReInstantiateTTSSettings(requireContext(), ApplicationSettings.SETTINGS_INSTANTIATE_TTS_NO);
+        if (getOutputReInstantiateTTSSettings(requireContext()).equals(SETTINGS_INSTANTIATE_TTS_YES)) {
             textToSpeech = new TextToSpeechHelper(requireContext());
             textToSpeech.setOnUtteranceProgressListener(utteranceProgressListener);
+            setInputReInstantiateTTSSettings(requireContext(), SETTINGS_INSTANTIATE_TTS_NO);
         }
     }
 
     @Override
-    public void onPause() {
-        super.onPause();
-
-    }
-
-    @Override
     public void onStop() {
-
-//        if (textToSpeech != null) {
-//            textToSpeech.destroy();
-//        }
-//
         //update stop ui when onStop() was called while AI is reading.
-        if (textToSpeech != null) textToSpeech.stop();
-        viewModel.setUtteranceProgress(UTTERANCE_DONE_READING);
-        viewModel.setButtonStopState(false);
-        viewModel.setButtonReadState(true);
+        Log.d(TAG, "onStop: called");
+        if (textToSpeech != null) {
+            textToSpeech.stop();
+        }
+
+        if (getOutputReadingStateTTSSettings(requireContext()).equals(SETTINGS_READING_STATE_TTS_YES)) {
+            viewModel.setUtteranceProgress(UTTERANCE_DONE_READING);
+            viewModel.setButtonStopState(false);
+            viewModel.setButtonReadState(true);
+        }
+
         super.onStop();
     }
 
