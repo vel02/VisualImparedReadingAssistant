@@ -40,4 +40,6 @@
     <string name="label_remove_marked">Remove Marked</string>
     <string name="label_dialog_deleting">Deleting images...</string>
     <string name="label_image_logo">Image Logo</string>
+    <string name="description_tip_icon">Tip icon</string>
+    <string name="label_tip">Tap the image to read the text, double to stop, and long press to clear the view.</string>
 </resources>

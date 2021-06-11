@@ -33,6 +33,7 @@ import sti.software.engineering.reading.assistant.R;
 import sti.software.engineering.reading.assistant.adapter.Image.ImageRecyclerAdapter;
 import sti.software.engineering.reading.assistant.databinding.FragmentReadBinding;
 import sti.software.engineering.reading.assistant.model.Image;
+import sti.software.engineering.reading.assistant.ui.OnNotifyChildListener;
 import sti.software.engineering.reading.assistant.ui.home.HomeActivity;
 import sti.software.engineering.reading.assistant.ui.home.HomeActivity.OnStartThroughServiceListener;
 import sti.software.engineering.reading.assistant.ui.home.selection.SelectImageFrom;
@@ -57,10 +58,17 @@ import static sti.software.engineering.reading.assistant.util.Utility.Messages.t
 
 
 public class ReadFragment extends DaggerFragment implements
+        OnNotifyChildListener,
         OnStartThroughServiceListener {
 
     private static final String TAG = "ReadFragment";
 
+    @SuppressLint("UseCompatLoadingForDrawables")
+    @Override
+    public void onGalleryDeletingImages() {
+        this.resetReadFragmentView();
+        viewModel.processDatabaseData();
+    }
 
     private final TextToSpeechHelper.OnUtteranceProgressListener utteranceProgressListener = new TextToSpeechHelper.OnUtteranceProgressListener() {
         @Override
@@ -107,8 +115,6 @@ public class ReadFragment extends DaggerFragment implements
     private SelectImageFrom selectImageFrom;
 
     private Uri imageUri;
-//    private File capturedImage;
-//    private String filename;
 
     private ImageRecyclerAdapter adapter;
     private TextToSpeechHelper textToSpeech;
@@ -127,8 +133,8 @@ public class ReadFragment extends DaggerFragment implements
 
         textToSpeech = new TextToSpeechHelper(requireContext());
         textToSpeech.setOnUtteranceProgressListener(utteranceProgressListener);
-
         ((HomeActivity) requireActivity()).setOnStartThroughServiceListener(this);
+        ((HomeActivity) requireActivity()).setOnNotifyChildListener(this);
         navigate();
         subscribeObservers();
         initImageRecyclerAdapter();
@@ -155,6 +161,14 @@ public class ReadFragment extends DaggerFragment implements
                 viewModel.setButtonReadState(true);
                 viewModel.setUtteranceProgress(UTTERANCE_DONE_READING);
                 return true;
+            }
+
+            @Override
+            public void onLongPress(MotionEvent e) {
+                super.onLongPress(e);
+                if (!(binding.contentReadViewImage.imvViewImage.getDrawable() instanceof BitmapDrawable))
+                    return;
+                ReadFragment.this.resetReadFragmentView();
             }
         });
 
@@ -183,7 +197,6 @@ public class ReadFragment extends DaggerFragment implements
         binding.contentReadViewList.viewList.setAdapter(adapter);
     }
 
-    @SuppressLint("UseCompatLoadingForDrawables")
     private void subscribeObservers() {
         viewModel.observedSelectedImage().removeObservers(getViewLifecycleOwner());
         viewModel.observedSelectedImage().observe(getViewLifecycleOwner(), selectImage -> {
@@ -192,8 +205,6 @@ public class ReadFragment extends DaggerFragment implements
                     selectImageFrom = new SelectImageFrom(requireActivity(), SelectImageFrom.SELECT_CAMERA);
                     startActivityForResult(selectImageFrom.pickCamera(), IMAGE_PICK_AUTO_CAMERA_CODE);
                     imageUri = selectImageFrom.getImageUri();
-//                        capturedImage = selectImageFrom.getFile();
-//                        filename = selectImageFrom.getFilename();
                 }
             }
         });
@@ -242,16 +253,7 @@ public class ReadFragment extends DaggerFragment implements
                     if (getOutputReadingStateTTSSettings(requireContext()).equals(SETTINGS_READING_STATE_TTS_YES)) {
                         this.setVisibilityMiniGallery(View.GONE, 1F);
                     }
-                } else {
-                    if (getOutputReadingStateTTSSettings(requireContext()).equals(SETTINGS_READING_STATE_TTS_YES)) {
-                        setInputReadingStateTTSSettings(requireContext(), SETTINGS_READING_STATE_TTS_NO);
-                        if (textToSpeech != null) textToSpeech.stop();
-                        viewModel.setButtonStopState(false);
-                    }
-                    this.setVisibilityMiniGallery(View.GONE, 1F);
-                    viewModel.setButtonReadState(false);
-                    binding.contentReadViewImage.imvViewImage.setImageDrawable(requireActivity().getDrawable(R.drawable.image_placeholder));
-                }
+                } else this.setVisibilityMiniGallery(View.GONE, 1F);
                 adapter.refresh(images);
             }
         });
@@ -292,6 +294,18 @@ public class ReadFragment extends DaggerFragment implements
 
     }
 
+    @SuppressLint("UseCompatLoadingForDrawables")
+    private void resetReadFragmentView() {
+        if (getOutputReadingStateTTSSettings(requireContext()).equals(SETTINGS_READING_STATE_TTS_YES)) {
+            setInputReadingStateTTSSettings(requireContext(), SETTINGS_READING_STATE_TTS_NO);
+            if (textToSpeech != null) textToSpeech.stop();
+            viewModel.setButtonStopState(false);
+        }
+
+        viewModel.setButtonReadState(false);
+        binding.contentReadViewImage.imvViewImage.setImageDrawable(requireActivity().getDrawable(R.drawable.image_placeholder));
+    }
+
     private void setVisibilityMiniGallery(int gone, float v) {
         binding.tvMiniGalleryLabel.setVisibility(gone);
         binding.contentReadViewList.cardRecyclerParent.setVisibility(gone);
@@ -309,11 +323,9 @@ public class ReadFragment extends DaggerFragment implements
         }
     }
 
-    @SuppressLint("UseCompatLoadingForDrawables")
     @Override
     public void onPause() {
         super.onPause();
-        viewModel.processDatabaseData();
     }
 
     @Override
@@ -351,5 +363,4 @@ public class ReadFragment extends DaggerFragment implements
             }
         }
     }
-
 }

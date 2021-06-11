@@ -25,7 +25,7 @@ public class DeletingImagesDialog extends DaggerDialogFragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         this.binding = DialogDeletingImagesBinding.inflate(inflater);
+        setCancelable(false);
         return this.binding.getRoot();
     }
-
 }

@@ -1,5 +1,7 @@
 package sti.software.engineering.reading.assistant.ui.home.sub.gallery;
 
+import android.app.Activity;
+import android.content.Context;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -20,6 +22,7 @@ import dagger.android.support.DaggerFragment;
 import sti.software.engineering.reading.assistant.adapter.gallery.GalleryRecyclerAdapter;
 import sti.software.engineering.reading.assistant.databinding.FragmentGalleryBinding;
 import sti.software.engineering.reading.assistant.model.Image;
+import sti.software.engineering.reading.assistant.ui.OnNotifyHostListener;
 import sti.software.engineering.reading.assistant.ui.home.sub.gallery.dialog.DeletingImagesDialog;
 import sti.software.engineering.reading.assistant.util.ProcessDatabaseDataManager;
 import sti.software.engineering.reading.assistant.viewmodel.ViewModelProviderFactory;
@@ -40,6 +43,7 @@ public class GalleryFragment extends DaggerFragment implements GalleryRecyclerAd
     private boolean isImageMarked;
 
     private DeletingImagesDialog dialog;
+    private OnNotifyHostListener notify;
 
     @Override
     public void onImageClicked(Image image) {
@@ -104,6 +108,7 @@ public class GalleryFragment extends DaggerFragment implements GalleryRecyclerAd
             this.adapter.resetSelectedItem();
             this.binding.btnGalleryRemove.setVisibility(View.GONE);
             this.isImageMarked = false;
+            this.notify.onGalleryDeletingImages();
             if (this.dialog != null) this.dialog.dismiss();
         }
     }
@@ -112,6 +117,24 @@ public class GalleryFragment extends DaggerFragment implements GalleryRecyclerAd
         if (selectedItems.size() > 0) {
             this.binding.btnGalleryRemove.setVisibility(View.VISIBLE);
         } else this.binding.btnGalleryRemove.setVisibility(View.GONE);
+    }
+
+    @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+        Activity activity = getActivity();
+        if (!(activity instanceof OnNotifyHostListener)) {
+            assert activity != null;
+            throw new ClassCastException(activity.getClass().getSimpleName()
+                    + " must implement OnNotifyHostListener interface.");
+        }
+        notify = (OnNotifyHostListener) activity;
+    }
+
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        notify = null;
     }
 
     @Override

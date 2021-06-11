@@ -35,6 +35,8 @@ import sti.software.engineering.reading.assistant.databinding.ActivityHomeBindin
 import sti.software.engineering.reading.assistant.model.Image;
 import sti.software.engineering.reading.assistant.service.TriggerCameraService;
 import sti.software.engineering.reading.assistant.ui.OnHostPermissionListener;
+import sti.software.engineering.reading.assistant.ui.OnNotifyChildListener;
+import sti.software.engineering.reading.assistant.ui.OnNotifyHostListener;
 import sti.software.engineering.reading.assistant.ui.about.AboutActivity;
 import sti.software.engineering.reading.assistant.ui.accessibility.AccessibilityActivity;
 import sti.software.engineering.reading.assistant.ui.home.sub.PagerAdapter;
@@ -47,10 +49,16 @@ import static android.Manifest.permission.WRITE_EXTERNAL_STORAGE;
 
 public class HomeActivity extends BaseActivity implements
         OnHostPermissionListener,
-        ImageRecyclerAdapter.OnImageClickListener{
+        OnNotifyHostListener,
+        ImageRecyclerAdapter.OnImageClickListener {
 
     private static final String TAG = "HomeActivity";
     private static final int OVERLAY_REQUEST_CODE = 401;
+
+    @Override
+    public void onGalleryDeletingImages() {
+        this.listener.onGalleryDeletingImages();
+    }
 
     @Override
     public void onImageClicked(Image image, Uri uri) {
@@ -79,8 +87,13 @@ public class HomeActivity extends BaseActivity implements
 
     private boolean startedThroughService;
 
-    private OnStartThroughServiceListener startThroughServiceListener;
+    private OnNotifyChildListener listener;
 
+    public void setOnNotifyChildListener(OnNotifyChildListener listener) {
+        this.listener = listener;
+    }
+
+    private OnStartThroughServiceListener startThroughServiceListener;
 
     public interface OnStartThroughServiceListener {
         void onStartedFromService();
@@ -144,7 +157,7 @@ public class HomeActivity extends BaseActivity implements
                             .setCancelable(false)
                             .show();
                 } else {
-                  if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q &&
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q &&
                             !Settings.canDrawOverlays(this)) {
                         //https://stackoverflow.com/questions/59419653/cannot-start-activity-background-in-android-10-android-q
                         AlertDialog.Builder builder = new AlertDialog.Builder(this);
