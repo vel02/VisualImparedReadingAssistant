@@ -1,4 +1,4 @@
-package sti.software.engineering.reading.assistant.adapter;
+package sti.software.engineering.reading.assistant.adapter.Image;
 
 import android.net.Uri;
 import android.view.LayoutInflater;

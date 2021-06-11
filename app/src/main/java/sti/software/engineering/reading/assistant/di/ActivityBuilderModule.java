@@ -6,6 +6,7 @@ import sti.software.engineering.reading.assistant.di.ui.about.AboutFragmentBuild
 import sti.software.engineering.reading.assistant.di.ui.about.AboutScope;
 import sti.software.engineering.reading.assistant.di.ui.accessibility.AccessibilityFragmentBuilderModule;
 import sti.software.engineering.reading.assistant.di.ui.accessibility.AccessibilityScope;
+import sti.software.engineering.reading.assistant.di.ui.home.HomeDialogBuilderModule;
 import sti.software.engineering.reading.assistant.di.ui.home.HomeFragmentBuilderModule;
 import sti.software.engineering.reading.assistant.di.ui.home.HomeScope;
 import sti.software.engineering.reading.assistant.di.ui.home.HomeViewModelModule;
@@ -18,7 +19,10 @@ public abstract class ActivityBuilderModule {
 
 
     @HomeScope
-    @ContributesAndroidInjector(modules = {HomeViewModelModule.class, HomeFragmentBuilderModule.class})
+    @ContributesAndroidInjector(modules = {
+            HomeDialogBuilderModule.class,
+            HomeViewModelModule.class,
+            HomeFragmentBuilderModule.class})
     abstract HomeActivity contributeHomeActivity();
 
     @AccessibilityScope

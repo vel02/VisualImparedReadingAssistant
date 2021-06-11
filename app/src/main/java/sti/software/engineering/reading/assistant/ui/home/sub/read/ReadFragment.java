@@ -29,7 +29,8 @@ import com.google.android.gms.vision.text.TextRecognizer;
 import javax.inject.Inject;
 
 import dagger.android.support.DaggerFragment;
-import sti.software.engineering.reading.assistant.adapter.ImageRecyclerAdapter;
+import sti.software.engineering.reading.assistant.R;
+import sti.software.engineering.reading.assistant.adapter.Image.ImageRecyclerAdapter;
 import sti.software.engineering.reading.assistant.databinding.FragmentReadBinding;
 import sti.software.engineering.reading.assistant.model.Image;
 import sti.software.engineering.reading.assistant.ui.home.HomeActivity;
@@ -182,6 +183,7 @@ public class ReadFragment extends DaggerFragment implements
         binding.contentReadViewList.viewList.setAdapter(adapter);
     }
 
+    @SuppressLint("UseCompatLoadingForDrawables")
     private void subscribeObservers() {
         viewModel.observedSelectedImage().removeObservers(getViewLifecycleOwner());
         viewModel.observedSelectedImage().observe(getViewLifecycleOwner(), selectImage -> {
@@ -240,7 +242,16 @@ public class ReadFragment extends DaggerFragment implements
                     if (getOutputReadingStateTTSSettings(requireContext()).equals(SETTINGS_READING_STATE_TTS_YES)) {
                         this.setVisibilityMiniGallery(View.GONE, 1F);
                     }
-                } else this.setVisibilityMiniGallery(View.GONE, 1F);
+                } else {
+                    if (getOutputReadingStateTTSSettings(requireContext()).equals(SETTINGS_READING_STATE_TTS_YES)) {
+                        setInputReadingStateTTSSettings(requireContext(), SETTINGS_READING_STATE_TTS_NO);
+                        if (textToSpeech != null) textToSpeech.stop();
+                        viewModel.setButtonStopState(false);
+                    }
+                    this.setVisibilityMiniGallery(View.GONE, 1F);
+                    viewModel.setButtonReadState(false);
+                    binding.contentReadViewImage.imvViewImage.setImageDrawable(requireActivity().getDrawable(R.drawable.image_placeholder));
+                }
                 adapter.refresh(images);
             }
         });
@@ -296,6 +307,13 @@ public class ReadFragment extends DaggerFragment implements
             textToSpeech.setOnUtteranceProgressListener(utteranceProgressListener);
             setInputReInstantiateTTSSettings(requireContext(), SETTINGS_INSTANTIATE_TTS_NO);
         }
+    }
+
+    @SuppressLint("UseCompatLoadingForDrawables")
+    @Override
+    public void onPause() {
+        super.onPause();
+        viewModel.processDatabaseData();
     }
 
     @Override

@@ -26,4 +26,6 @@
 
     <style name="Theme.VisualImparedReadingAssistant.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
 
+    <style name="RoundedCornersDialog" parent="@style/ThemeOverlay.MaterialComponents.Dialog" />
+
 </resources>

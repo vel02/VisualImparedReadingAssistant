@@ -5,6 +5,7 @@ import android.util.Log;
 
 import androidx.lifecycle.ViewModel;
 
+import sti.software.engineering.reading.assistant.ui.home.sub.gallery.GalleryFragmentViewModel;
 import sti.software.engineering.reading.assistant.ui.home.sub.read.ReadFragmentViewModel;
 
 public class ProcessDatabaseDataManager extends CountDownTimer {
@@ -26,7 +27,6 @@ public class ProcessDatabaseDataManager extends CountDownTimer {
         return instance;
     }
 
-
     @Override
     public void onTick(long millisUntilFinished) {
         Log.d(TAG, "onTick: " + (millisUntilFinished / 1000));
@@ -36,6 +36,8 @@ public class ProcessDatabaseDataManager extends CountDownTimer {
     public void onFinish() {
         if (viewModel instanceof ReadFragmentViewModel) {
             ((ReadFragmentViewModel) viewModel).processDatabaseData();
+        } else if (viewModel instanceof GalleryFragmentViewModel) {
+            ((GalleryFragmentViewModel) viewModel).processDatabaseData();
         }
     }
 }

@@ -37,4 +37,7 @@
     <string name="description_licensed">Copyright Visual Impaired Reading Assistant<br />Licensed under the MIT License</string>
     <string name="tag_fragment_instruction">tag_fragment_instruction</string>
     <string name="tag_fragment_contact_us">tag_fragment_contact_us</string>
+    <string name="label_remove_marked">Remove Marked</string>
+    <string name="label_dialog_deleting">Deleting images...</string>
+    <string name="label_image_logo">Image Logo</string>
 </resources>

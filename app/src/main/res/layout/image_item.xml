@@ -5,10 +5,6 @@
 
     <data>
 
-        <!--        <variable-->
-        <!--            name="placeholder"-->
-        <!--            type="android.net.Uri" />-->
-
         <variable
             name="image"
             type="sti.software.engineering.reading.assistant.model.Image" />
@@ -19,7 +15,7 @@
 
         <variable
             name="listener"
-            type="sti.software.engineering.reading.assistant.adapter.ImageRecyclerAdapter.OnImageClickListener" />
+            type="sti.software.engineering.reading.assistant.adapter.Image.ImageRecyclerAdapter.OnImageClickListener" />
 
     </data>
 

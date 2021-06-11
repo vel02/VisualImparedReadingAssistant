@@ -1,4 +1,4 @@
-package sti.software.engineering.reading.assistant.adapter;
+package sti.software.engineering.reading.assistant.adapter.Image;
 
 import android.net.Uri;
 import android.view.View;
@@ -8,6 +8,7 @@ import androidx.core.content.FileProvider;
 import androidx.databinding.DataBindingUtil;
 
 import sti.software.engineering.reading.assistant.R;
+import sti.software.engineering.reading.assistant.adapter.BaseBindHolder;
 import sti.software.engineering.reading.assistant.databinding.ImageItemBinding;
 import sti.software.engineering.reading.assistant.model.Image;
 

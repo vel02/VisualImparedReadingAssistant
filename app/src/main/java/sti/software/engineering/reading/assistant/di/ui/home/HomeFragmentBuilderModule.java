@@ -5,6 +5,7 @@ import dagger.android.ContributesAndroidInjector;
 import sti.software.engineering.reading.assistant.di.ui.home.camera.CameraFragmentScope;
 import sti.software.engineering.reading.assistant.di.ui.home.camera.CameraFragmentViewModelModule;
 import sti.software.engineering.reading.assistant.di.ui.home.gallery.GalleryFragmentScope;
+import sti.software.engineering.reading.assistant.di.ui.home.gallery.GalleryFragmentViewModelModule;
 import sti.software.engineering.reading.assistant.di.ui.home.read.ReadFragmentScope;
 import sti.software.engineering.reading.assistant.di.ui.home.read.ReadFragmentViewModelModule;
 import sti.software.engineering.reading.assistant.ui.home.sub.camera.CameraFragment;
@@ -23,7 +24,7 @@ public abstract class HomeFragmentBuilderModule {
     abstract CameraFragment contributeCameraFragment();
 
     @GalleryFragmentScope
-    @ContributesAndroidInjector
+    @ContributesAndroidInjector(modules = {GalleryFragmentViewModelModule.class})
     abstract GalleryFragment contributeGalleryFragment();
 
 }

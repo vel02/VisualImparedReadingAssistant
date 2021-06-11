@@ -30,7 +30,7 @@ import javax.inject.Inject;
 
 import sti.software.engineering.reading.assistant.BaseActivity;
 import sti.software.engineering.reading.assistant.R;
-import sti.software.engineering.reading.assistant.adapter.ImageRecyclerAdapter;
+import sti.software.engineering.reading.assistant.adapter.Image.ImageRecyclerAdapter;
 import sti.software.engineering.reading.assistant.databinding.ActivityHomeBinding;
 import sti.software.engineering.reading.assistant.model.Image;
 import sti.software.engineering.reading.assistant.service.TriggerCameraService;
@@ -47,7 +47,7 @@ import static android.Manifest.permission.WRITE_EXTERNAL_STORAGE;
 
 public class HomeActivity extends BaseActivity implements
         OnHostPermissionListener,
-        ImageRecyclerAdapter.OnImageClickListener {
+        ImageRecyclerAdapter.OnImageClickListener{
 
     private static final String TAG = "HomeActivity";
     private static final int OVERLAY_REQUEST_CODE = 401;
@@ -81,8 +81,10 @@ public class HomeActivity extends BaseActivity implements
 
     private OnStartThroughServiceListener startThroughServiceListener;
 
+
     public interface OnStartThroughServiceListener {
         void onStartedFromService();
+
     }
 
     public void setOnStartThroughServiceListener(OnStartThroughServiceListener listener) {
@@ -122,19 +124,6 @@ public class HomeActivity extends BaseActivity implements
             startService(intent);
         }
 
-//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q &&
-//                !Settings.canDrawOverlays(this)) {
-//            //https://stackoverflow.com/questions/59419653/cannot-start-activity-background-in-android-10-android-q
-//            AlertDialog.Builder builder = new AlertDialog.Builder(this);
-//            builder.setTitle("Display over other app");
-//            builder.setMessage("Allow \"Display over other app\" to grant camera access in the background");
-//            builder.setPositiveButton("OK", (dialog, which) -> {
-//                dialog.dismiss();
-//                requestPermission();
-//            });
-//            builder.setCancelable(false);
-//            builder.create().show();
-//        }
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             if (!Settings.canDrawOverlays(this)) {
@@ -155,9 +144,7 @@ public class HomeActivity extends BaseActivity implements
                             .setCancelable(false)
                             .show();
                 } else {
-//                    Intent overlaySettings = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:" + getPackageName()));
-//                    startActivityForResult(overlaySettings, OVERLAY_REQUEST_CODE);
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q &&
+                  if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q &&
                             !Settings.canDrawOverlays(this)) {
                         //https://stackoverflow.com/questions/59419653/cannot-start-activity-background-in-android-10-android-q
                         AlertDialog.Builder builder = new AlertDialog.Builder(this);
