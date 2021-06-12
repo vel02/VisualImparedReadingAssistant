@@ -10,13 +10,22 @@
 
     <!--  User Defined Colors  -->
 
-    <color name="primaryColor">#546e7a</color>
-    <color name="primaryLightColor">#ffffff</color>
-    <color name="primaryDarkColor">#c7c7c7</color>
+<!--    <color name="primaryColor">#546e7a</color>-->
+<!--    <color name="primaryLightColor">#ffffff</color>-->
+<!--    <color name="primaryDarkColor">#c7c7c7</color>-->
 
-    <color name="secondaryColor">#546e7a</color>
-    <color name="secondaryLightColor">#eceff1</color>
-    <color name="secondaryDarkColor">#29434e</color>
+
+    <color name="primaryColor">#1976d2</color>
+    <color name="primaryLightColor">#ffffff</color>
+    <color name="primaryDarkColor">#004ba0</color>
+
+<!--    <color name="secondaryColor">#546e7a</color>-->
+<!--    <color name="secondaryLightColor">#eceff1</color>-->
+<!--    <color name="secondaryDarkColor">#29434e</color>    -->
+
+    <color name="secondaryColor">#f57f17</color>
+    <color name="secondaryLightColor">#ffb04c</color>
+    <color name="secondaryDarkColor">#bc5100</color>
 
     <color name="primaryTextColor">#fafafa</color>
     <color name="secondaryTextColor">#212121</color>

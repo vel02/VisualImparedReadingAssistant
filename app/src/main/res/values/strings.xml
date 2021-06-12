@@ -20,10 +20,10 @@
     <string name="dialog_message_retake">Are you sure you want to re-take the image?</string>
     <string name="dialog_positive_yes">Yes</string>
     <string name="dialog_negative_no">No</string>
-    <string name="label_language">Language</string>
-    <string name="label_app_language">Use App Language</string>
-    <string name="label_system_language">Use System Language</string>
-    <string name="label_select_language">Select preferred application language</string>
+    <string name="label_voice_selection">Voice Selection</string>
+    <string name="label_app_language">Filipino (Default)</string>
+    <string name="label_system_language">English</string>
+    <string name="label_select_language">Select preferred application language voice</string>
     <string name="label_speech_rate">Speech rate</string>
     <string name="label_pitch">Pitch</string>
     <string name="label_play">Play</string>
