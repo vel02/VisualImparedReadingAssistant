@@ -36,6 +36,7 @@ public class GalleryBindHolder extends BaseBindHolder {
         Uri uri = FileProvider.getUriForFile(itemView.getContext(),
                 itemView.getContext().getPackageName()
                         + ".provider", image.getFileObject());
+
         binding.setImage(image);
         binding.setUri(uri);
     }

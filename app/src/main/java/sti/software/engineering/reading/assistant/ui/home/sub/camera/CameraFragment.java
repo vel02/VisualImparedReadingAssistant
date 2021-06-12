@@ -197,7 +197,6 @@ public class CameraFragment extends DaggerFragment {
 
             preferred_filename = preferred_filename + FILE_EXTENSION_JPG;
             File newFilename = new File(capturedImage.getParent() + FILE_PATH_SEPARATOR_SLASH + preferred_filename);
-
             Image image = new Image();
             if (!preferred_filename.equalsIgnoreCase(filename) && renameFile(capturedImage, newFilename)) {
                 Log.i(TAG, "RENAMED");

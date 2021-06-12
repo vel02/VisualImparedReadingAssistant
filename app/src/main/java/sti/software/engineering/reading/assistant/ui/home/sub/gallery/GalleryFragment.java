@@ -2,6 +2,7 @@ package sti.software.engineering.reading.assistant.ui.home.sub.gallery;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -24,8 +25,11 @@ import sti.software.engineering.reading.assistant.databinding.FragmentGalleryBin
 import sti.software.engineering.reading.assistant.model.Image;
 import sti.software.engineering.reading.assistant.ui.OnNotifyHostListener;
 import sti.software.engineering.reading.assistant.ui.home.sub.gallery.dialog.DeletingImagesDialog;
+import sti.software.engineering.reading.assistant.ui.picture.PictureActivity;
 import sti.software.engineering.reading.assistant.util.ProcessDatabaseDataManager;
 import sti.software.engineering.reading.assistant.viewmodel.ViewModelProviderFactory;
+
+import static sti.software.engineering.reading.assistant.util.Utility.IntentKeys.INTENT_KEY_PHOTO_CLICKED;
 
 public class GalleryFragment extends DaggerFragment implements GalleryRecyclerAdapter.OnImageClickListener {
 
@@ -48,11 +52,15 @@ public class GalleryFragment extends DaggerFragment implements GalleryRecyclerAd
     @Override
     public void onImageClicked(Image image) {
         Log.d(TAG, "onImageClicked: " + image.toString());
+        Intent intent = new Intent(requireContext(), PictureActivity.class);
+        intent.putExtra(INTENT_KEY_PHOTO_CLICKED, image);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        startActivity(intent);
     }
 
     @Override
-    public void onImageSelected(List<Image> selectedItems) {
-        Log.d(TAG, "onImageSelected: " + selectedItems.size());
+    public void onImageHighlighted(List<Image> selectedItems) {
+        Log.d(TAG, "onImageHighlighted: " + selectedItems.size());
         this.isImageMarked = true;
         this.selectedImages = selectedItems;
         this.setButtonGalleryRemoveVisibility(selectedItems);
@@ -94,6 +102,7 @@ public class GalleryFragment extends DaggerFragment implements GalleryRecyclerAd
         this.viewModel.observedImages().removeObservers(getViewLifecycleOwner());
         this.viewModel.observedImages().observe(getViewLifecycleOwner(), images -> {
             if (images != null) {
+                Log.d(TAG, "subscribeObservers: " + images);
                 this.adapter.refresh(images);
                 if (images.size() == 0) this.binding.placeholderGallery.setVisibility(View.VISIBLE);
                 else this.binding.placeholderGallery.setVisibility(View.GONE);

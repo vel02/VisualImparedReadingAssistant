@@ -2,17 +2,11 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <!--    <item-->
-    <!--        android:id="@+id/action_select_image"-->
-    <!--        android:icon="@drawable/ic_photo"-->
-    <!--        android:orderInCategory="100"-->
-    <!--        android:title="@string/label_select_image"-->
-    <!--        app:showAsAction="always" />-->
 
     <item
         android:id="@+id/action_accessibility"
         android:orderInCategory="100"
-        android:title="Accessibility"
+        android:title="@string/label_accessibility"
         app:showAsAction="never" />
 
 
@@ -21,14 +15,5 @@
         android:orderInCategory="200"
         android:title="@string/label_about"
         app:showAsAction="never" />
-
-<!--    <item-->
-<!--        android:id="@+id/action_app_voice"-->
-<!--        android:checkable="true"-->
-<!--        android:checked="true"-->
-<!--        android:orderInCategory="200"-->
-<!--        android:title="App Voice"-->
-<!--        app:showAsAction="never" />-->
-
 
 </menu>

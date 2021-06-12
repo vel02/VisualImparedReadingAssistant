@@ -42,4 +42,8 @@
     <string name="label_image_logo">Image Logo</string>
     <string name="description_tip_icon">Tip icon</string>
     <string name="label_tip">Tap the image to read the text, double to stop, and long press to clear the view.</string>
+    <string name="label_edit">Edit</string>
+    <string name="label_accessibility">Accessibility</string>
+    <string name="dialog_delete_image_title">Delete Image</string>
+    <string name="dialog_delete_image_message">Are you sure you want to delete this image?</string>
 </resources>

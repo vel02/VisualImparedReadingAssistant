@@ -10,9 +10,13 @@ import sti.software.engineering.reading.assistant.di.ui.home.HomeDialogBuilderMo
 import sti.software.engineering.reading.assistant.di.ui.home.HomeFragmentBuilderModule;
 import sti.software.engineering.reading.assistant.di.ui.home.HomeScope;
 import sti.software.engineering.reading.assistant.di.ui.home.HomeViewModelModule;
+import sti.software.engineering.reading.assistant.di.ui.picture.PictureFragmentBuilderModule;
+import sti.software.engineering.reading.assistant.di.ui.picture.PictureScope;
+import sti.software.engineering.reading.assistant.di.ui.picture.PictureViewModelModule;
 import sti.software.engineering.reading.assistant.ui.about.AboutActivity;
 import sti.software.engineering.reading.assistant.ui.accessibility.AccessibilityActivity;
 import sti.software.engineering.reading.assistant.ui.home.HomeActivity;
+import sti.software.engineering.reading.assistant.ui.picture.PictureActivity;
 
 @Module
 public abstract class ActivityBuilderModule {
@@ -32,5 +36,11 @@ public abstract class ActivityBuilderModule {
     @AboutScope
     @ContributesAndroidInjector(modules = {AboutFragmentBuilderModule.class})
     abstract AboutActivity contributeActivity();
+
+    @PictureScope
+    @ContributesAndroidInjector(modules = {
+            PictureViewModelModule.class,
+            PictureFragmentBuilderModule.class})
+    abstract PictureActivity contributePictureActivity();
 
 }

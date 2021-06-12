@@ -20,7 +20,8 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.VisualImparedReadingAssistant.NoActionBar">
-        <activity android:name=".ui.about.AboutActivity"></activity>
+        <activity android:name=".ui.picture.PictureActivity"></activity>
+        <activity android:name=".ui.about.AboutActivity" />
         <activity
             android:name=".ui.accessibility.AccessibilityActivity"
             android:label="@string/app_accessibility"

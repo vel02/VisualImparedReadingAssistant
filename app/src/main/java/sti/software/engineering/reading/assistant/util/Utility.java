@@ -31,6 +31,23 @@ public class Utility {
 
     }
 
+    public static class IntentKeys {
+
+        private IntentKeys() {
+        }
+
+        public static final String INTENT_KEY_PHOTO_CLICKED = "sti.software.engineering.reading.assistant.INTENT_PHOTO_CLICKED";
+
+    }
+
+    public static class ArgKeys {
+        private ArgKeys() {
+        }
+
+        public static final int ARG_KEY_PHOTO_CLICKED = 10001;
+        public static final String BUNDLE_KEY_PHOTO_CLICKED = "sti.software.engineering.reading.assistant.ARG_PHOTO_CLICKED";
+    }
+
     public static class Strings {
         private Strings() {
         }

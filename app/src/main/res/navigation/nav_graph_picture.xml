@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/nav_graph_picture"
+    app:startDestination="@id/nav_picture">
+
+    <fragment
+        android:id="@+id/nav_picture"
+        android:name="sti.software.engineering.reading.assistant.ui.picture.sub.PictureFragment"
+        android:label="Photo"
+        tools:layout="@layout/fragment_picture">
+        <argument
+            android:name="image"
+            app:argType="sti.software.engineering.reading.assistant.model.Image"
+            app:nullable="true"
+            android:defaultValue="@null" />
+    </fragment>
+</navigation>

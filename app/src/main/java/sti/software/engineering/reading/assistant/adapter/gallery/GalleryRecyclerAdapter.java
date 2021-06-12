@@ -41,6 +41,7 @@ public class GalleryRecyclerAdapter extends RecyclerView.Adapter<GalleryBindHold
 
     @Override
     public void onBindViewHolder(@NonNull GalleryBindHolder holder, int position) {
+
         holder.onBind(images.get(position));
         int highlight = holder.itemView.getResources().getColor(R.color.secondaryColor);
         holder.itemView.setOnLongClickListener(v -> {
@@ -59,7 +60,7 @@ public class GalleryRecyclerAdapter extends RecyclerView.Adapter<GalleryBindHold
                 selectedItems.add(image);
             }
 
-            listener.onImageSelected(selectedItems);
+            listener.onImageHighlighted(selectedItems);
 
             if (selectedItems.size() == 0) {
                 isSelectedMode = false;
@@ -83,7 +84,7 @@ public class GalleryRecyclerAdapter extends RecyclerView.Adapter<GalleryBindHold
                     selectedItems.add(image);
                 }
 
-                listener.onImageSelected(selectedItems);
+                listener.onImageHighlighted(selectedItems);
 
                 if (selectedItems.size() == 0) {
                     isSelectedMode = false;
@@ -111,7 +112,7 @@ public class GalleryRecyclerAdapter extends RecyclerView.Adapter<GalleryBindHold
     public interface OnImageClickListener {
         void onImageClicked(Image image);
 
-        void onImageSelected(List<Image> selectedItems);
+        void onImageHighlighted(List<Image> selectedItems);
     }
 
     private OnImageClickListener listener;
