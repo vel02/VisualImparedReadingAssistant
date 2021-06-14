@@ -25,6 +25,7 @@ import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.tabs.TabLayout;
 
 import java.util.Locale;
+import java.util.Objects;
 
 import javax.inject.Inject;
 
@@ -128,6 +129,11 @@ public class HomeActivity extends BaseActivity implements
         viewModel = new ViewModelProvider(HomeActivity.this, providerFactory).get(HomeViewModel.class);
 
         setSupportActionBar(binding.toolbar);
+        //Toolbar Logo
+        Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setTitle("Home");
+        binding.toolbar.setNavigationIcon(R.drawable.ic_vira_logo_toolbar);
+
         initViewPager();
 
         subscribeObservers();

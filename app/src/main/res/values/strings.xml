@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Visual Impaired Reading Assistant</string>
+    <string name="app_name">VIRA</string>
     <string name="app_accessibility">Accessibility</string>
     <string name="label_about">About</string>
     <string name="label_view_image">View Image</string>
