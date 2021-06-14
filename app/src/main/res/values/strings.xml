@@ -53,4 +53,9 @@
     <string name="label_back">Back</string>
     <string name="tag_fragment_instruction_three">tag_fragment_instruction_three</string>
     <string name="tag_fragment_instruction_four">tag_fragment_instruction_four</string>
+    <string name="tip_zoom">You can interact the image to zoom in and zoom out.</string>
+    <string name="instruction_about_customizing_image">Instruction about customizing image</string>
+    <string name="instruction_about_reading_image">Instruction about reading image</string>
+    <string name="instruction_about_removing_list_of_images">Instruction about removing list of images</string>
+    <string name="instruction_about_selecting_preferred_voice">Instruction about selecting preferred voice</string>
 </resources>

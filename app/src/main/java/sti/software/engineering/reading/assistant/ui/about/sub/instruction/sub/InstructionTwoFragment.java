@@ -30,6 +30,7 @@ public class InstructionTwoFragment extends DaggerFragment {
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        binding.zoomView.setImageResource(R.drawable.im_instruction_three);
         navigate();
     }
 

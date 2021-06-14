@@ -10,14 +10,21 @@
         android:weightSum="3"
         tools:context=".ui.about.sub.instruction.sub.InstructionOneFragment">
 
-        <ImageView
+        <include
+            android:id="@+id/content_zoom_tip"
+            layout="@layout/content_zoom_tip"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="16dp" />
+
+        <com.github.chrisbanes.photoview.PhotoView
+            android:id="@+id/zoom_view"
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="2.5"
             android:adjustViewBounds="true"
-            android:contentDescription="@string/instruction_about_camera"
-            android:scaleType="fitCenter"
-            android:src="@drawable/im_instruction_two" />
+            android:contentDescription="@string/instruction_about_customizing_image"
+            android:scaleType="fitCenter" />
 
 
         <RelativeLayout

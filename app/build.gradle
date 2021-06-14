@@ -63,9 +63,9 @@ dependencies {
     implementation "com.google.android.gms:play-services-vision:$image_to_text"
     //reference: https://developers.google.com/android/guides/releases
 
-//    def picasso_version = "2.71828"
-//    implementation "com.squareup.picasso:picasso:$picasso_version"
-//    //reference: https://github.com/square/picasso
+    def zoom_image = "2.0.0"
+    implementation "com.github.chrisbanes:PhotoView:$zoom_image"
+    //reference: https://github.com/Baseflow/PhotoView
 
     def room_version = "2.3.0"
     implementation "androidx.room:room-runtime:$room_version"
