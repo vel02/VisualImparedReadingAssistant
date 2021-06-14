@@ -2,20 +2,54 @@
 <layout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
-    <data>
-
-    </data>
-
-    <FrameLayout
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:background="@color/white"
+        android:orientation="vertical"
+        android:padding="16dp"
         tools:context=".ui.about.sub.ContactUsFragment">
 
-        <!-- TODO: Update blank fragment layout -->
+        <TextView
+            android:id="@+id/tv_description_one"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical|end"
+            android:text="VIRA or Visually Impaired Reading Assistant is a project built by a group of developers who are currently taking Bachelor of Science in Computer Science in STI College Global City. "
+            android:textAppearance="?android:attr/textAppearanceSmall" />
+
+        <TextView
+            android:id="@+id/tv_description_two"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical|end"
+            android:layout_marginTop="8dp"
+            android:text="This project or application aims to help people who are not able to use their sight to assist them when it come on reading the context of the book they want to read."
+            android:textAppearance="?android:attr/textAppearanceSmall" />
+
         <TextView
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:text="@string/hello_blank_fragment" />
+            android:layout_height="1dp"
+            android:layout_marginTop="16dp"
+            android:layout_marginBottom="16dp"
+            android:background="?android:attr/dividerVertical" />
 
-    </FrameLayout>
+
+        <TextView
+            android:id="@+id/tv_description_three"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical|end"
+            android:layout_marginTop="16dp"
+            android:text="For any questions, comment, or suggestions. We would love to hear from you."
+            android:textAppearance="?android:attr/textAppearanceSmall" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="vira.support@protonmail.com"
+            android:textAppearance="?android:attr/textAppearanceSmall" />
+
+    </LinearLayout>
 </layout>
