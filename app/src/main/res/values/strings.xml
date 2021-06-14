@@ -46,4 +46,11 @@
     <string name="label_accessibility">Accessibility</string>
     <string name="dialog_delete_image_title">Delete Image</string>
     <string name="dialog_delete_image_message">Are you sure you want to delete this image?</string>
+    <string name="instruction_about_camera">Instruction about camera</string>
+    <string name="label_next">Next</string>
+    <string name="tag_fragment_instruction_one">tag_fragment_instruction_one</string>
+    <string name="tag_fragment_instruction_two">tag_fragment_instruction_two</string>
+    <string name="label_back">Back</string>
+    <string name="tag_fragment_instruction_three">tag_fragment_instruction_three</string>
+    <string name="tag_fragment_instruction_four">tag_fragment_instruction_four</string>
 </resources>

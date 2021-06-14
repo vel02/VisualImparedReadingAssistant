@@ -16,7 +16,11 @@ import sti.software.engineering.reading.assistant.BaseActivity;
 import sti.software.engineering.reading.assistant.R;
 import sti.software.engineering.reading.assistant.databinding.ActivityAboutBinding;
 import sti.software.engineering.reading.assistant.ui.Hostable;
-import sti.software.engineering.reading.assistant.ui.about.sub.AboutFragmentDirections;
+import sti.software.engineering.reading.assistant.ui.about.sub.about.AboutFragmentDirections;
+import sti.software.engineering.reading.assistant.ui.about.sub.instruction.InstructionsFragmentDirections;
+import sti.software.engineering.reading.assistant.ui.about.sub.instruction.sub.InstructionOneFragmentDirections;
+import sti.software.engineering.reading.assistant.ui.about.sub.instruction.sub.InstructionThreeFragmentDirections;
+import sti.software.engineering.reading.assistant.ui.about.sub.instruction.sub.InstructionTwoFragmentDirections;
 
 public class AboutActivity extends BaseActivity implements Hostable {
 
@@ -34,6 +38,27 @@ public class AboutActivity extends BaseActivity implements Hostable {
                 directions = AboutFragmentDirections.actionNavAboutToContactUsFragment();
                 Navigation.findNavController(view).navigate(directions);
                 break;
+
+            case "tag_fragment_instruction_one":
+                directions = InstructionsFragmentDirections.actionNavInstructionsToInstructionOneFragment();
+                Navigation.findNavController(view).navigate(directions);
+                break;
+
+            case "tag_fragment_instruction_two":
+                directions = InstructionOneFragmentDirections.actionNavInstructionOneToInstructionTwoFragment();
+                Navigation.findNavController(view).navigate(directions);
+                break;
+
+            case "tag_fragment_instruction_three":
+                directions = InstructionTwoFragmentDirections.actionNavInstructionTwoToInstructionThreeFragment();
+                Navigation.findNavController(view).navigate(directions);
+                break;
+
+            case "tag_fragment_instruction_four":
+                directions = InstructionThreeFragmentDirections.actionNavInstructionThreeToInstructionFourFragment();
+                Navigation.findNavController(view).navigate(directions);
+                break;
+
         }
 
 

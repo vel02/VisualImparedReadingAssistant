@@ -1,4 +1,4 @@
-package sti.software.engineering.reading.assistant.ui.about.sub;
+package sti.software.engineering.reading.assistant.ui.about.sub.instruction.sub;
 
 import android.app.Activity;
 import android.content.Context;
@@ -11,38 +11,34 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import dagger.android.support.DaggerFragment;
-import sti.software.engineering.reading.assistant.BuildConfig;
 import sti.software.engineering.reading.assistant.R;
-import sti.software.engineering.reading.assistant.databinding.FragmentAboutBinding;
+import sti.software.engineering.reading.assistant.databinding.FragmentInstructionTwoBinding;
 import sti.software.engineering.reading.assistant.ui.Hostable;
 
-public class AboutFragment extends DaggerFragment {
+public class InstructionTwoFragment extends DaggerFragment {
 
-
-    private FragmentAboutBinding binding;
+    private FragmentInstructionTwoBinding binding;
     private Hostable hostable;
+
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        binding = FragmentAboutBinding.inflate(inflater);
+        binding = FragmentInstructionTwoBinding.inflate(inflater);
         return binding.getRoot();
     }
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
-        String version = BuildConfig.VERSION_NAME;
-        binding.setVersion(version);
         navigate();
     }
 
     private void navigate() {
-        binding.btnInstruction.setOnClickListener(v -> {
-            hostable.onInflate(v, getString(R.string.tag_fragment_instruction));
+        binding.btnNext.setOnClickListener(v -> {
+            hostable.onInflate(v, getString(R.string.tag_fragment_instruction_three));
         });
-
-        binding.btnContactUs.setOnClickListener(v -> {
-            hostable.onInflate(v, getString(R.string.tag_fragment_contact_us));
+        binding.btnBack.setOnClickListener(v -> {
+            requireActivity().onBackPressed();
         });
     }
 

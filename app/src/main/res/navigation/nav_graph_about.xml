@@ -7,7 +7,7 @@
 
     <fragment
         android:id="@+id/nav_about"
-        android:name="sti.software.engineering.reading.assistant.ui.about.sub.AboutFragment"
+        android:name="sti.software.engineering.reading.assistant.ui.about.sub.about.AboutFragment"
         android:label="About"
         tools:layout="@layout/fragment_about">
         <action
@@ -30,14 +30,72 @@
 
     <fragment
         android:id="@+id/nav_instructions"
-        android:name="sti.software.engineering.reading.assistant.ui.about.sub.InstructionsFragment"
-        android:label="Instructions"
-        tools:layout="@layout/fragment_instructions" />
+        android:name="sti.software.engineering.reading.assistant.ui.about.sub.instruction.InstructionsFragment"
+        android:label="Capture Image"
+        tools:layout="@layout/fragment_instructions">
+        <action
+            android:id="@+id/action_nav_instructions_to_instructionOneFragment"
+            app:destination="@id/nav_instruction_one"
+            app:enterAnim="@anim/slide_in_right"
+            app:exitAnim="@anim/slide_out_left"
+            app:popEnterAnim="@anim/slide_in_left"
+            app:popExitAnim="@anim/slide_out_right" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/nav_instruction_one"
+        android:name="sti.software.engineering.reading.assistant.ui.about.sub.instruction.sub.InstructionOneFragment"
+        android:label="Customize Image"
+        tools:layout="@layout/fragment_instruction_one">
+        <action
+            android:id="@+id/action_nav_instruction_one_to_instructionTwoFragment"
+            app:destination="@id/nav_instruction_two"
+            app:enterAnim="@anim/slide_in_right"
+            app:exitAnim="@anim/slide_out_left"
+            app:popEnterAnim="@anim/slide_in_left"
+            app:popExitAnim="@anim/slide_out_right" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/nav_instruction_two"
+        android:name="sti.software.engineering.reading.assistant.ui.about.sub.instruction.sub.InstructionTwoFragment"
+        android:label="Reading Image"
+        tools:layout="@layout/fragment_instruction_two">
+        <action
+            android:id="@+id/action_nav_instruction_two_to_instructionThreeFragment"
+            app:destination="@id/nav_instruction_three"
+            app:enterAnim="@anim/slide_in_right"
+            app:exitAnim="@anim/slide_out_left"
+            app:popEnterAnim="@anim/slide_in_left"
+            app:popExitAnim="@anim/slide_out_right" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/nav_instruction_three"
+        android:name="sti.software.engineering.reading.assistant.ui.about.sub.instruction.sub.InstructionThreeFragment"
+        android:label="Remove list of Images"
+        tools:layout="@layout/fragment_instruction_three">
+        <action
+            android:id="@+id/action_nav_instruction_three_to_instructionFourFragment"
+            app:destination="@id/nav_instruction_four"
+            app:enterAnim="@anim/slide_in_right"
+            app:exitAnim="@anim/slide_out_left"
+            app:popEnterAnim="@anim/slide_in_left"
+            app:popExitAnim="@anim/slide_out_right" />
+    </fragment>
+
+
+    <fragment
+        android:id="@+id/nav_instruction_four"
+        android:name="sti.software.engineering.reading.assistant.ui.about.sub.instruction.sub.InstructionFourFragment"
+        android:label="Select preferred voice"
+        tools:layout="@layout/fragment_instruction_four" />
 
     <fragment
         android:id="@+id/nav_contact_us"
         android:name="sti.software.engineering.reading.assistant.ui.about.sub.ContactUsFragment"
         android:label="Contact Us"
         tools:layout="@layout/fragment_contact_us" />
+
 
 </navigation>

@@ -16,7 +16,7 @@
         android:background="@color/white"
         android:orientation="vertical"
         android:padding="16dp"
-        tools:context=".ui.about.sub.AboutFragment">
+        tools:context=".ui.about.sub.about.AboutFragment">
 
         <LinearLayout
             android:id="@+id/btn_instruction"
