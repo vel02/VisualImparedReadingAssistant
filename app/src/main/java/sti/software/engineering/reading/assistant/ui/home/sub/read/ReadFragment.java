@@ -168,7 +168,8 @@ public class ReadFragment extends DaggerFragment implements
                 super.onLongPress(e);
                 if (!(binding.contentReadViewImage.imvViewImage.getDrawable() instanceof BitmapDrawable))
                     return;
-                ReadFragment.this.resetReadFragmentView();
+                if (getOutputReadingStateTTSSettings(requireContext()).equals(SETTINGS_READING_STATE_TTS_NO))
+                    ReadFragment.this.resetReadFragmentView();
             }
         });
 
@@ -316,22 +317,33 @@ public class ReadFragment extends DaggerFragment implements
     public void onResume() {
         super.onResume();
         viewModel.processDatabaseData();
+        Log.d(TAG, "onResume: calleded");
         if (getOutputReInstantiateTTSSettings(requireContext()).equals(SETTINGS_INSTANTIATE_TTS_YES)) {
+            Log.d(TAG, "onResume: called yes");
+            setInputReInstantiateTTSSettings(requireContext(), SETTINGS_INSTANTIATE_TTS_NO);
+            if (textToSpeech != null) {
+                textToSpeech.stop();
+                textToSpeech.destroy();
+            }
             textToSpeech = new TextToSpeechHelper(requireContext());
             textToSpeech.setOnUtteranceProgressListener(utteranceProgressListener);
-            setInputReInstantiateTTSSettings(requireContext(), SETTINGS_INSTANTIATE_TTS_NO);
+        }
+
+        if (getOutputReadingStateTTSSettings(requireContext()).equals(SETTINGS_READING_STATE_TTS_YES)) {
+            viewModel.setUtteranceProgress(UTTERANCE_DONE_READING);
+            viewModel.setButtonStopState(false);
+            viewModel.setButtonReadState(true);
         }
     }
 
     @Override
     public void onPause() {
         super.onPause();
-    }
+        if (getOutputReInstantiateTTSSettings(requireContext()).equals(SETTINGS_INSTANTIATE_TTS_NO)) {
+            Log.d(TAG, "onPause: called");
+            setInputReInstantiateTTSSettings(requireContext(), SETTINGS_INSTANTIATE_TTS_YES);
+        }
 
-    @Override
-    public void onStop() {
-        //update stop ui when onStop() was called while AI is reading.
-        Log.d(TAG, "onStop: called");
         if (textToSpeech != null) {
             textToSpeech.stop();
         }
@@ -341,6 +353,23 @@ public class ReadFragment extends DaggerFragment implements
             viewModel.setButtonStopState(false);
             viewModel.setButtonReadState(true);
         }
+
+
+    }
+
+    @Override
+    public void onStop() {
+        //update stop ui when onStop() was called while AI is reading.
+        Log.d(TAG, "onStop: called");
+//        if (textToSpeech != null) {
+//            textToSpeech.stop();
+//        }
+//
+//        if (getOutputReadingStateTTSSettings(requireContext()).equals(SETTINGS_READING_STATE_TTS_YES)) {
+//            viewModel.setUtteranceProgress(UTTERANCE_DONE_READING);
+//            viewModel.setButtonStopState(false);
+//            viewModel.setButtonReadState(true);
+//        }
 
         super.onStop();
     }
